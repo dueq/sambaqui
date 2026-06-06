@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sambaqui</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sand:    #e8dcc8;
+    --sand2:   #d4c5a9;
+    --sand3:   #b8a98a;
+    --dark:    #1c1510;
+    --mid:     #3d2e1e;
+    --accent:  #7a4f2e;
+    --gold:    #c49a44;
+    --cell-size: clamp(60px, 12vw, 90px);
+    --gap: clamp(3px, 0.6vw, 6px);
+  }
+
+  body {
+    min-height: 100vh;
+    background-color: var(--dark);
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% 0%, #2e1f0e 0%, transparent 70%),
+      repeating-linear-gradient(
+        0deg, transparent, transparent 3px,
+        rgba(255,255,255,0.012) 3px, rgba(255,255,255,0.012) 4px
+      ),
+      repeating-linear-gradient(
+        90deg, transparent, transparent 3px,
+        rgba(255,255,255,0.012) 3px, rgba(255,255,255,0.012) 4px
+      );
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lato', sans-serif;
+    color: var(--sand);
+    padding: 2rem 1rem;
+    gap: 2.5rem;
+  }
+
+  header {
+    text-align: center;
+  }
+
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2.2rem, 7vw, 3.8rem);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--gold);
+    text-shadow: 0 0 40px rgba(196,154,68,0.3);
+    line-height: 1;
+  }
+
+  .subtitle {
+    font-size: clamp(0.7rem, 2vw, 0.85rem);
+    font-weight: 300;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--sand3);
+    margin-top: 0.5rem;
+  }
+
+  .board-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap);
+  }
+
+  .board-row {
+    display: flex;
+    gap: var(--gap);
+  }
+
+  .cell {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    background-color: var(--sand2);
+    background-image:
+      radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.18) 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='40' height='40' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+    border: 1.5px solid var(--sand3);
+    border-radius: 4px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: 4px 6px;
+    position: relative;
+    transition: background-color 0.15s ease;
+  }
+
+  .cell-label {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(0.55rem, 1.5vw, 0.7rem);
+    font-weight: 400;
+    color: var(--accent);
+    line-height: 1;
+    user-select: none;
+    opacity: 0.7;
+  }
+
+  /* checkerboard tint on alternating squares */
+  .cell.dark-sq {
+    background-color: var(--sand3);
+    background-image:
+      radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.12) 0%, transparent 60%);
+  }
+
+  .board-border {
+    padding: clamp(10px, 2vw, 18px);
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    box-shadow:
+      0 0 0 1px rgba(196,154,68,0.15),
+      0 0 60px rgba(60,30,10,0.8),
+      inset 0 0 30px rgba(0,0,0,0.3);
+    background: rgba(28,21,16,0.6);
+    position: relative;
+  }
+
+  .board-border::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 1px solid rgba(196,154,68,0.2);
+    border-radius: 5px;
+    pointer-events: none;
+  }
+
+  .corner-ornament {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-color: var(--gold);
+    border-style: solid;
+    opacity: 0.5;
+  }
+  .corner-ornament.tl { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
+  .corner-ornament.tr { top: 8px; right: 8px; border-width: 2px 2px 0 0; }
+  .corner-ornament.bl { bottom: 8px; left: 8px; border-width: 0 0 2px 2px; }
+  .corner-ornament.br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+
+  footer {
+    font-size: 0.7rem;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Sambaqui</h1>
+  <p class="subtitle">A game of curling pieces &amp; strategy</p>
+</header>
+
+<div class="board-border">
+  <span class="corner-ornament tl"></span>
+  <span class="corner-ornament tr"></span>
+  <span class="corner-ornament bl"></span>
+  <span class="corner-ornament br"></span>
+  <div class="board-wrapper" id="board"></div>
+</div>
+
+<footer>Step 1 — Board</footer>
+
+<script>
+  const LABELS = 'ABCDEFGHIJKLMNOPQRSTUVWXY';
+  const board = document.getElementById('board');
+
+  for (let row = 0; row < 5; row++) {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'board-row';
+    for (let col = 0; col < 5; col++) {
+      const idx = row * 5 + col;
+      const cell = document.createElement('div');
+      const isDark = (row + col) % 2 === 1;
+      cell.className = 'cell' + (isDark ? ' dark-sq' : '');
+      cell.dataset.square = LABELS[idx];
+      cell.innerHTML = `<span class="cell-label">${LABELS[idx]}</span>`;
+      rowEl.appendChild(cell);
+    }
+    board.appendChild(rowEl);
+  }
+</script>
+</body>
+</html>
