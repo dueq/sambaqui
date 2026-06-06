@@ -18,7 +18,11 @@
     --dark:    #1c1510;
     --mid:     #3d2e1e;
     --accent:  #7a4f2e;
-    --gold:    #c49a44;
+    --gold:    #c4a000;
+    --p1:      #e8e0d0;
+    --p1-dim:  #9a9186;
+    --p2:      #2a1a0e;
+    --p2-dim:  #5c3d22;
     --cell-size: clamp(60px, 12vw, 90px);
     --gap: clamp(3px, 0.6vw, 6px);
   }
@@ -43,12 +47,10 @@
     font-family: 'Lato', sans-serif;
     color: var(--sand);
     padding: 2rem 1rem;
-    gap: 2.5rem;
+    gap: 2rem;
   }
 
-  header {
-    text-align: center;
-  }
+  header { text-align: center; }
 
   h1 {
     font-family: 'Cinzel', serif;
@@ -69,6 +71,52 @@
     margin-top: 0.5rem;
   }
 
+  /* ── Turn indicator ── */
+  .turn-bar {
+    display: flex;
+    align-items: center;
+    gap: 1.4rem;
+    font-family: 'Cinzel', serif;
+    font-size: clamp(0.7rem, 2vw, 0.85rem);
+    letter-spacing: 0.15em;
+  }
+
+  .player-tag {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.35;
+    transition: opacity 0.3s ease;
+  }
+
+  .player-tag.active { opacity: 1; }
+
+  .player-tag .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+  }
+
+  .player-tag.p1 .dot {
+    background: var(--p1);
+    border-color: var(--gold);
+  }
+
+  .player-tag.p2 .dot {
+    background: var(--p2);
+    border-color: var(--sand3);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+  }
+
+  .turn-divider {
+    width: 1px;
+    height: 16px;
+    background: var(--accent);
+    opacity: 0.4;
+  }
+
+  /* ── Board ── */
   .board-wrapper {
     display: flex;
     flex-direction: column;
@@ -91,14 +139,16 @@
     border: 1.5px solid var(--sand3);
     border-radius: 4px;
     display: flex;
-    align-items: flex-end;
-    justify-content: flex-start;
+    align-items: center;
+    justify-content: center;
     padding: 4px 6px;
     position: relative;
-    transition: background-color 0.15s ease;
   }
 
   .cell-label {
+    position: absolute;
+    bottom: 4px;
+    left: 6px;
     font-family: 'Cinzel', serif;
     font-size: clamp(0.55rem, 1.5vw, 0.7rem);
     font-weight: 400;
@@ -108,13 +158,84 @@
     opacity: 0.7;
   }
 
-  /* checkerboard tint on alternating squares */
   .cell.dark-sq {
     background-color: var(--sand3);
     background-image:
       radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.12) 0%, transparent 60%);
   }
 
+  /* ── Pieces ── */
+  .piece {
+    width: 68%;
+    height: 68%;
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  /* Player 1 — light stone */
+  .piece.p1 {
+    background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90);
+    border: 2px solid rgba(196,154,68,0.5);
+    box-shadow:
+      0 3px 8px rgba(0,0,0,0.5),
+      inset 0 1px 3px rgba(255,255,255,0.6),
+      inset 0 -2px 4px rgba(0,0,0,0.15);
+  }
+
+  /* Player 2 — dark stone */
+  .piece.p2 {
+    background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05);
+    border: 2px solid rgba(184,169,138,0.3);
+    box-shadow:
+      0 3px 8px rgba(0,0,0,0.6),
+      inset 0 1px 3px rgba(255,255,255,0.12),
+      inset 0 -2px 4px rgba(0,0,0,0.4);
+  }
+
+  /* Inactive pieces are desaturated and smaller */
+  .piece.inactive {
+    opacity: 0.45;
+    transform: scale(0.88);
+  }
+
+  /* Active piece pulses gently */
+  .piece.active-piece {
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .piece.p1.active-piece {
+    border-color: var(--gold);
+    box-shadow:
+      0 3px 8px rgba(0,0,0,0.5),
+      inset 0 1px 3px rgba(255,255,255,0.6),
+      0 0 0 3px rgba(196,154,68,0.35),
+      0 0 14px rgba(196,154,68,0.25);
+  }
+
+  .piece.p2.active-piece {
+    border-color: var(--sand);
+    box-shadow:
+      0 3px 8px rgba(0,0,0,0.6),
+      inset 0 1px 3px rgba(255,255,255,0.12),
+      0 0 0 3px rgba(232,220,200,0.3),
+      0 0 14px rgba(232,220,200,0.15);
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow:
+      0 3px 8px rgba(0,0,0,0.5),
+      inset 0 1px 3px rgba(255,255,255,0.5),
+      0 0 0 3px rgba(196,154,68,0.35),
+      0 0 14px rgba(196,154,68,0.2); }
+    50% { box-shadow:
+      0 3px 8px rgba(0,0,0,0.5),
+      inset 0 1px 3px rgba(255,255,255,0.5),
+      0 0 0 5px rgba(196,154,68,0.2),
+      0 0 22px rgba(196,154,68,0.35); }
+  }
+
+  /* ── Board frame ── */
   .board-border {
     padding: clamp(10px, 2vw, 18px);
     border: 2px solid var(--accent);
@@ -149,6 +270,39 @@
   .corner-ornament.bl { bottom: 8px; left: 8px; border-width: 0 0 2px 2px; }
   .corner-ornament.br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
 
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    gap: 2rem;
+    font-size: 0.75rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    color: var(--sand3);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .legend-piece {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .legend-piece.p1 {
+    background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90);
+    border: 1.5px solid rgba(196,154,68,0.5);
+  }
+
+  .legend-piece.p2 {
+    background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05);
+    border: 1.5px solid rgba(184,169,138,0.3);
+  }
+
   footer {
     font-size: 0.7rem;
     font-weight: 300;
@@ -166,6 +320,18 @@
   <p class="subtitle">A game of curling pieces &amp; strategy</p>
 </header>
 
+<div class="turn-bar">
+  <div class="player-tag p1 active" id="tag-p1">
+    <div class="dot"></div>
+    <span>Player 1</span>
+  </div>
+  <div class="turn-divider"></div>
+  <div class="player-tag p2" id="tag-p2">
+    <div class="dot"></div>
+    <span>Player 2</span>
+  </div>
+</div>
+
 <div class="board-border">
   <span class="corner-ornament tl"></span>
   <span class="corner-ornament tr"></span>
@@ -174,23 +340,60 @@
   <div class="board-wrapper" id="board"></div>
 </div>
 
-<footer>Step 1 — Board</footer>
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-piece p1"></div>
+    <span>Player 1 — light</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-piece p2"></div>
+    <span>Player 2 — dark</span>
+  </div>
+</div>
+
+<footer>Step 2 — Pieces</footer>
 
 <script>
   const LABELS = 'ABCDEFGHIJKLMNOPQRSTUVWXY';
+
+  // Starting positions per the rules
+  // P1: B, J, P, X  — active: B
+  // P2: D, F, T, V  — active: X (rule says P2 active starts on X)
+  const PIECES = {
+    B: { player: 1, active: true },
+    J: { player: 1, active: false },
+    P: { player: 1, active: false },
+    X: { player: 1, active: false },
+    D: { player: 2, active: false },
+    F: { player: 2, active: false },
+    T: { player: 2, active: false },
+    V: { player: 2, active: true },
+  };
+
   const board = document.getElementById('board');
+  const cells = {};
 
   for (let row = 0; row < 5; row++) {
     const rowEl = document.createElement('div');
     rowEl.className = 'board-row';
     for (let col = 0; col < 5; col++) {
       const idx = row * 5 + col;
-      const cell = document.createElement('div');
+      const label = LABELS[idx];
       const isDark = (row + col) % 2 === 1;
+      const cell = document.createElement('div');
       cell.className = 'cell' + (isDark ? ' dark-sq' : '');
-      cell.dataset.square = LABELS[idx];
-      cell.innerHTML = `<span class="cell-label">${LABELS[idx]}</span>`;
+      cell.dataset.square = label;
+      cell.innerHTML = `<span class="cell-label">${label}</span>`;
+
+      if (PIECES[label]) {
+        const p = PIECES[label];
+        const piece = document.createElement('div');
+        piece.className = `piece p${p.player}` + (p.active ? ' active-piece' : ' inactive');
+        cell.appendChild(piece);
+      }
+
       rowEl.appendChild(cell);
+      cells[label] = cell;
     }
     board.appendChild(rowEl);
   }
