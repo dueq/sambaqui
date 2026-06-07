@@ -6,7 +6,7 @@
 <title>Sambaqui</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Macondo:wght@400;700&family=Macondo:wght@300;400&display=swap" rel="stylesheet">
 
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,44 +30,29 @@
       radial-gradient(ellipse 80% 60% at 50% 0%, #2e1f0e 0%, transparent 70%),
       repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.012) 3px, rgba(255,255,255,0.012) 4px),
       repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(255,255,255,0.012) 3px, rgba(255,255,255,0.012) 4px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Lato', sans-serif;
-    color: var(--sand);
-    padding: 2rem 1rem;
-    gap: 2rem;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-family: 'Lato', sans-serif; color: var(--sand);
+    padding: 2rem 1rem; gap: 2rem;
   }
 
   header { text-align: center; }
 
   h1 {
-    font-family: 'Cinzel', serif;
+    font-family: 'Macondo', serif;
     font-size: clamp(2.2rem, 7vw, 3.8rem);
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    color: var(--gold);
-    text-shadow: 0 0 40px rgba(196,154,68,0.3);
-    line-height: 1;
+    font-weight: 700; letter-spacing: 0.18em;
+    color: var(--gold); text-shadow: 0 0 40px rgba(196,154,68,0.3); line-height: 1;
   }
 
   .subtitle {
-    font-size: clamp(0.7rem, 2vw, 0.85rem);
-    font-weight: 300;
-    letter-spacing: 0.35em;
-    text-transform: uppercase;
-    color: var(--sand3);
-    margin-top: 0.5rem;
+    font-size: clamp(0.7rem, 2vw, 0.85rem); font-weight: 300;
+    letter-spacing: 0.35em; text-transform: uppercase;
+    color: var(--sand3); margin-top: 0.5rem;
   }
 
   /* ── Turn bar ── */
-  .turn-bar {
-    display: flex; align-items: center; gap: 1.4rem;
-    font-family: 'Cinzel', serif;
-    font-size: clamp(0.7rem, 2vw, 0.85rem);
-    letter-spacing: 0.15em;
-  }
+  .turn-bar { display: flex; align-items: center; gap: 1.4rem; font-family: 'Cinzel', serif; font-size: clamp(0.7rem, 2vw, 0.85rem); letter-spacing: 0.15em; }
   .player-tag { display: flex; align-items: center; gap: 0.5rem; opacity: 0.35; transition: opacity 0.3s ease; }
   .player-tag.active { opacity: 1; }
   .player-tag .dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid transparent; }
@@ -77,15 +62,13 @@
 
   /* ── Status ── */
   .status {
-    font-family: 'Cinzel', serif;
-    font-size: clamp(0.65rem, 1.8vw, 0.78rem);
-    letter-spacing: 0.12em;
-    color: var(--sand3);
-    min-height: 1.2em;
-    text-align: center;
-    transition: color 0.2s ease;
+    font-family: 'Cinzel', serif; font-size: clamp(0.65rem, 1.8vw, 0.78rem);
+    letter-spacing: 0.12em; color: var(--sand3);
+    min-height: 1.2em; text-align: center; transition: color 0.2s ease;
   }
   .status.highlight { color: var(--gold); }
+  .status.warn      { color: #c0704a; }
+  .status.sneaking  { color: #7ab8c0; }
 
   /* ── Board ── */
   .board-wrapper { display: flex; flex-direction: column; align-items: center; gap: var(--gap); }
@@ -97,11 +80,9 @@
     background-image:
       radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.18) 0%, transparent 60%),
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='40' height='40' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
-    border: 1.5px solid var(--sand3);
-    border-radius: 4px;
+    border: 1.5px solid var(--sand3); border-radius: 4px;
     display: flex; align-items: center; justify-content: center;
-    position: relative;
-    cursor: default;
+    position: relative; cursor: default;
     transition: border-color 0.15s ease, background-color 0.15s ease;
   }
   .cell.dark-sq {
@@ -111,46 +92,41 @@
   .cell.selectable { cursor: pointer; }
   .cell.selectable:hover { border-color: var(--gold); }
   .cell.selected { border-color: var(--gold); box-shadow: inset 0 0 0 2px rgba(196,154,68,0.5); cursor: pointer; }
-
-  /* Landing square — where the piece WILL stop if you click this direction */
-  .cell.landing {
-    cursor: pointer;
-    border-color: rgba(196,154,68,0.7);
-    background-color: rgba(196,154,68,0.12);
-  }
+  .cell.landing { cursor: pointer; border-color: rgba(196,154,68,0.7); background-color: rgba(196,154,68,0.12); }
   .cell.dark-sq.landing { background-color: rgba(196,154,68,0.18); }
   .cell.landing:hover { border-color: var(--gold); background-color: rgba(196,154,68,0.22); }
-
-  /* Path squares (the trail the piece slides through) */
-  .cell.path {
-    background-color: rgba(196,154,68,0.06);
-  }
+  .cell.blocked-landing { border-color: rgba(180,80,40,0.5); background-color: rgba(180,80,40,0.07); cursor: not-allowed; }
+  .cell.dark-sq.blocked-landing { background-color: rgba(180,80,40,0.11); }
+  .cell.path { background-color: rgba(196,154,68,0.06); }
   .cell.dark-sq.path { background-color: rgba(196,154,68,0.09); }
+
+  /* LOS — enemy piece visible from stopped piece */
+  .cell.los-target {
+    border-color: rgba(192,112,74,0.7);
+    box-shadow: inset 0 0 0 2px rgba(192,112,74,0.35);
+  }
+
+  /* Win line */
+  .cell.win-line { border-color: var(--gold) !important; background-color: rgba(196,154,68,0.22) !important; animation: win-flash 0.7s ease-in-out 3; }
+  .cell.dark-sq.win-line { background-color: rgba(196,154,68,0.28) !important; }
+  @keyframes win-flash { 0%,100%{background-color:rgba(196,154,68,0.22)} 50%{background-color:rgba(196,154,68,0.42)} }
 
   .cell-label {
     position: absolute; bottom: 4px; left: 6px;
-    font-family: 'Cinzel', serif;
-    font-size: clamp(0.55rem, 1.5vw, 0.7rem);
-    font-weight: 400; color: var(--accent);
-    line-height: 1; user-select: none; opacity: 0.7;
+    font-family: 'Cinzel', serif; font-size: clamp(0.55rem, 1.5vw, 0.7rem);
+    font-weight: 400; color: var(--accent); line-height: 1; user-select: none; opacity: 0.7;
   }
 
-  /* Arrow overlay shown on landing cells */
   .arrow-hint {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: clamp(16px, 3vw, 22px);
-    color: rgba(196,154,68,0.75);
-    pointer-events: none;
-    user-select: none;
-    line-height: 1;
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-size: clamp(16px, 3vw, 22px); color: rgba(196,154,68,0.75);
+    pointer-events: none; user-select: none; line-height: 1;
   }
+  .arrow-hint.blocked { color: rgba(180,80,40,0.45); font-size: clamp(13px, 2.4vw, 17px); }
 
   /* ── Pieces ── */
   .piece {
-    width: 68%; height: 68%;
-    border-radius: 50%; flex-shrink: 0;
+    width: 68%; height: 68%; border-radius: 50%; flex-shrink: 0;
     transition: transform 0.15s ease, opacity 0.15s ease;
     position: relative; z-index: 1;
   }
@@ -177,36 +153,53 @@
       0 0 0 3px rgba(232,220,200,0.3), 0 0 14px rgba(232,220,200,0.15);
   }
   .piece.selected-piece {
-    animation: none !important;
-    transform: scale(1.1);
+    animation: none !important; transform: scale(1.1);
     border-color: var(--gold) !important;
     box-shadow: 0 6px 16px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.7),
       0 0 0 4px rgba(196,154,68,0.6), 0 0 24px rgba(196,154,68,0.5) !important;
   }
+  /* Sneaking combo — piece is mid-combo, soft cyan ring */
+  .piece.sneaking {
+    animation: pulse-sneak 1.2s ease-in-out infinite !important;
+    border-color: #7ab8c0 !important;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.5),
+      0 0 0 3px rgba(122,184,192,0.4), 0 0 16px rgba(122,184,192,0.3) !important;
+  }
+  @keyframes pulse-sneak {
+    0%,100%{ box-shadow: 0 3px 8px rgba(0,0,0,0.5), 0 0 0 3px rgba(122,184,192,0.4), 0 0 12px rgba(122,184,192,0.25); }
+    50%    { box-shadow: 0 3px 8px rgba(0,0,0,0.5), 0 0 0 5px rgba(122,184,192,0.25), 0 0 22px rgba(122,184,192,0.4); }
+  }
 
   @keyframes pulse {
-    0%, 100% { box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.5),
-      0 0 0 3px rgba(196,154,68,0.35), 0 0 14px rgba(196,154,68,0.2); }
-    50%       { box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.5),
-      0 0 0 5px rgba(196,154,68,0.2), 0 0 22px rgba(196,154,68,0.35); }
+    0%,100%{ box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.5), 0 0 0 3px rgba(196,154,68,0.35), 0 0 14px rgba(196,154,68,0.2); }
+    50%    { box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.5), 0 0 0 5px rgba(196,154,68,0.2), 0 0 22px rgba(196,154,68,0.35); }
   }
 
   /* ── Board frame ── */
   .board-border {
-    padding: clamp(10px, 2vw, 18px);
-    border: 2px solid var(--accent); border-radius: 8px;
+    padding: clamp(10px, 2vw, 18px); border: 2px solid var(--accent); border-radius: 8px;
     box-shadow: 0 0 0 1px rgba(196,154,68,0.15), 0 0 60px rgba(60,30,10,0.8), inset 0 0 30px rgba(0,0,0,0.3);
     background: rgba(28,21,16,0.6); position: relative;
   }
-  .board-border::before {
-    content: ''; position: absolute; inset: 4px;
-    border: 1px solid rgba(196,154,68,0.2); border-radius: 5px; pointer-events: none;
-  }
+  .board-border::before { content: ''; position: absolute; inset: 4px; border: 1px solid rgba(196,154,68,0.2); border-radius: 5px; pointer-events: none; }
   .corner-ornament { position: absolute; width: 14px; height: 14px; border-color: var(--gold); border-style: solid; opacity: 0.5; }
   .corner-ornament.tl { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
   .corner-ornament.tr { top: 8px; right: 8px; border-width: 2px 2px 0 0; }
   .corner-ornament.bl { bottom: 8px; left: 8px; border-width: 0 0 2px 2px; }
   .corner-ornament.br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+
+  /* ── Victory overlay ── */
+  .victory-overlay {
+    position: fixed; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: rgba(10,6,3,0.82); z-index: 100;
+    animation: fade-in 0.5s ease; gap: 1.5rem;
+  }
+  @keyframes fade-in { from{opacity:0} to{opacity:1} }
+  .victory-title { font-family: 'Cinzel', serif; font-size: clamp(2rem, 8vw, 4rem); font-weight: 700; color: var(--gold); letter-spacing: 0.15em; text-shadow: 0 0 60px rgba(196,154,68,0.6); text-align: center; }
+  .victory-sub   { font-family: 'Cinzel', serif; font-size: clamp(0.8rem, 2.5vw, 1.1rem); letter-spacing: 0.2em; color: var(--sand3); text-align: center; }
+  .victory-btn   { margin-top: 0.5rem; font-family: 'Cinzel', serif; font-size: clamp(0.7rem,2vw,0.85rem); letter-spacing: 0.2em; color: var(--gold); background: transparent; border: 1px solid rgba(196,154,68,0.5); border-radius: 4px; padding: 0.6rem 1.8rem; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease; }
+  .victory-btn:hover { background: rgba(196,154,68,0.1); border-color: var(--gold); }
 
   /* ── Legend ── */
   .legend { display: flex; gap: 2rem; font-size: 0.75rem; font-weight: 300; letter-spacing: 0.1em; color: var(--sand3); }
@@ -216,13 +209,35 @@
   .legend-piece.p2 { background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05); border: 1.5px solid rgba(184,169,138,0.3); }
 
   footer { font-size: 0.7rem; font-weight: 300; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; opacity: 0.6; }
+
+  /* ── Sliding ghost piece ── */
+  /* A clone floats over the board during animation; the board is locked. */
+  .piece-ghost {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 50;
+    /* transitions are applied via JS for precise control */
+  }
+  .piece-ghost.p1 {
+    background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90);
+    border: 2px solid var(--gold);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.55), inset 0 1px 3px rgba(255,255,255,0.7),
+      0 0 0 3px rgba(196,154,68,0.5), 0 0 18px rgba(196,154,68,0.35);
+  }
+  .piece-ghost.p2 {
+    background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05);
+    border: 2px solid var(--sand);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.65), inset 0 1px 3px rgba(255,255,255,0.15),
+      0 0 0 3px rgba(232,220,200,0.35), 0 0 18px rgba(232,220,200,0.2);
+  }
 </style>
 </head>
 <body>
 
 <header>
   <h1>Sambaqui</h1>
-  <p class="subtitle">A game of curling pieces &amp; strategy</p>
+  <p class="subtitle">Place three pieces in sequence</p>
 </header>
 
 <div class="turn-bar">
@@ -244,7 +259,7 @@
   <div class="legend-item"><div class="legend-piece p2"></div><span>Player 2 — dark</span></div>
 </div>
 
-<footer>Step 4 — Sliding</footer>
+<footer>Sambaqui — Animated Sliding</footer>
 
 <script>
   // ─────────────────────────────────────────────
@@ -252,48 +267,39 @@
   // ─────────────────────────────────────────────
   const LABELS = 'ABCDEFGHIJKLMNOPQRSTUVWXY';
 
-  // Convert label to [row, col]
   function labelToRC(label) {
     const idx = LABELS.indexOf(label);
     return [Math.floor(idx / 5), idx % 5];
   }
 
-  // Convert [row, col] to label, or null if out of bounds
   function rcToLabel(r, c) {
     if (r < 0 || r > 4 || c < 0 || c > 4) return null;
     return LABELS[r * 5 + c];
   }
 
-  // 8 directions: [dr, dc, arrow glyph]
   const DIRS = [
     [-1, -1, '↖'], [-1,  0, '↑'], [-1,  1, '↗'],
     [ 0, -1, '←'],                [ 0,  1, '→'],
     [ 1, -1, '↙'], [ 1,  0, '↓'], [ 1,  1, '↘'],
   ];
 
-  // Slide a piece from `fromLabel` in direction [dr,dc].
-  // Returns { landing, path } where path is the list of squares
-  // the piece passes through (excluding from, including landing).
-  // Returns null if the piece can't move (already blocked).
+  // ─────────────────────────────────────────────
+  //  SLIDING
+  // ─────────────────────────────────────────────
   function computeSlide(fromLabel, dr, dc, pieces) {
     const [r0, c0] = labelToRC(fromLabel);
     const path = [];
     let r = r0 + dr, c = c0 + dc;
     while (r >= 0 && r <= 4 && c >= 0 && c <= 4) {
       const sq = rcToLabel(r, c);
-      if (pieces[sq]) {
-        // Blocked by a piece — stop one square before
-        break;
-      }
+      if (pieces[sq]) break;
       path.push(sq);
       r += dr; c += dc;
     }
-    if (path.length === 0) return null; // Can't move this way
+    if (path.length === 0) return null;
     return { landing: path[path.length - 1], path };
   }
 
-  // Compute all valid slides from a square; returns array of
-  // { dr, dc, arrow, landing, path }
   function computeAllSlides(fromLabel, pieces) {
     const moves = [];
     for (const [dr, dc, arrow] of DIRS) {
@@ -304,14 +310,134 @@
   }
 
   // ─────────────────────────────────────────────
+  //  LINE OF SIGHT
+  // ─────────────────────────────────────────────
+  // From `fromLabel`, cast rays in all 8 directions.
+  // The FIRST piece encountered in each direction is "visible".
+  // Returns an array of square labels of visible enemy pieces
+  // that are also moveable (have at least one legal slide).
+  function computeVisibleMoveableEnemies(fromLabel, pieces, currentPlayer) {
+    const enemy = currentPlayer === 1 ? 2 : 1;
+    const visible = [];
+
+    for (const [dr, dc] of DIRS) {
+      const [r0, c0] = labelToRC(fromLabel);
+      let r = r0 + dr, c = c0 + dc;
+      while (r >= 0 && r <= 4 && c >= 0 && c <= 4) {
+        const sq = rcToLabel(r, c);
+        if (pieces[sq]) {
+          // First piece in this direction
+          if (pieces[sq].player === enemy) {
+            // Check moveability: does it have any legal slide?
+            const slides = computeAllSlides(sq, pieces);
+            if (slides.length > 0) visible.push(sq);
+          }
+          break; // Stop at the first piece regardless
+        }
+        r += dr; c += dc;
+      }
+    }
+
+    return visible;
+  }
+
+  // ─────────────────────────────────────────────
+  //  MOVEABILITY CHECK (for a player's pieces)
+  // ─────────────────────────────────────────────
+  function isMoveablePiece(sq, pieces) {
+    return computeAllSlides(sq, pieces).length > 0;
+  }
+
+  // ─────────────────────────────────────────────
+  //  VICTORY CHECK
+  // ─────────────────────────────────────────────
+  const ALL_LINES = (function() {
+    const lines = [];
+    const dirs = [[0,1],[1,0],[1,1],[1,-1]];
+    for (const [dr, dc] of dirs) {
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+          const run = [];
+          let rr = r, cc = c;
+          while (rr >= 0 && rr < 5 && cc >= 0 && cc < 5) {
+            run.push(rcToLabel(rr, cc)); rr += dr; cc += dc;
+          }
+          for (let s = 0; s <= run.length - 3; s++)
+            for (let len = 3; len <= run.length - s; len++)
+              lines.push(run.slice(s, s + len));
+        }
+      }
+    }
+    const seen = new Set();
+    return lines.filter(line => {
+      const key = line.join(',');
+      if (seen.has(key)) return false;
+      seen.add(key); return true;
+    });
+  })();
+
+  function checkVictory(pieces) {
+    for (const line of ALL_LINES) {
+      const players = line.map(sq => pieces[sq]?.player);
+      if (players.every(p => p === 1)) return { winner: 1, line };
+      if (players.every(p => p === 2)) return { winner: 2, line };
+    }
+    return null;
+  }
+
+  // ─────────────────────────────────────────────
+  //  NOVELTY RULE
+  // ─────────────────────────────────────────────
+  function serialiseState(pieces, currentPlayer) {
+    const parts = Object.entries(pieces)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([sq, p]) => `${sq}${p.player}${p.active ? 'A' : 'I'}`);
+    return `${currentPlayer}|${parts.join(',')}`;
+  }
+
+  // Simulate the full result of moving `fromLabel` → `landing` and return
+  // the serialised state key exactly as executeMove would record it.
+  // This is the only way to match keys correctly, because the active set
+  // after the move depends on LOS from the landing square.
+  function hypotheticalKey(fromLabel, landing, currentPieces, currentPlayer) {
+    // Clone pieces
+    const next = {};
+    for (const [sq, p] of Object.entries(currentPieces)) next[sq] = { ...p };
+
+    // Apply slide
+    const moving = { ...next[fromLabel], active: false };
+    delete next[fromLabel];
+    next[landing] = moving;
+
+    const enemy      = currentPlayer === 1 ? 2 : 1;
+    const nextPlayer = enemy;
+
+    // Simulate LOS from landing square
+    const visibleEnemies = computeVisibleMoveableEnemies(landing, next, currentPlayer);
+
+    if (visibleEnemies.length > 0) {
+      // Activity Transfer: deactivate all enemy pieces, activate visible ones
+      for (const [sq, p] of Object.entries(next)) {
+        if (p.player === enemy) next[sq] = { ...p, active: false };
+      }
+      for (const sq of visibleEnemies) {
+        next[sq] = { ...next[sq], active: true };
+      }
+    } else {
+      // Sneaking Combo: same player moves again, landing piece stays active
+      next[landing] = { ...next[landing], active: true };
+      // Key is for the *same* player (they haven't handed off yet)
+      return serialiseState(next, currentPlayer);
+    }
+
+    return serialiseState(next, nextPlayer);
+  }
+
+  // ─────────────────────────────────────────────
   //  GAME STATE
   // ─────────────────────────────────────────────
-  const state = {
-    currentPlayer: 1,
-    selectedSquare: null,
-    // currentMoves: array of move objects for selected piece
-    currentMoves: [],
-    pieces: {
+  function makeInitialPieces() {
+    return {
       B: { player: 1, active: true  },
       J: { player: 1, active: false },
       P: { player: 1, active: false },
@@ -319,9 +445,27 @@
       D: { player: 2, active: false },
       F: { player: 2, active: false },
       T: { player: 2, active: false },
-      V: { player: 2, active: true  },
-    }
+      V: { player: 2, active: false },
+    };
+  }
+
+  const state = {
+    currentPlayer: 1,
+    selectedSquare: null,
+    currentMoves: [],
+    pieces: makeInitialPieces(),
+    history: new Set(),
+    gameOver: false,
+    winLine: null,
+    // Sneaking Combo state
+    sneaking: false,        // true when the current piece must move again
+    sneakingSquare: null,   // the square of the piece locked in a combo
+    // LOS state (for rendering after a move, before input)
+    losSquares: [],         // enemy squares visible from stopped piece
+    animating: false,       // true while a slide animation is in flight
   };
+
+  state.history.add(serialiseState(state.pieces, state.currentPlayer));
 
   // ─────────────────────────────────────────────
   //  BUILD BOARD DOM
@@ -356,32 +500,38 @@
     tagP1.classList.toggle('active', state.currentPlayer === 1);
     tagP2.classList.toggle('active', state.currentPlayer === 2);
 
-    // Build sets for fast lookup
-    const landingSquares = new Set(state.currentMoves.map(m => m.landing));
-    const pathSquares    = new Set(state.currentMoves.flatMap(m => m.path.slice(0, -1)));
-    // Map landing → arrow glyph
-    const landingArrow   = {};
-    for (const m of state.currentMoves) landingArrow[m.landing] = m.arrow;
+    const landingMap  = {};
+    const pathSquares = new Set();
+    for (const m of state.currentMoves) {
+      landingMap[m.landing] = m;
+      m.path.slice(0, -1).forEach(sq => pathSquares.add(sq));
+    }
+
+    const winSet = state.winLine ? new Set(state.winLine) : new Set();
+    const losSet = new Set(state.losSquares);
 
     for (const label of LABELS) {
       const cell  = cellEls[label];
       const piece = state.pieces[label];
       const isSelected = label === state.selectedSquare;
-      const isLanding  = landingSquares.has(label);
+      const move       = landingMap[label];
       const isPath     = pathSquares.has(label);
 
-      // Reset classes (keep base + dark-sq)
       const base = cell.className.includes('dark-sq') ? 'cell dark-sq' : 'cell';
       cell.className = base;
-
-      // Remove old overlays
       cell.querySelectorAll('.piece, .arrow-hint').forEach(el => el.remove());
 
-      // Apply move-hint classes
-      if (isLanding) cell.classList.add('landing');
-      else if (isPath) cell.classList.add('path');
+      // Layer: win > LOS > landing/path
+      if (winSet.has(label)) {
+        cell.classList.add('win-line');
+      } else if (losSet.has(label) && !move) {
+        cell.classList.add('los-target');
+      } else if (move) {
+        cell.classList.add(move.blocked ? 'blocked-landing' : 'landing');
+      } else if (isPath) {
+        cell.classList.add('path');
+      }
 
-      // Piece
       if (piece) {
         const el = document.createElement('div');
         const isCurrentPlayer = piece.player === state.currentPlayer;
@@ -389,96 +539,283 @@
         if (isSelected) {
           el.className = `piece p${piece.player} selected-piece`;
           cell.classList.add('selected');
+        } else if (state.sneaking && label === state.sneakingSquare) {
+          // Piece locked in a Sneaking Combo — distinct style
+          el.className = `piece p${piece.player} sneaking`;
         } else if (piece.active) {
           el.className = `piece p${piece.player} active-piece`;
-          if (isCurrentPlayer) cell.classList.add('selectable');
+          if (isCurrentPlayer && !state.gameOver) cell.classList.add('selectable');
         } else {
           el.className = `piece p${piece.player} inactive`;
         }
         cell.appendChild(el);
       }
 
-      // Arrow hint on landing squares (no piece there)
-      if (isLanding && !piece) {
+      if (move && !piece && !state.gameOver) {
         const arrow = document.createElement('div');
-        arrow.className = 'arrow-hint';
-        arrow.textContent = landingArrow[label];
+        arrow.className = 'arrow-hint' + (move.blocked ? ' blocked' : '');
+        arrow.textContent = move.arrow;
         cell.appendChild(arrow);
-        cell.classList.add('selectable');
+        if (!move.blocked) cell.classList.add('selectable');
       }
     }
+  }
+
+  // ─────────────────────────────────────────────
+  //  VICTORY OVERLAY
+  // ─────────────────────────────────────────────
+  function showVictory(winner) {
+    const overlay = document.createElement('div');
+    overlay.className = 'victory-overlay';
+    overlay.innerHTML = `
+      <div class="victory-title">Player ${winner} Wins</div>
+      <div class="victory-sub">Three in a row — victory secured</div>
+      <button class="victory-btn" id="restart-btn">Play Again</button>
+    `;
+    document.body.appendChild(overlay);
+    document.getElementById('restart-btn').addEventListener('click', restartGame);
+  }
+
+  function restartGame() {
+    document.querySelector('.victory-overlay')?.remove();
+    state.currentPlayer  = 1;
+    state.selectedSquare = null;
+    state.currentMoves   = [];
+    state.gameOver       = false;
+    state.winLine        = null;
+    state.sneaking       = false;
+    state.sneakingSquare = null;
+    state.losSquares     = [];
+    state.animating      = false;
+    state.pieces         = makeInitialPieces();
+    state.history        = new Set();
+    state.history.add(serialiseState(state.pieces, state.currentPlayer));
+    setStatus('Select an active piece to move');
+    render();
   }
 
   // ─────────────────────────────────────────────
   //  INTERACTION
   // ─────────────────────────────────────────────
   function onCellClick(label) {
+    if (state.gameOver || state.animating) return;
+
     const piece = state.pieces[label];
+    const move  = state.currentMoves.find(m => m.landing === label);
 
-    // ── Click a landing square → execute the move ──
-    const move = state.currentMoves.find(m => m.landing === label);
-    if (move) {
-      executeMove(state.selectedSquare, move);
+    if (move && !move.blocked) { executeMove(state.selectedSquare, move); return; }
+    if (move &&  move.blocked) { setStatus('That move would repeat a previous position — forbidden', 'warn'); return; }
+
+    // During a Sneaking Combo the player cannot switch pieces
+    if (state.sneaking) {
+      setStatus('Sneaking Combo — this piece must move again', 'warn');
       return;
     }
 
-    // ── Click an active own piece → select / deselect ──
     if (piece && piece.player === state.currentPlayer && piece.active) {
-      if (state.selectedSquare === label) {
-        clearSelection();
-      } else {
-        selectPiece(label);
-      }
+      state.selectedSquare === label ? clearSelection() : selectPiece(label);
       return;
     }
 
-    // ── Click anywhere else while selected → deselect ──
-    if (state.selectedSquare) {
-      clearSelection();
-    }
+    if (state.selectedSquare) clearSelection();
   }
 
   function selectPiece(label) {
     state.selectedSquare = label;
-    state.currentMoves   = computeAllSlides(label, state.pieces);
-    const n = state.currentMoves.length;
-    setStatus(
-      n > 0
-        ? `Piece on ${label} — ${n} slide${n > 1 ? 's' : ''} available`
-        : `Piece on ${label} — no moves available`,
-      n > 0
-    );
+    state.losSquares     = [];   // clear LOS highlights when re-selecting
+
+    const raw = computeAllSlides(label, state.pieces);
+
+    // Tag each move with whether the Novelty Rule blocks it.
+    // hypotheticalKey fully simulates LOS + Activity Transfer / Sneaking so
+    // the projected key matches exactly what executeMove will record.
+    state.currentMoves = raw.map(m => {
+      const key     = hypotheticalKey(label, m.landing, state.pieces, state.currentPlayer);
+      const blocked = state.history.has(key);
+      return { ...m, blocked };
+    });
+
+    const free    = state.currentMoves.filter(m => !m.blocked).length;
+    const blocked = state.currentMoves.filter(m =>  m.blocked).length;
+
+    if (state.currentMoves.length === 0) {
+      setStatus(`Piece on ${label} — no moves available`);
+    } else if (free === 0) {
+      setStatus(`Piece on ${label} — all ${blocked} slide${blocked > 1 ? 's' : ''} forbidden by Novelty Rule`, 'warn');
+    } else {
+      const suffix = blocked > 0 ? ` (${blocked} forbidden)` : '';
+      const prefix = state.sneaking ? 'Sneaking — ' : '';
+      setStatus(`${prefix}Piece on ${label} — ${free} legal slide${free > 1 ? 's' : ''}${suffix}`, state.sneaking ? 'sneaking' : true);
+    }
     render();
   }
 
   function clearSelection() {
     state.selectedSquare = null;
     state.currentMoves   = [];
+    state.losSquares     = [];
     setStatus('Select an active piece to move');
     render();
   }
 
-  function executeMove(fromLabel, move) {
-    const piece = state.pieces[fromLabel];
+  // ─────────────────────────────────────────────
+  //  ANIMATION — slide a piece across the board
+  // ─────────────────────────────────────────────
 
-    // Move piece to landing square
-    delete state.pieces[fromLabel];
-    state.pieces[move.landing] = { ...piece, active: false };
-
-    // Switch turn (Activity Transfer logic comes in Step 7-8;
-    // for now just hand off and mark the moved piece inactive,
-    // activating the other player's active piece(s) remain as-is)
-    state.currentPlayer = state.currentPlayer === 1 ? 2 : 1;
-    state.selectedSquare = null;
-    state.currentMoves   = [];
-
-    setStatus(`Piece moved to ${move.landing} — Player ${state.currentPlayer}'s turn`);
-    render();
+  // Returns the pixel center of a cell relative to the viewport.
+  function cellCenter(label) {
+    const rect = cellEls[label].getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
   }
 
-  function setStatus(msg, highlight = false) {
+  // Animate a piece sliding from fromLabel through path[], then call onDone.
+  // We walk each step of the path so the piece visibly passes through
+  // intermediate squares rather than jumping straight to the landing.
+  function animateSlide(player, fromLabel, path, onDone) {
+    state.animating = true;
+
+    // Measure the piece size from the source cell
+    const srcRect  = cellEls[fromLabel].getBoundingClientRect();
+    const pieceSize = srcRect.width * 0.68;
+
+    // Create the floating ghost
+    const ghost = document.createElement('div');
+    ghost.className = `piece-ghost p${player}`;
+    ghost.style.width  = pieceSize + 'px';
+    ghost.style.height = pieceSize + 'px';
+
+    // Start position: centered on fromLabel
+    const start = cellCenter(fromLabel);
+    ghost.style.left = (start.x - pieceSize / 2) + 'px';
+    ghost.style.top  = (start.y - pieceSize / 2) + 'px';
+    ghost.style.transition = 'none';
+    document.body.appendChild(ghost);
+
+    // Hide the source piece while ghost travels
+    const srcPieceEl = cellEls[fromLabel].querySelector('.piece');
+    if (srcPieceEl) srcPieceEl.style.opacity = '0';
+
+    // Walk each step with a per-step duration proportional to distance
+    // (each step is exactly 1 cell — orthogonal or diagonal).
+    const STEP_MS = 60; // ms per cell travelled
+
+    let step = 0;
+    function nextStep() {
+      if (step >= path.length) {
+        // Animation complete — clean up ghost and hand off
+        ghost.remove();
+        state.animating = false;
+        onDone();
+        return;
+      }
+      const target = cellCenter(path[step]);
+      ghost.style.transition = `left ${STEP_MS}ms linear, top ${STEP_MS}ms linear`;
+      ghost.style.left = (target.x - pieceSize / 2) + 'px';
+      ghost.style.top  = (target.y - pieceSize / 2) + 'px';
+      step++;
+      setTimeout(nextStep, STEP_MS);
+    }
+
+    // Kick off after one frame so the initial position paints first
+    requestAnimationFrame(() => setTimeout(nextStep, 16));
+  }
+
+  // ─────────────────────────────────────────────
+  //  EXECUTE MOVE — core turn logic
+  // ─────────────────────────────────────────────
+  function executeMove(fromLabel, move) {
+    const movingPiece = state.pieces[fromLabel];
+    const player      = movingPiece.player;
+
+    // Clear UI immediately — hide arrows and selection ring while animating
+    state.selectedSquare = null;
+    state.currentMoves   = [];
+    render();
+
+    // Animate, then apply game logic when piece lands
+    animateSlide(player, fromLabel, move.path, () => applyMove(fromLabel, move, movingPiece));
+  }
+
+  function applyMove(fromLabel, move, movingPiece) {
+    // 0. Deactivate all other friendly pieces
+    for (const [sq, p] of Object.entries(state.pieces)) {
+      if (p.player === state.currentPlayer && sq !== fromLabel) {
+        state.pieces[sq] = { ...p, active: false };
+      }
+    }
+
+    // 1. Apply the slide
+    delete state.pieces[fromLabel];
+    state.pieces[move.landing] = { ...movingPiece, active: false };
+
+    // 2. Check victory (before any transfer)
+    const victory = checkVictory(state.pieces);
+    if (victory) {
+      state.gameOver   = true;
+      state.winLine    = victory.line;
+      state.losSquares = [];
+      state.sneaking   = false;
+      render();
+      setTimeout(() => showVictory(victory.winner), 600);
+      return;
+    }
+
+    // 3. Seeing Is Believing
+    const visibleEnemies = computeVisibleMoveableEnemies(
+      move.landing, state.pieces, state.currentPlayer
+    );
+
+    if (visibleEnemies.length > 0) {
+      // ── 4a. HALT → Activity Transfer ──────────────────────────────────
+      const enemy = state.currentPlayer === 1 ? 2 : 1;
+
+      for (const [sq, p] of Object.entries(state.pieces)) {
+        if (p.player === enemy) state.pieces[sq] = { ...p, active: false };
+      }
+      for (const sq of visibleEnemies) {
+        state.pieces[sq] = { ...state.pieces[sq], active: true };
+      }
+
+      state.currentPlayer  = enemy;
+      state.sneaking        = false;
+      state.sneakingSquare  = null;
+
+      const key = serialiseState(state.pieces, state.currentPlayer);
+      state.history.add(key);
+
+      state.losSquares = visibleEnemies;
+      render();
+
+      const n = visibleEnemies.length;
+      setStatus(
+        `Halted — ${n} enemy piece${n > 1 ? 's' : ''} spotted. Player ${state.currentPlayer}, select an active piece.`
+      );
+
+      setTimeout(() => { state.losSquares = []; render(); }, 1200);
+
+    } else {
+      // ── 4b. SNEAKING COMBO ─────────────────────────────────────────────
+      state.sneaking       = true;
+      state.sneakingSquare = move.landing;
+      state.losSquares     = [];
+
+      state.pieces[move.landing] = { ...state.pieces[move.landing], active: true };
+
+      const key = serialiseState(state.pieces, state.currentPlayer);
+      state.history.add(key);
+
+      render();
+      setStatus('Sneaking Combo — no enemies spotted, move again!', 'sneaking');
+      selectPiece(move.landing);
+    }
+  }
+
+  function setStatus(msg, variant = false) {
     statusEl.textContent = msg;
-    statusEl.classList.toggle('highlight', highlight);
+    statusEl.classList.remove('highlight', 'warn', 'sneaking');
+    if (variant === true)        statusEl.classList.add('highlight');
+    if (variant === 'warn')      statusEl.classList.add('warn');
+    if (variant === 'sneaking')  statusEl.classList.add('sneaking');
   }
 
   // ─────────────────────────────────────────────
