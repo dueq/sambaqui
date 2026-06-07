@@ -13,10 +13,10 @@
 
   :root {
     --sand:    #e8dcc8;
-    --sand2:   #d4c5a9;
-    --sand3:   #b8a98a;
+    --sand2:   #d2c0a0;
+    --sand3:   #988a6c;
     --dark:    #1c1510;
-    --mid:     #3d2e1e;
+    --mid:     #6c623e;
     --accent:  #7a4f2e;
     --gold:    #c49a44;
     --cell-size: clamp(60px, 12vw, 90px);
@@ -41,7 +41,7 @@
   h1 {
     font-family: 'Macondo', serif;
     font-size: clamp(2.2rem, 7vw, 3.8rem);
-    font-weight: 700; letter-spacing: 0.18em;
+    font-weight: 800; letter-spacing: 0.06em;
     color: var(--gold); text-shadow: 0 0 40px rgba(196,154,68,0.3); line-height: 1;
   }
 
@@ -70,9 +70,56 @@
   .status.warn      { color: #c0704a; }
   .status.sneaking  { color: #7ab8c0; }
 
-  /* ── Board ── */
+  /* ── Board Layout Grouping ── */
+  .board-container-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .board-border {
+    padding: clamp(10px, 2vw, 18px); border: 2px solid var(--accent); border-radius: 8px;
+    box-shadow: 0 0 0 1px rgba(196,154,68,0.15), 0 0 60px rgba(60,30,10,0.8), inset 0 0 30px rgba(0,0,0,0.3);
+    background: rgba(28,21,16,0.6); position: relative;
+  }
+
   .board-wrapper { display: flex; flex-direction: column; align-items: center; gap: var(--gap); }
   .board-row { display: flex; gap: var(--gap); }
+
+  /* ── Miniature Analysis Controls ── */
+  .board-controls {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: calc(var(--cell-size) * 5 + var(--gap) * 4 + clamp(20px, 4vw, 36px) + 4px);
+    padding: 0 2px;
+  }
+  .nav-btn {
+    background: var(--mid);
+    border: 1px solid var(--accent);
+    color: var(--gold);
+    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+  .nav-btn:hover:not(:disabled) {
+    background: var(--accent);
+    border-color: var(--gold);
+    color: #fff;
+  }
+  .nav-btn:disabled {
+    opacity: 0.15;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
 
   .cell {
     width: var(--cell-size); height: var(--cell-size);
@@ -97,23 +144,21 @@
   .cell.landing:hover { border-color: var(--gold); background-color: rgba(196,154,68,0.22); }
   .cell.blocked-landing { border-color: rgba(180,80,40,0.5); background-color: rgba(180,80,40,0.07); cursor: not-allowed; }
   .cell.dark-sq.blocked-landing { background-color: rgba(180,80,40,0.11); }
-  .cell.path { background-color: rgba(196,154,68,0.06); }
-  .cell.dark-sq.path { background-color: rgba(196,154,68,0.09); }
+  .cell.path { background-color: var(--sand2); }
+  .cell.dark-sq.path { background-color: var(--sand3); }
 
-  /* LOS — enemy piece visible from stopped piece */
   .cell.los-target {
     border-color: rgba(192,112,74,0.7);
     box-shadow: inset 0 0 0 2px rgba(192,112,74,0.35);
   }
 
-  /* Win line */
   .cell.win-line { border-color: var(--gold) !important; background-color: rgba(196,154,68,0.22) !important; animation: win-flash 0.7s ease-in-out 3; }
   .cell.dark-sq.win-line { background-color: rgba(196,154,68,0.28) !important; }
   @keyframes win-flash { 0%,100%{background-color:rgba(196,154,68,0.22)} 50%{background-color:rgba(196,154,68,0.42)} }
 
   .cell-label {
     position: absolute; bottom: 4px; left: 6px;
-    font-family: 'Cinzel', serif; font-size: clamp(0.55rem, 1.5vw, 0.7rem);
+    font-family: 'Macondo', serif; font-size: clamp(0.55rem, 1.5vw, 0.7rem);
     font-weight: 400; color: var(--accent); line-height: 1; user-select: none; opacity: 0.7;
   }
 
@@ -140,12 +185,12 @@
     border: 2px solid rgba(184,169,138,0.3);
     box-shadow: 0 3px 8px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.12), inset 0 -2px 4px rgba(0,0,0,0.4);
   }
-  .piece.inactive { opacity: 0.45; transform: scale(0.88); }
+  .piece.inactive { opacity: 0.9; transform: scale(0.9); }
   .piece.active-piece { animation: pulse 2s ease-in-out infinite; }
   .piece.p1.active-piece {
     border-color: var(--gold);
     box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.6),
-      0 0 0 3px rgba(196,154,68,0.35), 0 0 14px rgba(196,154,68,0.25);
+      0 0 0 3px rgba(200, 146, 37, 0.35), 0 0 14px rgba(196,154,68,0.25);
   }
   .piece.p2.active-piece {
     border-color: var(--sand);
@@ -158,7 +203,6 @@
     box-shadow: 0 6px 16px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.7),
       0 0 0 4px rgba(196,154,68,0.6), 0 0 24px rgba(196,154,68,0.5) !important;
   }
-  /* Sneaking combo — piece is mid-combo, soft cyan ring */
   .piece.sneaking {
     animation: pulse-sneak 1.2s ease-in-out infinite !important;
     border-color: #7ab8c0 !important;
@@ -175,19 +219,6 @@
     50%    { box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.5), 0 0 0 5px rgba(196,154,68,0.2), 0 0 22px rgba(196,154,68,0.35); }
   }
 
-  /* ── Board frame ── */
-  .board-border {
-    padding: clamp(10px, 2vw, 18px); border: 2px solid var(--accent); border-radius: 8px;
-    box-shadow: 0 0 0 1px rgba(196,154,68,0.15), 0 0 60px rgba(60,30,10,0.8), inset 0 0 30px rgba(0,0,0,0.3);
-    background: rgba(28,21,16,0.6); position: relative;
-  }
-  .board-border::before { content: ''; position: absolute; inset: 4px; border: 1px solid rgba(196,154,68,0.2); border-radius: 5px; pointer-events: none; }
-  .corner-ornament { position: absolute; width: 14px; height: 14px; border-color: var(--gold); border-style: solid; opacity: 0.5; }
-  .corner-ornament.tl { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
-  .corner-ornament.tr { top: 8px; right: 8px; border-width: 2px 2px 0 0; }
-  .corner-ornament.bl { bottom: 8px; left: 8px; border-width: 0 0 2px 2px; }
-  .corner-ornament.br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
-
   /* ── Victory overlay ── */
   .victory-overlay {
     position: fixed; inset: 0; display: flex; flex-direction: column;
@@ -196,9 +227,9 @@
     animation: fade-in 0.5s ease; gap: 1.5rem;
   }
   @keyframes fade-in { from{opacity:0} to{opacity:1} }
-  .victory-title { font-family: 'Cinzel', serif; font-size: clamp(2rem, 8vw, 4rem); font-weight: 700; color: var(--gold); letter-spacing: 0.15em; text-shadow: 0 0 60px rgba(196,154,68,0.6); text-align: center; }
-  .victory-sub   { font-family: 'Cinzel', serif; font-size: clamp(0.8rem, 2.5vw, 1.1rem); letter-spacing: 0.2em; color: var(--sand3); text-align: center; }
-  .victory-btn   { margin-top: 0.5rem; font-family: 'Cinzel', serif; font-size: clamp(0.7rem,2vw,0.85rem); letter-spacing: 0.2em; color: var(--gold); background: transparent; border: 1px solid rgba(196,154,68,0.5); border-radius: 4px; padding: 0.6rem 1.8rem; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease; }
+  .victory-title { font-family: 'Macondo', serif; font-size: clamp(2rem, 8vw, 4rem); font-weight: 700; color: var(--gold); letter-spacing: 0.15em; text-shadow: 0 0 60px rgba(196,154,68,0.6); text-align: center; }
+  .victory-sub   { font-family: 'Macondo', serif; font-size: clamp(0.8rem, 2.5vw, 1.1rem); letter-spacing: 0.2em; color: var(--sand3); text-align: center; }
+  .victory-btn   { margin-top: 0.5rem; font-family: 'Macondo', serif; font-size: clamp(0.7rem,2vw,0.85rem); letter-spacing: 0.2em; color: var(--gold); background: transparent; border: 1px solid rgba(196,154,68,0.5); border-radius: 4px; padding: 0.6rem 1.8rem; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease; }
   .victory-btn:hover { background: rgba(196,154,68,0.1); border-color: var(--gold); }
 
   /* ── Legend ── */
@@ -210,14 +241,11 @@
 
   footer { font-size: 0.7rem; font-weight: 300; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; opacity: 0.6; }
 
-  /* ── Sliding ghost piece ── */
-  /* A clone floats over the board during animation; the board is locked. */
   .piece-ghost {
     position: fixed;
     border-radius: 50%;
     pointer-events: none;
     z-index: 50;
-    /* transitions are applied via JS for precise control */
   }
   .piece-ghost.p1 {
     background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90);
@@ -237,29 +265,27 @@
 
 <header>
   <h1>Sambaqui</h1>
-  <p class="subtitle">Place three pieces in sequence</p>
 </header>
 
 <div class="turn-bar">
   <div class="player-tag p1 active" id="tag-p1"><div class="dot"></div><span>Player 1</span></div>
   <div class="turn-divider"></div>
-  <div class="player-tag p2" id="tag-p2"><div class="dot"></div><span>Player 2</span></div>
+  <div class="player-tag p2" id="tag-p2"><div class="dot"></div><span>Player 2 (Computer)</span></div>
 </div>
 
 <div class="status" id="status">Select an active piece to move</div>
 
-<div class="board-border">
-  <span class="corner-ornament tl"></span><span class="corner-ornament tr"></span>
-  <span class="corner-ornament bl"></span><span class="corner-ornament br"></span>
-  <div class="board-wrapper" id="board"></div>
+<div class="board-container-wrapper">
+  <div class="board-border">
+    <span class="corner-ornament tl"></span><span class="corner-ornament tr"></span>
+    <span class="corner-ornament bl"></span><span class="corner-ornament br"></span>
+    <div class="board-wrapper" id="board"></div>
+  </div>
+  <div class="board-controls">
+    <button id="undo-btn" class="nav-btn" title="Undo" disabled>◀</button>
+    <button id="redo-btn" class="nav-btn" title="Redo" disabled>▶</button>
+  </div>
 </div>
-
-<div class="legend">
-  <div class="legend-item"><div class="legend-piece p1"></div><span>Player 1 — light</span></div>
-  <div class="legend-item"><div class="legend-piece p2"></div><span>Player 2 — dark</span></div>
-</div>
-
-<footer>Sambaqui — Animated Sliding</footer>
 
 <script>
   // ─────────────────────────────────────────────
@@ -312,10 +338,6 @@
   // ─────────────────────────────────────────────
   //  LINE OF SIGHT
   // ─────────────────────────────────────────────
-  // From `fromLabel`, cast rays in all 8 directions.
-  // The FIRST piece encountered in each direction is "visible".
-  // Returns an array of square labels of visible enemy pieces
-  // that are also moveable (have at least one legal slide).
   function computeVisibleMoveableEnemies(fromLabel, pieces, currentPlayer) {
     const enemy = currentPlayer === 1 ? 2 : 1;
     const visible = [];
@@ -326,24 +348,18 @@
       while (r >= 0 && r <= 4 && c >= 0 && c <= 4) {
         const sq = rcToLabel(r, c);
         if (pieces[sq]) {
-          // First piece in this direction
           if (pieces[sq].player === enemy) {
-            // Check moveability: does it have any legal slide?
             const slides = computeAllSlides(sq, pieces);
             if (slides.length > 0) visible.push(sq);
           }
-          break; // Stop at the first piece regardless
+          break;
         }
         r += dr; c += dc;
       }
     }
-
     return visible;
   }
 
-  // ─────────────────────────────────────────────
-  //  MOVEABILITY CHECK (for a player's pieces)
-  // ─────────────────────────────────────────────
   function isMoveablePiece(sq, pieces) {
     return computeAllSlides(sq, pieces).length > 0;
   }
@@ -395,46 +411,33 @@
     return `${currentPlayer}|${parts.join(',')}`;
   }
 
-  // Simulate the full result of moving `fromLabel` → `landing` and return
-  // the serialised state key exactly as executeMove would record it.
-  // This is the only way to match keys correctly, because the active set
-  // after the move depends on LOS from the landing square.
-  function hypotheticalKey(fromLabel, landing, currentPieces, currentPlayer) {
-    // Clone pieces
+  function hypotheticalKeySim(fromLabel, landing, currentPieces, currentPlayer) {
     const next = {};
     for (const [sq, p] of Object.entries(currentPieces)) next[sq] = { ...p };
 
-    // Apply slide
     const moving = { ...next[fromLabel], active: false };
     delete next[fromLabel];
     next[landing] = moving;
 
-    const enemy      = currentPlayer === 1 ? 2 : 1;
-    const nextPlayer = enemy;
-
-    // Simulate LOS from landing square
+    const enemy = currentPlayer === 1 ? 2 : 1;
     const visibleEnemies = computeVisibleMoveableEnemies(landing, next, currentPlayer);
 
     if (visibleEnemies.length > 0) {
-      // Activity Transfer: deactivate all enemy pieces, activate visible ones
       for (const [sq, p] of Object.entries(next)) {
         if (p.player === enemy) next[sq] = { ...p, active: false };
       }
       for (const sq of visibleEnemies) {
         next[sq] = { ...next[sq], active: true };
       }
+      return serialiseState(next, enemy);
     } else {
-      // Sneaking Combo: same player moves again, landing piece stays active
       next[landing] = { ...next[landing], active: true };
-      // Key is for the *same* player (they haven't handed off yet)
       return serialiseState(next, currentPlayer);
     }
-
-    return serialiseState(next, nextPlayer);
   }
 
   // ─────────────────────────────────────────────
-  //  GAME STATE
+  //  GAME STATE & INITIALIZATION
   // ─────────────────────────────────────────────
   function makeInitialPieces() {
     return {
@@ -457,15 +460,69 @@
     history: new Set(),
     gameOver: false,
     winLine: null,
-    // Sneaking Combo state
-    sneaking: false,        // true when the current piece must move again
-    sneakingSquare: null,   // the square of the piece locked in a combo
-    // LOS state (for rendering after a move, before input)
-    losSquares: [],         // enemy squares visible from stopped piece
-    animating: false,       // true while a slide animation is in flight
+    sneaking: false,
+    sneakingSquare: null,
+    losSquares: [],
+    animating: false,
   };
 
   state.history.add(serialiseState(state.pieces, state.currentPlayer));
+
+  // Linear Timeline configuration for historical navigation
+  const timeline = [];
+  let timelineIndex = -1;
+
+  function pushTimeline() {
+    if (timelineIndex < timeline.length - 1) {
+      timeline.splice(timelineIndex + 1);
+    }
+    timeline.push({
+      pieces: JSON.parse(JSON.stringify(state.pieces)),
+      currentPlayer: state.currentPlayer,
+      sneaking: state.sneaking,
+      sneakingSquare: state.sneakingSquare,
+      history: new Set(state.history),
+      gameOver: state.gameOver,
+      winLine: state.winLine ? [...state.winLine] : null
+    });
+    timelineIndex = timeline.length - 1;
+    updateUndoRedoButtons();
+  }
+
+  function restoreTimeline(index) {
+    const snap = timeline[index];
+    state.pieces = JSON.parse(JSON.stringify(snap.pieces));
+    state.currentPlayer = snap.currentPlayer;
+    state.sneaking = snap.sneaking;
+    state.sneakingSquare = snap.sneakingSquare;
+    state.history = new Set(snap.history);
+    state.gameOver = snap.gameOver;
+    state.winLine = snap.winLine ? [...snap.winLine] : null;
+    state.selectedSquare = null;
+    state.currentMoves = [];
+    state.losSquares = [];
+
+    if (state.gameOver) {
+      if (state.winLine) {
+        const win = checkVictory(state.pieces);
+        setStatus(`Game Over! Player ${win ? win.winner : 1} Wins.`);
+      } else {
+        setStatus("Game Over! Stalemate Draw.");
+      }
+    } else {
+      if (state.sneaking) {
+        setStatus('Move again!', 'sneaking');
+        selectPiece(state.sneakingSquare);
+      } else {
+        setStatus(state.currentPlayer === 1 ? "Select an active piece to move" : "AI is calculating moves...", state.currentPlayer === 2 ? "highlight" : false);
+      }
+    }
+    render();
+    updateUndoRedoButtons();
+    if (!state.gameOver && state.currentPlayer === 2) {
+      triggerAIMoveIfNeeded();
+    }
+  }
 
   // ─────────────────────────────────────────────
   //  BUILD BOARD DOM
@@ -474,6 +531,8 @@
   const statusEl = document.getElementById('status');
   const tagP1    = document.getElementById('tag-p1');
   const tagP2    = document.getElementById('tag-p2');
+  const undoBtn  = document.getElementById('undo-btn');
+  const redoBtn  = document.getElementById('redo-btn');
   const cellEls  = {};
 
   for (let row = 0; row < 5; row++) {
@@ -492,6 +551,19 @@
     }
     boardEl.appendChild(rowEl);
   }
+
+  function updateUndoRedoButtons() {
+    // Lock navigation adjustments during an ongoing AI turn loop or mid-slide animations
+    undoBtn.disabled = (timelineIndex <= 0 || state.animating || state.currentPlayer === 2);
+    redoBtn.disabled = (timelineIndex >= timeline.length - 1 || state.animating || state.currentPlayer === 2);
+  }
+
+  undoBtn.addEventListener('click', () => {
+    if (timelineIndex > 0 && !state.animating && state.currentPlayer !== 2) restoreTimeline(timelineIndex - 1);
+  });
+  redoBtn.addEventListener('click', () => {
+    if (timelineIndex < timeline.length - 1 && !state.animating && state.currentPlayer !== 2) restoreTimeline(timelineIndex + 1);
+  });
 
   // ─────────────────────────────────────────────
   //  RENDER
@@ -517,11 +589,9 @@
       const move       = landingMap[label];
       const isPath     = pathSquares.has(label);
 
-      const base = cell.className.includes('dark-sq') ? 'cell dark-sq' : 'cell';
-      cell.className = base;
+      cell.className = cell.className.includes('dark-sq') ? 'cell dark-sq' : 'cell';
       cell.querySelectorAll('.piece, .arrow-hint').forEach(el => el.remove());
 
-      // Layer: win > LOS > landing/path
       if (winSet.has(label)) {
         cell.classList.add('win-line');
       } else if (losSet.has(label) && !move) {
@@ -540,11 +610,10 @@
           el.className = `piece p${piece.player} selected-piece`;
           cell.classList.add('selected');
         } else if (state.sneaking && label === state.sneakingSquare) {
-          // Piece locked in a Sneaking Combo — distinct style
           el.className = `piece p${piece.player} sneaking`;
         } else if (piece.active) {
           el.className = `piece p${piece.player} active-piece`;
-          if (isCurrentPlayer && !state.gameOver) cell.classList.add('selectable');
+          if (isCurrentPlayer && !state.gameOver && state.currentPlayer === 1) cell.classList.add('selectable');
         } else {
           el.className = `piece p${piece.player} inactive`;
         }
@@ -556,22 +625,26 @@
         arrow.className = 'arrow-hint' + (move.blocked ? ' blocked' : '');
         arrow.textContent = move.arrow;
         cell.appendChild(arrow);
-        if (!move.blocked) cell.classList.add('selectable');
+        if (!move.blocked && state.currentPlayer === 1) cell.classList.add('selectable');
       }
     }
   }
 
-  // ─────────────────────────────────────────────
-  //  VICTORY OVERLAY
-  // ─────────────────────────────────────────────
   function showVictory(winner) {
     const overlay = document.createElement('div');
     overlay.className = 'victory-overlay';
-    overlay.innerHTML = `
-      <div class="victory-title">Player ${winner} Wins</div>
-      <div class="victory-sub">Three in a row — victory secured</div>
-      <button class="victory-btn" id="restart-btn">Play Again</button>
-    `;
+    if (winner === 'Draw') {
+      overlay.innerHTML = `
+        <div class="victory-title">Stalemate Draw</div>
+        <div class="victory-sub">No legal positions remain for either player</div>
+        <button class="victory-btn" id="restart-btn">Play Again</button>
+      `;
+    } else {
+      overlay.innerHTML = `
+        <div class="victory-title">Player ${winner} Wins</div>
+        <button class="victory-btn" id="restart-btn">Play Again</button>
+      `;
+    }
     document.body.appendChild(overlay);
     document.getElementById('restart-btn').addEventListener('click', restartGame);
   }
@@ -590,15 +663,20 @@
     state.pieces         = makeInitialPieces();
     state.history        = new Set();
     state.history.add(serialiseState(state.pieces, state.currentPlayer));
+    
+    timeline.length = 0;
+    timelineIndex = -1;
+    pushTimeline();
+
     setStatus('Select an active piece to move');
     render();
   }
 
   // ─────────────────────────────────────────────
-  //  INTERACTION
+  //  INTERACTION & SELECTION
   // ─────────────────────────────────────────────
   function onCellClick(label) {
-    if (state.gameOver || state.animating) return;
+    if (state.gameOver || state.animating || state.currentPlayer === 2) return;
 
     const piece = state.pieces[label];
     const move  = state.currentMoves.find(m => m.landing === label);
@@ -606,7 +684,6 @@
     if (move && !move.blocked) { executeMove(state.selectedSquare, move); return; }
     if (move &&  move.blocked) { setStatus('That move would repeat a previous position — forbidden', 'warn'); return; }
 
-    // During a Sneaking Combo the player cannot switch pieces
     if (state.sneaking) {
       setStatus('Sneaking Combo — this piece must move again', 'warn');
       return;
@@ -622,15 +699,12 @@
 
   function selectPiece(label) {
     state.selectedSquare = label;
-    state.losSquares     = [];   // clear LOS highlights when re-selecting
+    state.losSquares     = [];
 
     const raw = computeAllSlides(label, state.pieces);
 
-    // Tag each move with whether the Novelty Rule blocks it.
-    // hypotheticalKey fully simulates LOS + Activity Transfer / Sneaking so
-    // the projected key matches exactly what executeMove will record.
     state.currentMoves = raw.map(m => {
-      const key     = hypotheticalKey(label, m.landing, state.pieces, state.currentPlayer);
+      const key     = hypotheticalKeySim(label, m.landing, state.pieces, state.currentPlayer);
       const blocked = state.history.has(key);
       return { ...m, blocked };
     });
@@ -641,7 +715,7 @@
     if (state.currentMoves.length === 0) {
       setStatus(`Piece on ${label} — no moves available`);
     } else if (free === 0) {
-      setStatus(`Piece on ${label} — all ${blocked} slide${blocked > 1 ? 's' : ''} forbidden by Novelty Rule`, 'warn');
+      setStatus(`Piece on ${label} — all ${blocked} slides forbidden by Novelty Rule`, 'warn');
     } else {
       const suffix = blocked > 0 ? ` (${blocked} forbidden)` : '';
       const prefix = state.sneaking ? 'Sneaking — ' : '';
@@ -659,52 +733,42 @@
   }
 
   // ─────────────────────────────────────────────
-  //  ANIMATION — slide a piece across the board
+  //  ANIMATION
   // ─────────────────────────────────────────────
-
-  // Returns the pixel center of a cell relative to the viewport.
   function cellCenter(label) {
     const rect = cellEls[label].getBoundingClientRect();
     return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
   }
 
-  // Animate a piece sliding from fromLabel through path[], then call onDone.
-  // We walk each step of the path so the piece visibly passes through
-  // intermediate squares rather than jumping straight to the landing.
   function animateSlide(player, fromLabel, path, onDone) {
     state.animating = true;
+    updateUndoRedoButtons();
 
-    // Measure the piece size from the source cell
     const srcRect  = cellEls[fromLabel].getBoundingClientRect();
     const pieceSize = srcRect.width * 0.68;
 
-    // Create the floating ghost
     const ghost = document.createElement('div');
     ghost.className = `piece-ghost p${player}`;
     ghost.style.width  = pieceSize + 'px';
     ghost.style.height = pieceSize + 'px';
 
-    // Start position: centered on fromLabel
     const start = cellCenter(fromLabel);
     ghost.style.left = (start.x - pieceSize / 2) + 'px';
     ghost.style.top  = (start.y - pieceSize / 2) + 'px';
     ghost.style.transition = 'none';
     document.body.appendChild(ghost);
 
-    // Hide the source piece while ghost travels
     const srcPieceEl = cellEls[fromLabel].querySelector('.piece');
     if (srcPieceEl) srcPieceEl.style.opacity = '0';
 
-    // Walk each step with a per-step duration proportional to distance
-    // (each step is exactly 1 cell — orthogonal or diagonal).
-    const STEP_MS = 60; // ms per cell travelled
-
+    const STEP_MS = 60;
     let step = 0;
+    
     function nextStep() {
       if (step >= path.length) {
-        // Animation complete — clean up ghost and hand off
         ghost.remove();
         state.animating = false;
+        updateUndoRedoButtons();
         onDone();
         return;
       }
@@ -715,40 +779,33 @@
       step++;
       setTimeout(nextStep, STEP_MS);
     }
-
-    // Kick off after one frame so the initial position paints first
     requestAnimationFrame(() => setTimeout(nextStep, 16));
   }
 
   // ─────────────────────────────────────────────
-  //  EXECUTE MOVE — core turn logic
+  //  EXECUTE MOVE & POST-MOVE VALIDATORS
   // ─────────────────────────────────────────────
   function executeMove(fromLabel, move) {
     const movingPiece = state.pieces[fromLabel];
     const player      = movingPiece.player;
 
-    // Clear UI immediately — hide arrows and selection ring while animating
     state.selectedSquare = null;
     state.currentMoves   = [];
     render();
 
-    // Animate, then apply game logic when piece lands
     animateSlide(player, fromLabel, move.path, () => applyMove(fromLabel, move, movingPiece));
   }
 
   function applyMove(fromLabel, move, movingPiece) {
-    // 0. Deactivate all other friendly pieces
     for (const [sq, p] of Object.entries(state.pieces)) {
       if (p.player === state.currentPlayer && sq !== fromLabel) {
         state.pieces[sq] = { ...p, active: false };
       }
     }
 
-    // 1. Apply the slide
     delete state.pieces[fromLabel];
     state.pieces[move.landing] = { ...movingPiece, active: false };
 
-    // 2. Check victory (before any transfer)
     const victory = checkVictory(state.pieces);
     if (victory) {
       state.gameOver   = true;
@@ -756,17 +813,14 @@
       state.losSquares = [];
       state.sneaking   = false;
       render();
+      pushTimeline();
       setTimeout(() => showVictory(victory.winner), 600);
       return;
     }
 
-    // 3. Seeing Is Believing
-    const visibleEnemies = computeVisibleMoveableEnemies(
-      move.landing, state.pieces, state.currentPlayer
-    );
+    const visibleEnemies = computeVisibleMoveableEnemies(move.landing, state.pieces, state.currentPlayer);
 
     if (visibleEnemies.length > 0) {
-      // ── 4a. HALT → Activity Transfer ──────────────────────────────────
       const enemy = state.currentPlayer === 1 ? 2 : 1;
 
       for (const [sq, p] of Object.entries(state.pieces)) {
@@ -785,28 +839,92 @@
 
       state.losSquares = visibleEnemies;
       render();
+      pushTimeline();
 
       const n = visibleEnemies.length;
-      setStatus(
-        `Halted — ${n} enemy piece${n > 1 ? 's' : ''} spotted. Player ${state.currentPlayer}, select an active piece.`
-      );
-
-      setTimeout(() => { state.losSquares = []; render(); }, 1200);
-
+      setStatus(`Halted — ${n} enemy piece${n > 1 ? 's' : ''} spotted. Shifted control.`);
+      setTimeout(() => { state.losSquares = []; render(); checkTurnPassing(); }, 1200);
     } else {
-      // ── 4b. SNEAKING COMBO ─────────────────────────────────────────────
       state.sneaking       = true;
       state.sneakingSquare = move.landing;
       state.losSquares     = [];
-
       state.pieces[move.landing] = { ...state.pieces[move.landing], active: true };
 
       const key = serialiseState(state.pieces, state.currentPlayer);
       state.history.add(key);
 
       render();
+      pushTimeline();
       setStatus('Sneaking Combo — no enemies spotted, move again!', 'sneaking');
-      selectPiece(move.landing);
+      
+      if (state.currentPlayer === 1) {
+        selectPiece(move.landing);
+      }
+      checkTurnPassing();
+    }
+  }
+
+  function checkTurnPassing() {
+    if (state.gameOver) return;
+
+    let currentHasMoves = false;
+    const piecesToScan = state.sneaking ? [state.sneakingSquare] : LABELS;
+    const currentHistory = new Set(state.history);
+
+    for (const label of piecesToScan) {
+      const p = state.pieces[label];
+      if (p && p.player === state.currentPlayer && p.active) {
+        const slides = computeAllSlides(label, state.pieces);
+        for (const m of slides) {
+          const key = hypotheticalKeySim(label, m.landing, state.pieces, state.currentPlayer);
+          if (!currentHistory.has(key)) { currentHasMoves = true; break; }
+        }
+      }
+      if (currentHasMoves) break;
+    }
+
+    if (!currentHasMoves) {
+      let originalPlayer = state.currentPlayer;
+      state.sneaking = false;
+      state.sneakingSquare = null;
+      state.currentPlayer = state.currentPlayer === 1 ? 2 : 1;
+
+      for (const sq in state.pieces) {
+        if (state.pieces[sq].player === state.currentPlayer) {
+          state.pieces[sq].active = isMoveablePiece(sq, state.pieces);
+        } else {
+          state.pieces[sq].active = false;
+        }
+      }
+
+      const passKey = serialiseState(state.pieces, state.currentPlayer);
+      state.history.add(passKey);
+      pushTimeline();
+
+      let alternateHasMoves = false;
+      for (const label of LABELS) {
+        const p = state.pieces[label];
+        if (p && p.player === state.currentPlayer && p.active) {
+          const slides = computeAllSlides(label, state.pieces);
+          for (const m of slides) {
+            const key = hypotheticalKeySim(label, m.landing, state.pieces, state.currentPlayer);
+            if (!state.history.has(key)) { alternateHasMoves = true; break; }
+          }
+        }
+        if (alternateHasMoves) break;
+      }
+
+      if (!alternateHasMoves) {
+        state.gameOver = true;
+        setStatus("Stalemate Draw — no remaining legal positions available.", "warn");
+        setTimeout(() => showVictory("Draw"), 600);
+      } else {
+        setStatus(`Player ${originalPlayer} has no legal moves left! Turn automatically passes.`, "warn");
+        render();
+        triggerAIMoveIfNeeded();
+      }
+    } else {
+      triggerAIMoveIfNeeded();
     }
   }
 
@@ -819,8 +937,181 @@
   }
 
   // ─────────────────────────────────────────────
-  //  INIT
+  //  MONTE CARLO SEARCH TREE ALGORITHM
   // ─────────────────────────────────────────────
+  function triggerAIMoveIfNeeded() {
+    if (state.currentPlayer === 2 && !state.gameOver && !state.animating) {
+      setStatus("AI is thinking...", "highlight");
+      setTimeout(() => {
+        const bestAction = runMonteCarloSearch();
+        if (bestAction) {
+          const slides = computeAllSlides(bestAction.from, state.pieces);
+          const match = slides.find(s => s.landing === bestAction.move.landing);
+          if (match) {
+            state.selectedSquare = bestAction.from;
+            executeMove(bestAction.from, match);
+          }
+        }
+      }, 500);
+    }
+  }
+
+  function getPiecesClone(pieces) {
+    const out = {};
+    for (const sq in pieces) {
+      out[sq] = { player: pieces[sq].player, active: pieces[sq].active };
+    }
+    return out;
+  }
+
+  function applyMoveSim(fromLabel, moveObj, currentPieces, currentPlayer, historySet) {
+    const nextPieces = getPiecesClone(currentPieces);
+    for (const sq in nextPieces) {
+      if (nextPieces[sq].player === currentPlayer) nextPieces[sq].active = false;
+    }
+
+    const moving = nextPieces[fromLabel];
+    delete nextPieces[fromLabel];
+    nextPieces[moveObj.landing] = moving;
+    moving.active = false;
+
+    const victory = checkVictory(nextPieces);
+    if (victory) return { pieces: nextPieces, currentPlayer, gameOver: true, winner: victory.winner };
+
+    const visibleEnemies = computeVisibleMoveableEnemies(moveObj.landing, nextPieces, currentPlayer);
+    let nextPlayer = currentPlayer;
+    let nextSneaking = false;
+    let nextSneakingSquare = null;
+
+    if (visibleEnemies.length > 0) {
+      const enemy = currentPlayer === 1 ? 2 : 1;
+      for (const sq in nextPieces) {
+        if (nextPieces[sq].player === enemy) nextPieces[sq].active = false;
+      }
+      for (const sq of visibleEnemies) nextPieces[sq].active = true;
+      nextPlayer = enemy;
+    } else {
+      nextSneaking = true;
+      nextSneakingSquare = moveObj.landing;
+      nextPieces[moveObj.landing].active = true;
+    }
+
+    const nextHistory = new Set(historySet);
+    const key = serialiseState(nextPieces, nextPlayer);
+    nextHistory.add(key);
+
+    let nextLegalCount = getRawLegalMovesCountSim(nextPieces, nextPlayer, nextSneaking, nextSneakingSquare, nextHistory);
+    if (nextLegalCount === 0) {
+      nextSneaking = false;
+      nextSneakingSquare = null;
+      nextPlayer = nextPlayer === 1 ? 2 : 1;
+
+      for (const sq in nextPieces) {
+        nextPieces[sq].active = (nextPieces[sq].player === nextPlayer) ? computeAllSlides(sq, nextPieces).length > 0 : false;
+      }
+
+      const passKey = serialiseState(nextPieces, nextPlayer);
+      nextHistory.add(passKey);
+
+      if (getRawLegalMovesCountSim(nextPieces, nextPlayer, nextSneaking, nextSneakingSquare, nextHistory) === 0) {
+        return { pieces: nextPieces, currentPlayer: nextPlayer, gameOver: true, winner: 'Draw' };
+      }
+    }
+
+    return { pieces: nextPieces, currentPlayer: nextPlayer, sneaking: nextSneaking, sneakingSquare: nextSneakingSquare, history: nextHistory, gameOver: false, winner: null };
+  }
+
+  function getRawLegalMovesCountSim(pieces, currentPlayer, sneaking, sneakingSquare, historySet) {
+    let tally = 0;
+    const targetSquares = sneaking ? [sneakingSquare] : LABELS;
+    for (const label of targetSquares) {
+      const p = pieces[label];
+      if (p && p.player === currentPlayer && p.active) {
+        const slides = computeAllSlides(label, pieces);
+        for (const m of slides) {
+          if (!historySet.has(hypotheticalKeySim(label, m.landing, pieces, currentPlayer))) tally++;
+        }
+      }
+    }
+    return tally;
+  }
+
+  function runMonteCarloSearch() {
+    const rootHistory = new Set(state.history);
+    const options = [];
+    const searchPool = state.sneaking ? [state.sneakingSquare] : LABELS;
+
+    for (const label of searchPool) {
+      const p = state.pieces[label];
+      if (p && p.player === 2 && p.active) {
+        const slides = computeAllSlides(label, state.pieces);
+        for (const m of slides) {
+          if (!rootHistory.has(hypotheticalKeySim(label, m.landing, state.pieces, 2))) {
+            options.push({ from: label, move: m });
+          }
+        }
+      }
+    }
+
+    if (options.length === 0) return null;
+    if (options.length === 1) return options[0];
+
+    const SIMULATIONS_PER_OPTION = 200; 
+    let bestSelection = null;
+    let highestValue = -Infinity;
+
+    for (const opt of options) {
+      let accumulativeScore = 0;
+      for (let run = 0; run < SIMULATIONS_PER_OPTION; run++) {
+        accumulativeScore += executeRollout(opt.from, opt.move, state.pieces, 2, rootHistory);
+      }
+      if (accumulativeScore > highestValue) {
+        highestValue = accumulativeScore;
+        bestSelection = opt;
+      }
+    }
+    return bestSelection;
+  }
+
+  function executeRollout(rootFrom, rootMove, startingPieces, startingPlayer, rootHistory) {
+    let sim = applyMoveSim(rootFrom, rootMove, startingPieces, startingPlayer, rootHistory);
+    let depthCount = 0;
+    const MAX_ROLLOUT_DEPTH = 60;
+
+    while (!sim.gameOver && depthCount < MAX_ROLLOUT_DEPTH) {
+      depthCount++;
+      const availableMoves = [];
+      const validationPool = sim.sneaking ? [sim.sneakingSquare] : LABELS;
+
+      for (const label of validationPool) {
+        const p = sim.pieces[label];
+        if (p && p.player === sim.currentPlayer && p.active) {
+          const slides = computeAllSlides(label, sim.pieces);
+          for (const m of slides) {
+            if (!sim.history.has(hypotheticalKeySim(label, m.landing, sim.pieces, sim.currentPlayer))) {
+              availableMoves.push({ from: label, move: m });
+            }
+          }
+        }
+      }
+
+      if (availableMoves.length === 0) break;
+
+      const randomChoice = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+      sim = applyMoveSim(randomChoice.from, randomChoice.move, sim.pieces, sim.currentPlayer, sim.history);
+    }
+
+    if (sim.gameOver) {
+      if (sim.winner === 2) return 1.0; 
+      if (sim.winner === 1) return -1.0;
+    }
+    return 0.0;
+  }
+
+  // ─────────────────────────────────────────────
+  //  INIT RUN
+  // ─────────────────────────────────────────────
+  pushTimeline();
   render();
 </script>
 </body>
