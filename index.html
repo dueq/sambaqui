@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -37,17 +37,19 @@
     padding: 2rem 1rem; gap: 1.2rem;
   }
 
+  body.clickable-restart {
+    cursor: pointer !important;
+  }
+  body.clickable-restart .cell.selectable {
+    cursor: pointer !important;
+  }
+
   /* ── Header ── */
   header { text-align: center; }
   h1 {
     font-size: clamp(2.2rem, 7vw, 3.8rem); font-weight: 800;
     letter-spacing: 0.06em; color: var(--gold);
     text-shadow: 0 0 40px rgba(196,154,68,0.3); line-height: 1;
-  }
-  .subtitle {
-    font-size: clamp(0.7rem, 2vw, 0.85rem); font-weight: 300;
-    letter-spacing: 0.35em; text-transform: uppercase;
-    color: var(--sand3); margin-top: 0.5rem;
   }
 
   /* ── Stats Bar ── */
@@ -104,7 +106,7 @@
   .board-border {
     padding: clamp(10px, 2vw, 18px); border: 2px solid var(--accent); border-radius: 8px;
     box-shadow: 0 0 0 1px rgba(196,154,68,0.15), 0 0 60px rgba(60,30,10,0.8), inset 0 0 30px rgba(0,0,0,0.3);
-    background: rgba(28,21,16,0.6);
+    background: rgba(202, 172, 121, 0.572);
   }
   .board-wrapper { display: flex; flex-direction: column; align-items: center; gap: var(--gap); }
   .board-row    { display: flex; gap: var(--gap); }
@@ -115,7 +117,7 @@
     max-width: calc(var(--cell-size) * 5 + var(--gap) * 4 + clamp(20px, 4vw, 36px) + 4px);
     padding: 0 2px; min-height: 28px;
   }
-  .board-controls.hidden { visibility: hidden; pointer-events: none; }
+  .board-controls.hidden { display: none !important; }
   .nav-btn {
     background: var(--mid); border: 1px solid var(--accent); color: var(--gold);
     border-radius: 4px; width: 28px; height: 28px;
@@ -126,7 +128,7 @@
   .nav-btn:hover:not(:disabled) { background: var(--accent); border-color: var(--gold); color: #fff; }
   .nav-btn:disabled { opacity: 0.15; cursor: not-allowed; box-shadow: none; }
 
-  /* ── 2P result banner ── */
+  /* ── Result banner ── */
   .result-banner {
     display: flex; align-items: center; justify-content: center; gap: 1.2rem;
     border: 1px solid var(--accent); border-radius: 6px;
@@ -163,12 +165,12 @@
   .cell.selectable            { cursor: pointer; }
   .cell.selectable:hover      { border-color: var(--gold); }
   .cell.selected              { border-color: var(--gold); box-shadow: inset 0 0 0 2px rgba(196,154,68,0.5); cursor: pointer; }
-  .cell.landing               { cursor: pointer; border-color: rgba(196,154,68,0.7); background-color: rgba(196,154,68,0.12); }
+  .cell.landing               { cursor: pointer; border-color: rgba(122, 92, 32, 0.331); background-color: rgba(230, 162, 27, 0.368); }
   .cell.dark-sq.landing       { background-color: rgba(196,154,68,0.18); }
   .cell.landing:hover         { border-color: var(--gold); background-color: rgba(196,154,68,0.22); }
   .cell.blocked-landing       { border-color: rgba(180,80,40,0.5); background-color: rgba(180,80,40,0.07); cursor: not-allowed; }
   .cell.dark-sq.blocked-landing { background-color: rgba(180,80,40,0.11); }
-  .cell.los-target            { border-color: rgba(192,112,74,0.7); box-shadow: inset 0 0 0 2px rgba(192,112,74,0.35); }
+  .cell.los-target            { color: rgba(229, 180, 119, 0.944); }
   .cell.win-line              { border-color: var(--gold) !important; background-color: rgba(196,154,68,0.22) !important; animation: win-flash 0.7s ease-in-out 3; }
   .cell.dark-sq.win-line      { background-color: rgba(196,154,68,0.28) !important; }
 
@@ -194,7 +196,7 @@
   .piece {
     width: 68%; height: 68%; border-radius: 50%; flex-shrink: 0;
     transition: transform 0.15s, opacity 0.15s;
-    position: relative; z-index: 1;
+    position: relative; z-index: 1; pointer-events: none; /* Evita que cliques caiam no elemento interno da peça */
   }
   .piece.p1 {
     background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90);
@@ -207,21 +209,19 @@
     box-shadow: 0 3px 8px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.12), inset 0 -2px 4px rgba(0,0,0,0.4);
   }
   .piece.inactive       { opacity: 0.9; transform: scale(0.95); }
-  .piece.active-piece   { animation: pulse 2s ease-in-out infinite; }
+  .piece.active-piece   { opacity: 1; transform: scale(1); }
   .piece.p1.active-piece {
-    border-color: var(--accent);
-    border: 4px solid var(--gold);
-    box-shadow: 0 3px 12px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.6),
+    border: 4px solid rgba(231, 221, 196, 0.82);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.6),
       0 0 0 3px rgba(232,220,200,0.3), 0 0 14px rgba(232,220,200,0.15);
   }
   .piece.p2.active-piece {
-    border-color: var(--sand);
-    border: 4px solid var(--gold);
+    border: 4px solid rgba(165, 118, 8, 0.474);
     box-shadow: 0 3px 8px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.12),
       0 0 0 3px rgba(232,220,200,0.3), 0 0 14px rgba(232,220,200,0.15);
   }
   .piece.selected-piece {
-    animation: none !important; transform: scale(1.05); border-color: var(--gold) !important;
+    transform: scale(1.05); border-color: var(--gold) !important;
     box-shadow: 0 6px 16px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.7),
       0 0 0 4px rgba(196,154,68,0.6), 0 0 24px rgba(196,154,68,0.5) !important;
   }
@@ -234,10 +234,6 @@
   @keyframes pulse-sneak {
     0%,100% { box-shadow: 0 3px 8px rgba(0,0,0,0.5), 0 0 0 3px rgba(122,184,192,0.4), 0 0 12px rgba(122,184,192,0.25); }
     50%     { box-shadow: 0 3px 8px rgba(0,0,0,0.5), 0 0 0 5px rgba(122,184,192,0.25), 0 0 22px rgba(122,184,192,0.4); }
-  }
-  @keyframes pulse {
-    0%,100% { box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.5), 0 0 0 3px rgba(196,154,68,0.35), 0 0 14px rgba(196,154,68,0.2); }
-    50%     { box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.5), 0 0 0 5px rgba(196,154,68,0.2), 0 0 22px rgba(196,154,68,0.35); }
   }
 
   /* ── Piece ghost ── */
@@ -276,19 +272,44 @@
     background: #241a12; border: 2px solid var(--accent); border-radius: 8px;
     width: 90%; max-width: 440px; padding: 1.8rem; display: flex; flex-direction: column; gap: 1.2rem;
     box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.4);
+    position: relative;
   }
-  .tutorial-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(122,79,46,0.3); padding-bottom: 0.6rem; }
+  .tutorial-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(122,79,46,0.3); padding-bottom: 0.6rem; gap: 0.5rem; }
+  .tutorial-title-area { display: flex; align-items: center; gap: 0.6rem; }
   .tutorial-title { color: var(--gold); font-size: 1.4rem; font-weight: bold; letter-spacing: 0.05em; }
-  .tutorial-pages { font-size: 0.8rem; color: var(--sand3); letter-spacing: 0.1em; }
+  .tutorial-lang-btn {
+    background: transparent; border: 1px solid rgba(196,154,68,0.3); border-radius: 4px;
+    color: var(--sand3); padding: 0.15rem 0.4rem; cursor: pointer;
+    font-family: 'Macondo', serif; font-size: 0.65rem; letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+  .tutorial-lang-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(196,154,68,0.08); }
+  .tutorial-pages { font-size: 0.8rem; color: var(--sand3); letter-spacing: 0.1em; white-space: nowrap; }
   .tutorial-body { font-family:"Lato"; font-size: 0.95rem; line-height: 1.5; color: var(--sand); min-height: 120px; }
   .tutorial-body strong { color: var(--gold); }
-  .tutorial-body ul { padding-left: 1.2rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
   .tutorial-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; }
   .tut-nav { background: transparent; border: 1px solid rgba(184,169,138,0.2); color: var(--sand2); font-family: 'Macondo', serif; padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer; transition: all 0.2s; font-size: 0.8rem; }
   .tut-nav:hover:not(:disabled) { border-color: var(--sand3); color: #fff; }
   .tut-nav:disabled { opacity: 0.2; cursor: not-allowed; }
 
-  footer { font-size: 0.7rem; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; opacity: 0.6; }
+  /* ── Enhanced Footer ── */
+  footer {
+    font-size: 0.72rem; letter-spacing: 0.15em; color: var(--sand3);
+    text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
+    margin-top: 1rem; text-align: center;
+  }
+  footer .author { opacity: 0.5; font-size: 0.65rem; letter-spacing: 0.2em; }
+  footer .links { display: flex; align-items: center; gap: 1rem; }
+  footer .links a, footer .links span {
+    color: var(--gold); text-decoration: none; cursor: pointer;
+    transition: color 0.2s, opacity 0.2s; font-weight: bold;
+  }
+  footer .links a:hover, footer .links span:hover { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.2); }
+  footer .footer-divider { width: 1px; height: 12px; background: var(--accent); opacity: 0.4; }
+  #toast-msg {
+    font-size: 0.65rem; color: var(--teal); letter-spacing: 0.1em;
+    min-height: 1.2em; opacity: 0; transition: opacity 0.3s;
+  }
 </style>
 </head>
 <body>
@@ -297,60 +318,63 @@
   <h1>sambaqui</h1>
 </header>
 
-<div class="stats-bar" id="stats-bar">
-  <div>Level <strong id="stat-streak">0</strong></div>
-    <div class="turn-divider"></div>
-  <div>Best <strong id="stat-high">0</strong></div>
-</div>
-
 <div class="menu-controls">
   <div class="mode-bar">
-    <button class="mode-btn active" id="mode-ai">vs Computer</button>
-    <button class="mode-btn"        id="mode-2p">2 Players</button>
-  <button class="help-btn" id="open-tutorial-btn">How to Play</button>
+    <button class="mode-btn active" id="mode-ai">Novo Jogo</button>
+    <button class="mode-btn"        id="mode-2p">Treinar</button>
+    <button class="mode-btn"        id="lang-toggle-btn">EN</button>
+    <button class="help-btn" id="open-tutorial-btn">Tutorial</button>
+  </div>
 </div>
 
-
-
+<div class="stats-bar" id="stats-bar">
+  <div><span id="stat-lvl-label">Nível</span> <strong id="stat-streak">0</strong></div>
+    <div class="turn-divider"></div>
+  <div><span id="stat-best-label">Melhor</span> <strong id="stat-high">0</strong></div>
+</div>
 
 <div class="board-container-wrapper">
   <div class="board-border">
     <div class="board-wrapper" id="board"></div>
   </div>
-  <div class="status" id="status">Select an active piece to move</div>
+  <div class="status" id="status">Selecione uma peça ativa para mover</div>
 
-
-<div class="turn-bar">
-  <div class="player-tag p1 active" id="tag-p1"><div class="dot"></div><span id="label-p1">Player (You)</span></div>
-  <div class="turn-divider"></div>
-  <div class="player-tag p2"        id="tag-p2"><div class="dot"></div><span id="label-p2">Computer</span></div>
-</div>
+  <div class="turn-bar">
+    <div class="player-tag p1 active" id="tag-p1"><div class="dot"></div><span id="label-p1">Jogador (Você)</span></div>
+    <div class="turn-divider"></div>
+    <div class="player-tag p2"        id="tag-p2"><div class="dot"></div><span id="label-p2">Computador</span></div>
+  </div>
 
   <div class="board-controls" id="nav-controls">
     <button id="undo-btn" class="nav-btn" title="Undo" disabled>◀</button>
-    
     <button id="redo-btn" class="nav-btn" title="Redo" disabled>▶</button>
   </div>
   <div id="result-banner-slot"></div>
 </div>
 
-
-
-<footer>Sambaqui &mdash; Strategy Game</footer>
+<footer>
+  <div class="links">
+    <a href="https://ko-fi.com/eduardoeller" target="_blank" id="footer-support-link">♥ Apoiar</a>
+    <div class="footer-divider"></div>
+    <span id="footer-share-link">↪ Compartilhar</span>
+  </div>
+  <div id="toast-msg"></div>
+  <div class="author">sambaqui 2026 v.1</div>
+</footer>
 
 <script>
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════
-//  SECTION 1 — CONSTANTS & COORDINATE HELPERS
+//  SECTION 1 — CONSTANTS, COORDINATE HELPERS & LOCALIZATION
 // ═══════════════════════════════════════════════════════════════
 
 const LABELS = 'ABCDEFGHIJKLMNOPQRSTUVWXY';
 
 const DIRS = [
-  [-1, -1, '↖'], [-1,  0, '↑'], [-1,  1, '↗'],
-  [ 0, -1, '←'],                [ 0,  1, '→'],
-  [ 1, -1, '↙'], [ 1,  0, '↓'], [ 1,  1, '↘'],
+  [-1, -1, '↖\uFE0E'], [-1,  0, '↑\uFE0E'], [-1,  1, '↗\uFE0E'],
+  [ 0, -1, '←\uFE0E'],                     [ 0,  1, '→\uFE0E'],
+  [ 1, -1, '↙\uFE0E'], [ 1,  0, '↓\uFE0E'], [ 1,  1, '↘\uFE0E'],
 ];
 
 function labelToRC(label) {
@@ -361,6 +385,127 @@ function labelToRC(label) {
 function rcToLabel(r, c) {
   if (r < 0 || r > 4 || c < 0 || c > 4) return null;
   return LABELS[r * 5 + c];
+}
+
+let currentLang = localStorage.getItem('sambaqui_lang') || 'PT';
+
+const translations = {
+  EN: {
+    newGame: "New Game",
+    practice: "Practice",
+    level: "Level",
+    best: "Best",
+    playerYou: "Player (You)",
+    computer: "Computer",
+    player1: "Player 1",
+    player2: "Player 2",
+    selectActive: "Select an active piece to move",
+    calculating: "Computer is calculating moves…",
+    calculatingOpening: "Computer is calculating opening moves…",
+    thinking: "Computer is thinking…",
+    stalemateDraw: "Stalemate Draw.",
+    stalemateDrawPositions: "Stalemate Draw — no remaining legal positions available.",
+    stalemateNoPositions: "Stalemate — no legal positions remain",
+    playerWins: "Player {winner} wins!",
+    playerWinsBanner: "Player {winner} wins",
+    humanWinsStreakBanner: "You won {streak} game{plural}.",
+    gameOver: "Game Over!",
+    moveAgain: "Move again!",
+    repeatForbidden: "That move would repeat a previous position — forbidden",
+    chainMoveAgain: "Chain move. This piece must move again",
+    noMovesAvailable: "Piece on {label} — no moves available",
+    forbiddenByNovelty: "Piece on {label} — all {blocked} slides forbidden by Novelty Rule",
+    legalMoves: "{prefix}Piece on {label}. {free} legal move{plural}{suffix}",
+    chainMovePrefix: "Chain move. ",
+    forbiddenSuffix: " ({blocked} forbidden)",
+    haltedEnemies: "Halted. {n} enemy piece{plural} spotted.",
+    chainNoEnemies: "Chain Move: no enemies spotted, move again.",
+    noLegalMovesPass: "Player {passedFrom} has no legal moves! Turn automatically passes.",
+    victoryOverlayTitle: "Victory!",
+    victoryLevelComplete: "Level {humanStreak} Complete",
+    nextRound: "Next Round",
+    advanceNextRound: "Advance to Next Round",
+    stalematePreserved: "Your win streak of {humanStreak} is preserved! Switching pieces for the next match.",
+    gamesWon: "Game{plural} Won!",
+    bestScore: "Best Score: <strong>{highScore}</strong>",
+    share: "↪ Share Game",
+    supportLink: "♥ Support",
+    shareLink: "↪ Share Game",
+    linkCopied: "Link copied to clipboard!",
+    tutorialNext: "Next >",
+    tutorialPrev: "< Prev",
+    tutorialPlay: "Play Game!",
+    tutorialPages: [
+      { title: "The Goal", text: "Align <strong>three consecutive pieces</strong> of your color.<br></br> The triple can be placed anywhere on the board. It can be oriented horizontally, vertically or diagonally." },
+      { title: "Movement Rules", text: "Only <strong>active pieces</strong> are allowed to move.<br></br> Pieces move by <strong>sliding in straight lines</strong>. Pieces slide until stopped by the edge of the board or some other piece." },
+      { title: "Line of Sight Rule", text: "As soon as your piece <strong>stops</strong>, moveable enemy stones in its <strong>line of sight</strong> wake up and become <strong>active</strong>. <br></br> Your piece goes to sleep and turn passes to your opponent." },
+      { title: "The Chain Rule", text: "If a sliding piece halts and <strong>cannot see any enemies</strong> the <strong>chain move</strong> is triggered. The piece remains active and must be moved again immediately." },
+      { title: "The Novelty Rule", text: "Moves that would repeat a previous game state are not allowed. If you have no legal moves left, your turn ends and all enemy pieces activate." },
+      { title: "About the Game", text: "This game is named after ancient shell mounds found along the coast of Brazil. It draws inspiration from games like Cidade Dorme, Bejeweled, Zuma and Ultimate Tic-Tac-Toe. Have fun playing it!" }
+    ]
+  },
+  PT: {
+    newGame: "Novo Jogo",
+    practice: "Treinar",
+    level: "Nível",
+    best: "Melhor",
+    playerYou: "Jogador (Você)",
+    computer: "Computador",
+    player1: "Jogador 1",
+    player2: "Jogador 2",
+    selectActive: "Selecione uma peça ativa para mover",
+    calculating: "Computador calculando movimentos…",
+    calculatingOpening: "Computador calculando jogadas de abertura…",
+    thinking: "Computador pensando…",
+    stalemateDraw: "Empate por afogamento.",
+    stalemateDrawPositions: "Empate — não restam posições válidas disponíveis.",
+    stalemateNoPositions: "Empate — não restam posições válidas",
+    playerWins: "Jogador {winner} venceu!",
+    playerWinsBanner: "Jogador {winner} venceu",
+    humanWinsStreakBanner: "Você venceu {streak} jogo{plural}.",
+    gameOver: "Fim de Jogo!",
+    moveAgain: "Mova novamente!",
+    repeatForbidden: "Esse movimento repetiria uma posição anterior.",
+    chainMoveAgain: "Movimento em cadeia. Esta peça deve mover-se novamente",
+    noMovesAvailable: "Peça em {label}. sem movimentos disponíveis",
+    forbiddenByNovelty: "Peça em {label}. Todos os {blocked} deslizamentos proibidos pela Regra da Novidade",
+    legalMoves: "{prefix}Peça em {label}. {free} movimento{plural} válido{plural}{suffix}",
+    chainMovePrefix: "Movimento em cadeia. ",
+    forbiddenSuffix: " ({blocked} proibido)",
+    haltedEnemies: "Parado. {n} peça{plural} inimiga{plural} avistada{plural}.",
+    chainNoEnemies: "Movimento em Cadeia: nenhum inimigo avistado, mova novamente.",
+    noLegalMovesPass: "Jogador {passedFrom} não tem movimentos válidos! O turno passa automaticamente.",
+    victoryOverlayTitle: "Vitória!",
+    victoryLevelComplete: "Nível {humanStreak} Concluído",
+    nextRound: "Próximo Nível",
+    advanceNextRound: "Avançar para o Próximo Turno",
+    stalematePreserved: "Sua sequência de {humanStreak} vitórias foi preservada! Trocando as peças para a próxima partida.",
+    gamesWon: "Jogo{plural} Vencido{plural}!",
+    bestScore: "Melhor Pontuação: <strong>{highScore}</strong>",
+    share: "↪ Compartilhar",
+    supportLink: "♥ Apoiar",
+    shareLink: "↪ Compartilhar",
+    linkCopied: "Link copiado para a área de transferência!",
+    tutorialNext: "Próximo >",
+    tutorialPrev: "< Anterior",
+    tutorialPlay: "Jogar!",
+    tutorialPages: [
+      { title: "O Objetivo", text: "Alinhe <strong>três peças consecutivas</strong> da sua cor.<br></br> O trio pode ser colocado em qualquer lugar do tabuleiro, orientado horizontalmente, verticalmente ou diagonalmente." },
+      { title: "Regras de Movimento", text: "Apenas <strong>peças ativas</strong> podem se mover.<br></br> As peças movem-se <strong>deslizando em linha reta</strong> até serem paradas pela borda do tabuleiro ou por outra peça." },
+      { title: "Regra da Linha de Visão", text: "Assim que sua peça <strong>para</strong>, as pedras inimigas móveis na sua <strong>linha de visão</strong> acordam e tornam-se <strong>ativas</strong>.<br></br> Sua peça dorme e o turno passa para o oponente." },
+      { title: "Regra da Cadeia", text: "Se uma peça parar e <strong>não avistar nenhum inimigo</strong>, o <strong>movimento em cadeia</strong> é ativado. A peça continua ativa e deve ser movida novamente de imediato." },
+      { title: "Regra da Novidade", text: "Movimentos que repetiriam um estado de jogo anterior não são permitidos. Se você ficar sem movimentos válidos, seu turno termina e todas as peças inimigas são ativadas." },
+      { title: "Sobre o Jogo", text: "Este jogo recebeu o nome dos antigos amontoados de conchas encontrados na costa do Brasil (Sambaquis). Inspira-se em jogos como Cidade Dorme, Bejeweled, Zuma e Ultimate Tic-Tac-Toe. Divirta-se jogando!" }
+    ]
+  }
+};
+
+function t(key, variables = {}) {
+  let text = translations[currentLang][key] || translations['EN'][key] || '';
+  Object.keys(variables).forEach(v => {
+    text = text.replaceAll(`{${v}}`, variables[v]);
+  });
+  return text;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -417,49 +562,59 @@ const ALL_LINES = (() => {
         const run = [];
         let rr = r, cc = c;
         while (rr >= 0 && rr < 5 && cc >= 0 && cc < 5) {
-          run.push(rcToLabel(rr, cc)); rr += dr; cc += dc;
+          run.push(rcToLabel(rr, cc));
+          rr += dr; cc += dc;
         }
-        for (let s = 0; s <= run.length - 3; s++)
-          for (let len = 3; len <= run.length - s; len++)
+        for (let s = 0; s <= run.length - 3; s++) {
+          for (let len = 3; len <= run.length - s; len++) {
             lines.push(run.slice(s, s + len));
+          }
+        }
       }
     }
   }
+  const unique = [];
   const seen = new Set();
-  return lines.filter(line => {
+  for (const line of lines) {
     const key = line.join(',');
-    if (seen.has(key)) return false;
-    seen.add(key); return true;
-  }).sort((a, b) => b.length - a.length); // FIX: Evaluates longer vectors first so full 4 or 5-in-a-rows highlight completely
+    if (!seen.has(key)) { seen.add(key); unique.push(line); }
+  }
+  return unique;
 })();
 
 function checkVictory(pieces) {
   for (const line of ALL_LINES) {
-    const players = line.map(sq => pieces[sq]?.player);
-    if (players.every(p => p === 1)) return { winner: 1, line };
-    if (players.every(p => p === 2)) return { winner: 2, line };
+    if (line.length < 3) continue;
+    let match = true;
+    const firstPiece = pieces[line[0]];
+    if (!firstPiece) continue;
+    const pId = firstPiece.player;
+    for (let i = 1; i < line.length; i++) {
+      if (!pieces[line[i]] || pieces[line[i]].player !== pId) { match = false; break; }
+    }
+    if (match) return { winner: pId, line: line };
   }
   return null;
 }
 
 function serialiseState(pieces, currentPlayer) {
-  const parts = Object.entries(pieces)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([sq, p]) => `${sq}${p.player}${p.active ? 'A' : 'I'}`);
-  return `${currentPlayer}|${parts.join(',')}`;
+  const parts = [];
+  for (const label of LABELS) {
+    const p = pieces[label];
+    if (p) parts.push(`${label}${p.player}${p.active ? 'A' : 'I'}`);
+  }
+  parts.sort();
+  return `${currentPlayer}:${parts.join(',')}`;
 }
 
-function hypotheticalKey(fromLabel, landing, pieces, currentPlayer) {
+function hypotheticalKey(fromLabel, landing, currentPieces, currentPlayer) {
   const next = {};
-  for (const [sq, p] of Object.entries(pieces)) next[sq] = { ...p };
-
+  for (const [sq, p] of Object.entries(currentPieces)) next[sq] = { ...p };
   const moving = { ...next[fromLabel], active: false };
   delete next[fromLabel];
   next[landing] = moving;
-
   const enemy = currentPlayer === 1 ? 2 : 1;
   const visibleEnemies = computeVisibleMoveableEnemies(landing, next, currentPlayer);
-
   if (visibleEnemies.length > 0) {
     for (const [sq, p] of Object.entries(next)) {
       if (p.player === enemy) next[sq] = { ...p, active: false };
@@ -472,21 +627,37 @@ function hypotheticalKey(fromLabel, landing, pieces, currentPlayer) {
   }
 }
 
+function currentPlayerHasLegalMoves(pieces, currentPlayer, sneaking, sneakingSquare, history) {
+  const pool = sneaking ? [sneakingSquare] : LABELS;
+  for (const label of pool) {
+    const p = pieces[label];
+    if (!p || p.player !== currentPlayer || !p.active) continue;
+    const slides = computeAllSlides(label, pieces);
+    for (const m of slides) {
+      const key = hypotheticalKey(label, m.landing, pieces, currentPlayer);
+      if (!history.has(key)) return true;
+    }
+  }
+  return false;
+}
+
 // ═══════════════════════════════════════════════════════════════
 //  SECTION 3 — GAME STATE & META-PROGRESSION
 // ═══════════════════════════════════════════════════════════════
-
 let vsAI = true;
 let humanStreak = 0;
 let highScore = parseInt(localStorage.getItem('sambaqui_high_score') || '0', 10);
-let humanPlayerColor = 1; // Alternates every round (1 or 2)
+let humanPlayerColor = 1;
+
+window.isWaitingForContinue = false;
+window.achievedNewBest = false;
 
 function makeInitialPieces() {
   return {
-    B: { player: 1, active: true  },
-    J: { player: 1, active: false },
-    P: { player: 1, active: false },
-    X: { player: 1, active: false },
+    B: { player: 1, active: true },
+    J: { player: 1, active: true },
+    P: { player: 1, active: true },
+    X: { player: 1, active: true },
     D: { player: 2, active: false },
     F: { player: 2, active: false },
     T: { player: 2, active: false },
@@ -495,22 +666,19 @@ function makeInitialPieces() {
 }
 
 const state = {
-  currentPlayer:  1,
+  currentPlayer: 1,
   selectedSquare: null,
-  currentMoves:   [],   
-  pieces:         makeInitialPieces(),
-  history:        new Set(),
-  gameOver:       false,
-  winLine:        null,
-  sneaking:       false,        
-  sneakingSquare: null,         
-  losSquares:     [],           
-  animating:      false,
+  currentMoves: [],
+  pieces: makeInitialPieces(),
+  history: new Set(),
+  gameOver: false,
+  winLine: null,
+  sneaking: false,
+  sneakingSquare: null,
+  losSquares: [],
+  animating: false,
 };
-
 state.history.add(serialiseState(state.pieces, state.currentPlayer));
-
-// ── Timeline (consecutive undo/redo mechanics) ────────────────
 
 const timeline = [];
 let timelineIndex = -1;
@@ -519,62 +687,91 @@ function pushTimeline() {
   if (timelineIndex < timeline.length - 1) timeline.splice(timelineIndex + 1);
   const victoryNow = state.gameOver ? checkVictory(state.pieces) : null;
   timeline.push({
-    pieces:         JSON.parse(JSON.stringify(state.pieces)),
-    currentPlayer:  state.currentPlayer,
-    sneaking:       state.sneaking,
+    pieces: JSON.parse(JSON.stringify(state.pieces)),
+    currentPlayer: state.currentPlayer,
+    sneaking: state.sneaking,
     sneakingSquare: state.sneakingSquare,
-    history:        new Set(state.history),
-    gameOver:       state.gameOver,
-    winLine:        state.winLine ? [...state.winLine] : null,
-    winner:         state.gameOver ? (victoryNow ? victoryNow.winner : 'Draw') : null,
+    history: new Set(state.history),
+    gameOver: state.gameOver,
+    winLine: state.winLine ? [...state.winLine] : null,
+    winner: victoryNow ? victoryNow.winner : (state.gameOver ? 'Draw' : null)
   });
-  timelineIndex = timeline.length - 1;
-  updateNavButtons();
+  timelineIndex++;
 }
 
-function restoreTimeline(index) {
-  timelineIndex = index;
-  const snap = timeline[index];
+function restoreTimeline(idx) {
+  if (idx < 0 || idx >= timeline.length || state.animating) return;
   
-  state.pieces         = JSON.parse(JSON.stringify(snap.pieces));
-  state.currentPlayer  = snap.currentPlayer;
-  state.sneaking       = snap.sneaking;
+  window.isWaitingForContinue = false;
+  document.body.classList.remove('clickable-restart');
+  
+  timelineIndex = idx;
+  const snap = timeline[idx];
+  state.pieces = JSON.parse(JSON.stringify(snap.pieces));
+  state.currentPlayer = snap.currentPlayer;
+  state.sneaking = snap.sneaking;
   state.sneakingSquare = snap.sneakingSquare;
-  state.history        = new Set(snap.history);
-  state.gameOver       = snap.gameOver;
-  state.winLine        = snap.winLine ? [...snap.winLine] : null;
+  state.history = new Set(snap.history);
+  state.gameOver = snap.gameOver;
+  state.winLine = snap.winLine ? [...snap.winLine] : null;
   state.selectedSquare = null;
-  state.currentMoves   = [];
-  state.losSquares     = [];
+  state.currentMoves = [];
+  state.losSquares = [];
 
-  if (!vsAI) {
-    if (snap.gameOver) {
-      showResultBanner(snap.winner);
-      setStatus(snap.winner === 'Draw' ? 'Stalemate Draw.' : `Player ${snap.winner} wins!`, snap.winner === 'Draw' ? 'warn' : true);
-    } else {
-      clearResultBanner();
-      if (state.sneaking) {
-        setStatus('Move again!', 'sneaking');
-        selectPiece(state.sneakingSquare);
+  if (state.gameOver) {
+    const victory = checkVictory(state.pieces);
+    if (victory) {
+      showResultBanner(victory.winner);
+      if (!vsAI) {
+        setStatus(victory.winner === 'Draw' ? t('stalemateDraw') : t('playerWins', { winner: victory.winner }), victory.winner === 'Draw' ? 'warn' : true);
       } else {
-        setStatus('Select an active piece to move');
+        if (victory.winner === humanPlayerColor) {
+          if (humanPlayerColor === 1) {
+            document.getElementById('label-p1').textContent = currentLang === 'PT' ? "Jogador Venceu" : "Player Wins";
+            tagP1.classList.add('active'); tagP2.classList.remove('active');
+          } else {
+            document.getElementById('label-p2').textContent = currentLang === 'PT' ? "Jogador Venceu" : "Player Wins";
+            tagP2.classList.add('active'); tagP1.classList.remove('active');
+          }
+          setStatus(currentLang === 'PT' ? "Clique em qualquer lugar para continuar." : "Click anywhere to continue.", true);
+          document.body.classList.add('clickable-restart');
+          window.isWaitingForContinue = true;
+        } else {
+          if (humanPlayerColor === 1) {
+            document.getElementById('label-p2').textContent = currentLang === 'PT' ? "Computador Venceu" : "Computer Wins";
+            tagP2.classList.add('active'); tagP1.classList.remove('active');
+          } else {
+            document.getElementById('label-p1').textContent = currentLang === 'PT' ? "Computador Venceu" : "Computer Wins";
+            tagP1.classList.add('active'); tagP2.classList.remove('active');
+          }
+          setStatus(currentLang === 'PT' ? `Computador Venceu. Pontuação final: ${humanStreak}` : `Computer Wins. Final score: ${humanStreak}`, 'warn');
+        }
       }
+    } else {
+      showResultBanner('Draw');
+      setStatus(t('stalemateDraw'), 'warn');
     }
   } else {
-    if (state.gameOver) {
-      setStatus(state.winLine ? 'Game Over!' : 'Stalemate Draw.');
-    } else if (state.sneaking) {
-      setStatus('Move again!', 'sneaking');
-      selectPiece(state.sneakingSquare);
-    } else {
+    clearResultBanner();
+    if (vsAI) {
       const aiTurn = state.currentPlayer !== humanPlayerColor;
-      setStatus(aiTurn ? 'Computer is calculating moves…' : 'Select an active piece to move', aiTurn ? 'highlight' : false);
+      if (state.sneaking) {
+        setStatus(t('moveAgain'), 'sneaking');
+        if (!aiTurn) selectPiece(state.sneakingSquare);
+      } else {
+        setStatus(aiTurn ? t('calculating') : t('selectActive'), aiTurn ? 'highlight' : false);
+      }
+    } else {
+      if (state.sneaking) {
+        setStatus(t('moveAgain'), 'sneaking');
+        selectPiece(state.sneakingSquare);
+      } else {
+        setStatus(t('selectActive'));
+      }
     }
   }
-
   render();
   updateNavButtons();
-
   if (!state.gameOver && vsAI && state.currentPlayer !== humanPlayerColor) triggerAIMove();
 }
 
@@ -583,13 +780,27 @@ function showResultBanner(winner) {
   const banner = document.createElement('div');
   banner.className = 'result-banner';
   banner.id = 'result-banner';
-  const text = winner === 'Draw' ? 'Stalemate — no legal positions remain' : `Player ${winner} wins`;
+  
+  let text = '';
+  let btnText = t('newGame');
+  
+  if (vsAI && winner === humanPlayerColor) {
+    const pluralStr = humanStreak !== 1 ? 's' : '';
+    text = t('humanWinsStreakBanner', { streak: humanStreak, plural: pluralStr });
+    btnText = t('newGame');
+  } else {
+    text = winner === 'Draw' ? t('stalemateNoPositions') : t('playerWinsBanner', { winner: winner });
+  }
+
   banner.innerHTML = `
     <span class="banner-text">${text}</span>
-    <button class="new-game-btn" id="banner-new-game">New Game</button>
+    <button class="new-game-btn" id="banner-new-game">${btnText}</button>
   `;
   resultBannerSlot.appendChild(banner);
-  document.getElementById('banner-new-game').addEventListener('click', () => restartGame(false));
+  document.getElementById('banner-new-game').addEventListener('click', (e) => {
+    e.stopPropagation(); // Impede o clique fantasma de reiniciar duas vezes
+    restartGame(false);
+  });
 }
 
 function clearResultBanner() {
@@ -599,39 +810,49 @@ function clearResultBanner() {
 // ═══════════════════════════════════════════════════════════════
 //  SECTION 4 — DOM REFERENCES & BOARD CONSTRUCTION
 // ═══════════════════════════════════════════════════════════════
-
-const boardEl          = document.getElementById('board');
-const statusEl         = document.getElementById('status');
-const tagP1            = document.getElementById('tag-p1');
-const tagP2            = document.getElementById('tag-p2');
-const labelP1          = document.getElementById('label-p1');
-const labelP2          = document.getElementById('label-p2');
-const undoBtn          = document.getElementById('undo-btn');
-const redoBtn          = document.getElementById('redo-btn');
-const navControls      = document.getElementById('nav-controls');
+const boardEl = document.getElementById('board');
+const statusEl = document.getElementById('status');
+const tagP1 = document.getElementById('tag-p1');
+const tagP2 = document.getElementById('tag-p2');
+const labelP1 = document.getElementById('label-p1');
+const labelP2 = document.getElementById('label-p2');
+const undoBtn = document.getElementById('undo-btn');
+const redoBtn = document.getElementById('redo-btn');
+const navControls = document.getElementById('nav-controls');
 const resultBannerSlot = document.getElementById('result-banner-slot');
-const modeAIBtn        = document.getElementById('mode-ai');
-const mode2PBtn        = document.getElementById('mode-2p');
-const openTutorialBtn  = document.getElementById('open-tutorial-btn');
-const statStreakEl     = document.getElementById('stat-streak');
-const statHighEl       = document.getElementById('stat-high');
-const statsBarEl       = document.getElementById('stats-bar');
-const cellEls          = {};
+const modeAIBtn = document.getElementById('mode-ai');
+const mode2PBtn = document.getElementById('mode-2p');
+const langToggleBtn = document.getElementById('lang-toggle-btn');
+const openTutorialBtn = document.getElementById('open-tutorial-btn');
+const statStreakEl = document.getElementById('stat-streak');
+const statHighEl = document.getElementById('stat-high');
+const statsBarEl = document.getElementById('stats-bar');
+const statLvlLabel = document.getElementById('stat-lvl-label');
+const statBestLabel = document.getElementById('stat-best-label');
+const footerSupportLink = document.getElementById('footer-support-link');
+const footerShareLink = document.getElementById('footer-share-link');
+const toastMsgEl = document.getElementById('toast-msg');
 
-for (let row = 0; row < 5; row++) {
-  const rowEl = document.createElement('div');
-  rowEl.className = 'board-row';
-  for (let col = 0; col < 5; col++) {
-    const label = LABELS[row * 5 + col];
-    const cell  = document.createElement('div');
-    cell.className = `cell${(row + col) % 2 === 1 ? ' dark-sq' : ''}`;
-    cell.dataset.square = label;
-    cell.innerHTML = `<span class="cell-label">${label}</span>`;
-    cell.addEventListener('click', () => onCellClick(label));
-    rowEl.appendChild(cell);
+const cellEls = {};
+
+for (let r = 0; r < 5; r++) {
+  const row = document.createElement('div');
+  row.className = 'board-row';
+  for (let c = 0; c < 5; c++) {
+    const label = rcToLabel(r, c);
+    const cell = document.createElement('div');
+    cell.className = 'cell' + (((r + c) % 2 === 1) ? ' dark-sq' : '');
+    
+    const coord = document.createElement('div');
+    coord.className = 'cell-label';
+    coord.textContent = label;
+    cell.appendChild(coord);
+    
+    cell.addEventListener('click', () => handleSquareClick(label));
+    row.appendChild(cell);
     cellEls[label] = cell;
   }
-  boardEl.appendChild(rowEl);
+  boardEl.appendChild(row);
 }
 
 function updateNavButtons() {
@@ -639,231 +860,73 @@ function updateNavButtons() {
     navControls.classList.add('hidden');
   } else {
     navControls.classList.remove('hidden');
-    undoBtn.disabled = timelineIndex <= 0 || state.animating;
-    redoBtn.disabled = timelineIndex >= timeline.length - 1 || state.animating;
+    undoBtn.disabled = (timelineIndex <= 0 || state.animating);
+    redoBtn.disabled = (timelineIndex >= timeline.length - 1 || state.animating);
   }
-}
-
-function updateMetaDisplay() {
-  statStreakEl.textContent = humanStreak + 1;
-  statHighEl.textContent = highScore;
-  if (vsAI) {
-    statsBarEl.style.visibility = 'visible';
-    if (humanPlayerColor === 1) {
-      labelP1.textContent = "Player (You)";
-      labelP2.textContent = "Computer";
-    } else {
-      labelP1.textContent = "Computer";
-      labelP2.textContent = "Player (You)";
-    }
-  } else {
-    statsBarEl.style.visibility = 'hidden';
-    labelP1.textContent = "Player 1";
-    labelP2.textContent = "Player 2";
-  }
-}
-
-undoBtn.addEventListener('click', () => { if (!undoBtn.disabled) restoreTimeline(timelineIndex - 1); });
-redoBtn.addEventListener('click', () => { if (!redoBtn.disabled) restoreTimeline(timelineIndex + 1); });
-
-modeAIBtn.addEventListener('click', () => setMode(true));
-mode2PBtn.addEventListener('click', () => setMode(false));
-openTutorialBtn.addEventListener('click', () => launchTutorial(unlockedTutorialTrigger));
-
-function setMode(ai) {
-  vsAI = ai;
-  modeAIBtn.classList.toggle('active',  ai);
-  mode2PBtn.classList.toggle('active', !ai);
-  document.querySelector('.victory-overlay')?.remove();
-  clearResultBanner();
-  restartGame(true); // reset system state back to default colors
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  SECTION 5 — RENDER
+//  SECTION 5 — INTERACTION RULES
 // ═══════════════════════════════════════════════════════════════
-
-function render() {
-  tagP1.classList.toggle('active', state.currentPlayer === 1);
-  tagP2.classList.toggle('active', state.currentPlayer === 2);
-
-  const landingMap  = {};
-  const pathSquares = new Set();
-  for (const m of state.currentMoves) {
-    landingMap[m.landing] = m;
-    m.path.slice(0, -1).forEach(sq => pathSquares.add(sq));
-  }
-
-  const winSet = new Set(state.winLine ?? []);
-  const losSet = new Set(state.losSquares);
-  const humanTurn = !vsAI || state.currentPlayer === humanPlayerColor;
-
-  for (const label of LABELS) {
-    const cell      = cellEls[label];
-    const piece     = state.pieces[label];
-    const isSelected = label === state.selectedSquare;
-    const move       = landingMap[label];
-
-    cell.className = cell.className.includes('dark-sq') ? 'cell dark-sq' : 'cell';
-    cell.querySelectorAll('.piece, .arrow-hint').forEach(el => el.remove());
-
-    if      (winSet.has(label))                cell.classList.add('win-line');
-    else if (losSet.has(label) && !move)        cell.classList.add('los-target');
-    else if (move)                              cell.classList.add(move.blocked ? 'blocked-landing' : 'landing');
-    else if (pathSquares.has(label))            cell.classList.add('path');
-
-    if (piece) {
-      const el = document.createElement('div');
-      if (isSelected) {
-        el.className = `piece p${piece.player} selected-piece`;
-        cell.classList.add('selected');
-      } else if (state.sneaking && label === state.sneakingSquare) {
-        el.className = `piece p${piece.player} sneaking`;
-      } else if (piece.active) {
-        el.className = `piece p${piece.player} active-piece`;
-        if (piece.player === state.currentPlayer && !state.gameOver && humanTurn) {
-          cell.classList.add('selectable');
-        }
-      } else {
-        el.className = `piece p${piece.player} inactive`;
-      }
-      cell.appendChild(el);
-    }
-
-    if (move && !piece && !state.gameOver) {
-      const arrow = document.createElement('div');
-      arrow.className = `arrow-hint${move.blocked ? ' blocked' : ''}`;
-      arrow.textContent = move.arrow;
-      cell.appendChild(arrow);
-      if (!move.blocked && humanTurn) cell.classList.add('selectable');
-    }
-  }
-}
-
-function setStatus(msg, variant = false) {
-  statusEl.textContent = msg;
-  statusEl.classList.remove('highlight', 'warn', 'sneaking');
-  if (variant === true)        statusEl.classList.add('highlight');
-  if (variant === 'warn')      statusEl.classList.add('warn');
-  if (variant === 'sneaking')  statusEl.classList.add('sneaking');
-}
-
-function showVictory(winner) {
-  if (!vsAI) {
-    if (state.winLine) state.winLine._winner = winner;
-    showResultBanner(winner);
-    setStatus(winner === 'Draw' ? 'Stalemate Draw.' : `Player ${winner} wins!`, winner === 'Draw' ? 'warn' : true);
-    return;
-  }
-
-  const overlay = document.createElement('div');
-  overlay.className = 'victory-overlay';
-
-  if (winner === 'Draw') {
-    overlay.innerHTML = `
-      <div class="victory-title">Stalemate Draw</div>
-      <div class="victory-sub">Your win streak of ${humanStreak} is preserved! Switching pieces for the next match.</div>
-      <button class="generic-btn" id="next-round-btn">Advance to Next Round</button>
-    `;
-    document.body.appendChild(overlay);
-    document.getElementById('next-round-btn').addEventListener('click', () => restartGame(false));
-  } else if (winner === humanPlayerColor) {
-    humanStreak++;
-    if (humanStreak > highScore) {
-      highScore = humanStreak;
-      localStorage.setItem('sambaqui_high_score', highScore);
-    }
-    overlay.innerHTML = `
-      <div class="victory-title">Victory!</div>
-      <div class="victory-sub">Level ${humanStreak} Complete</div>
-      <button class="generic-btn" id="next-round-btn">Next Round</button>
-    `;
-    document.body.appendChild(overlay);
-    document.getElementById('next-round-btn').addEventListener('click', () => restartGame(false));
-  } else {
-    const finalScore = humanStreak;
-    humanStreak = 0;
-    overlay.innerHTML = `
-      <div class="victory-title"><strong>${finalScore}</strong></div>
-      <div class="victory-sub">Game Over </div>
-      <div class="victory-sub">Best Score: <strong>${highScore}</strong></div>
-      <button class="generic-btn danger" id="reset-run-btn">Start New Game</button>
-      <button class="generic-btn danger" id="reset-run-btn">Share the Game</button>
-      <button class="generic-btn danger" id="reset-run-btn">Support the Game ❤</button>
-    `;
-    document.body.appendChild(overlay);
-    document.getElementById('reset-run-btn').addEventListener('click', () => restartGame(true));
-  }
-  updateMetaDisplay();
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  SECTION 6 — INTERACTION
-// ═══════════════════════════════════════════════════════════════
-
-function onCellClick(label) {
-  if (state.animating || state.gameOver) return;
+function handleSquareClick(label) {
+  if (state.gameOver || state.animating) return;
   if (vsAI && state.currentPlayer !== humanPlayerColor) return;
+  if (window.isWaitingForContinue) return; // Trava interações se estiver aguardando clique para o próximo nível
 
   const piece = state.pieces[label];
-  const move  = state.currentMoves.find(m => m.landing === label);
+  const targetMove = state.currentMoves.find(m => m.landing === label && !m.blocked);
 
-  if (move) {
-    if (!move.blocked) { executeMove(state.selectedSquare, move); return; }
-    setStatus('That move would repeat a previous position — forbidden', 'warn');
-    return;
+  if (targetMove) {
+    const src = state.selectedSquare;
+    clearSelection();
+    executeMove(src, targetMove);
+  } else if (piece && piece.player === state.currentPlayer && piece.active) {
+    if (state.sneaking && label !== state.sneakingSquare) return;
+    if (state.selectedSquare === label) clearSelection();
+    else selectPiece(label);
+  } else {
+    clearSelection();
   }
-
-  if (state.sneaking) {
-    setStatus('Chain move. This piece must move again', 'warn');
-    return;
-  }
-
-  if (piece && piece.player === state.currentPlayer && piece.active) {
-    state.selectedSquare === label ? clearSelection() : selectPiece(label);
-    return;
-  }
-
-  if (state.selectedSquare) clearSelection();
 }
 
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 6 — CORE STATE MODIFIERS
+// ═══════════════════════════════════════════════════════════════
 function selectPiece(label) {
   state.selectedSquare = label;
-  state.losSquares     = [];
-
+  state.losSquares = [];
   const raw = computeAllSlides(label, state.pieces);
   state.currentMoves = raw.map(m => ({
     ...m,
     blocked: state.history.has(hypotheticalKey(label, m.landing, state.pieces, state.currentPlayer)),
   }));
-
-  const free    = state.currentMoves.filter(m => !m.blocked).length;
-  const blocked = state.currentMoves.filter(m =>  m.blocked).length;
+  const free = state.currentMoves.filter(m => !m.blocked).length;
+  const blocked = state.currentMoves.filter(m => m.blocked).length;
 
   if (state.currentMoves.length === 0) {
-    setStatus(`Piece on ${label} — no moves available`);
+    setStatus(t('noMovesAvailable', { label: label }));
   } else if (free === 0) {
-    setStatus(`Piece on ${label} — all ${blocked} slides forbidden by Novelty Rule`, 'warn');
+    setStatus(t('forbiddenByNovelty', { label: label, blocked: blocked }), 'warn');
   } else {
-    const suffix = blocked > 0 ? ` (${blocked} forbidden)` : '';
-    const prefix = state.sneaking ? 'Chain move. ' : '';
-    setStatus(`${prefix}Piece on ${label}. ${free} legal move${free !== 1 ? 's' : ''}${suffix}`, state.sneaking ? 'sneaking' : true);
+    const suffix = blocked > 0 ? t('forbiddenSuffix', { blocked: blocked }) : '';
+    const prefix = state.sneaking ? t('chainMovePrefix') : '';
+    let pluralStr = free !== 1 ? 's' : '';
+    setStatus(t('legalMoves', { prefix: prefix, label: label, free: free, plural: pluralStr, suffix: suffix }), state.sneaking ? 'sneaking' : true);
   }
   render();
 }
 
 function clearSelection() {
   state.selectedSquare = null;
-  state.currentMoves   = [];
-  state.losSquares     = [];
-  setStatus('Select an active piece to move');
+  state.currentMoves = [];
+  state.losSquares = [];
+  setStatus(t('selectActive'));
   render();
 }
 
 // ═══════════════════════════════════════════════════════════════
 //  SECTION 7 — HARDWARE-ACCELERATED ANIMATION ENGINE
 // ═══════════════════════════════════════════════════════════════
-
 function cellCenter(label) {
   const rect = cellEls[label].getBoundingClientRect();
   return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
@@ -874,9 +937,9 @@ function animateSlide(player, fromLabel, path, onDone) {
   updateNavButtons();
 
   const finalLabel = path[path.length - 1];
-  const srcCell    = cellEls[fromLabel];
-  const srcRect    = srcCell.getBoundingClientRect();
-  const pieceSize  = srcRect.width * 0.68;
+  const srcCell = cellEls[fromLabel];
+  const srcRect = srcCell.getBoundingClientRect();
+  const pieceSize = srcRect.width * 0.68;
 
   const ghost = document.createElement('div');
   ghost.className = `piece-ghost p${player}`;
@@ -884,106 +947,122 @@ function animateSlide(player, fromLabel, path, onDone) {
     width: ${pieceSize}px;
     height: ${pieceSize}px;
     position: fixed;
-    left: 0;
-    top: 0;
+    left: 0; top: 0;
     z-index: 9999;
     pointer-events: none;
     transition: none;
   `;
 
   const start = cellCenter(fromLabel);
-  const end   = cellCenter(finalLabel);
-
+  const end = cellCenter(finalLabel);
   const startX = start.x - pieceSize / 2;
   const startY = start.y - pieceSize / 2;
+
   ghost.style.transform = `translate3d(${startX}px, ${startY}px, 0)`;
   document.body.appendChild(ghost);
 
-  const srcPieceEl = srcCell.querySelector('.piece');
-  if (srcPieceEl) srcPieceEl.style.opacity = '0';
+  const internalPiece = srcCell.querySelector('.piece');
+  if (internalPiece) internalPiece.style.opacity = '0';
 
-  ghost.offsetHeight; // Flush layout reflow
+  const duration = 240;
+  const startTime = performance.now();
 
-  const SLIDE_DURATION = 240;
-  ghost.style.transition = `transform ${SLIDE_DURATION}ms cubic-bezier(0.25, 1, 0.5, 1)`;
-  
-  const endX = end.x - pieceSize / 2;
-  const endY = end.y - pieceSize / 2;
-  ghost.style.transform = `translate3d(${endX}px, ${endY}px, 0)`;
+  function frame(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const tCoeff = progress * (2 - progress);
 
-  setTimeout(() => {
-    ghost.remove();
-    state.animating = false;
-    updateNavButtons();
-    onDone();
-  }, SLIDE_DURATION);
+    const curX = startX + (end.x - start.x) * tCoeff;
+    const curY = startY + (end.y - start.y) * tCoeff;
+    ghost.style.transform = `translate3d(${curX}px, ${curY}px, 0)`;
+
+    if (progress < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      ghost.remove();
+      state.animating = false;
+      updateNavButtons();
+      onDone();
+    }
+  }
+  requestAnimationFrame(frame);
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  SECTION 8 — MOVE EXECUTION & RESOLUTION
+//  SECTION 8 — MOVE DISPATCHER & COMBAT LOGIC
 // ═══════════════════════════════════════════════════════════════
-
 function executeMove(fromLabel, move) {
-  state.selectedSquare = null;
-  state.currentMoves   = [];
-  render();
-  const player = state.pieces[fromLabel].player;
-  animateSlide(player, fromLabel, move.path, () => applyMove(fromLabel, move));
+  const player = state.currentPlayer;
+  animateSlide(player, fromLabel, move.path, () => {
+    finalizeMove(fromLabel, move);
+  });
 }
 
-function applyMove(fromLabel, move) {
+function finalizeMove(fromLabel, move) {
   for (const [sq, p] of Object.entries(state.pieces)) {
     if (p.player === state.currentPlayer && sq !== fromLabel) {
       state.pieces[sq] = { ...p, active: false };
     }
   }
+
   const movingPiece = { ...state.pieces[fromLabel], active: false };
   delete state.pieces[fromLabel];
   state.pieces[move.landing] = movingPiece;
 
   const victory = checkVictory(state.pieces);
   if (victory) {
-    state.gameOver   = true;
-    state.winLine    = victory.line;
-    state.sneaking   = false;
+    state.gameOver = true;
+    state.winLine = victory.line;
+    state.sneaking = false;
     state.losSquares = [];
     render();
+    
+    if (vsAI && victory.winner === humanPlayerColor) {
+      humanStreak++;
+      if (humanStreak > highScore) {
+        highScore = humanStreak;
+        localStorage.setItem('sambaqui_high_score', highScore);
+        window.achievedNewBest = true;
+      }
+    }
+    
     pushTimeline();
     setTimeout(() => showVictory(victory.winner), 600);
     return;
   }
 
   const visibleEnemies = computeVisibleMoveableEnemies(move.landing, state.pieces, state.currentPlayer);
-
   if (visibleEnemies.length > 0) {
     const enemy = state.currentPlayer === 1 ? 2 : 1;
     for (const [sq, p] of Object.entries(state.pieces)) {
       state.pieces[sq] = { ...p, active: p.player === enemy && visibleEnemies.includes(sq) };
     }
     state.currentPlayer = enemy;
-    state.sneaking      = false;
+    state.sneaking = false;
     state.sneakingSquare = null;
-
     state.history.add(serialiseState(state.pieces, state.currentPlayer));
     state.losSquares = visibleEnemies;
     render();
     pushTimeline();
 
     const n = visibleEnemies.length;
-    setStatus(`Halted. ${n} enemy piece${n !== 1 ? 's' : ''} spotted.`);
-    setTimeout(() => { state.losSquares = []; render(); checkTurnPassing(); }, 1200);
-
+    let pluralStr = n !== 1 ? 's' : '';
+    setStatus(t('haltedEnemies', { n: n, plural: pluralStr }));
+    setTimeout(() => {
+      state.losSquares = [];
+      render();
+      checkTurnPassing();
+    }, 1200);
   } else {
-    state.sneaking       = true;
+    state.sneaking = true;
     state.sneakingSquare = move.landing;
-    state.losSquares     = [];
+    state.losSquares = [];
     state.pieces[move.landing] = { ...state.pieces[move.landing], active: true };
-
     state.history.add(serialiseState(state.pieces, state.currentPlayer));
     render();
     pushTimeline();
-    setStatus('Chain Move: no enemies spotted, move again.', 'sneaking');
 
+    setStatus(t('chainNoEnemies'), 'sneaking');
     if (!vsAI || state.currentPlayer === humanPlayerColor) selectPiece(move.landing);
     checkTurnPassing();
   }
@@ -992,102 +1071,138 @@ function applyMove(fromLabel, move) {
 // ═══════════════════════════════════════════════════════════════
 //  SECTION 9 — PASS & DEADLOCK
 // ═══════════════════════════════════════════════════════════════
-
 function checkTurnPassing() {
   if (state.gameOver) return;
-
   const hasMoves = currentPlayerHasLegalMoves(state.pieces, state.currentPlayer, state.sneaking, state.sneakingSquare, state.history);
   if (hasMoves) {
     if (vsAI && state.currentPlayer !== humanPlayerColor) triggerAIMove();
     return;
   }
 
-  const passedFrom = state.currentPlayer;
-  state.sneaking       = false;
-  state.sneakingSquare = null;
-  state.currentPlayer  = state.currentPlayer === 1 ? 2 : 1;
+  const oppositePlayer = state.currentPlayer === 1 ? 2 : 1;
+  const oppositeHasMoves = currentPlayerHasLegalMoves(state.pieces, oppositePlayer, false, null, state.history);
 
-  for (const sq in state.pieces) {
-    const p = state.pieces[sq];
-    state.pieces[sq] = { ...p, active: p.player === state.currentPlayer && computeAllSlides(sq, state.pieces).length > 0 };
-  }
-
-  state.history.add(serialiseState(state.pieces, state.currentPlayer));
-  pushTimeline();
-
-  const newPlayerHasMoves = currentPlayerHasLegalMoves(state.pieces, state.currentPlayer, false, null, state.history);
-  if (!newPlayerHasMoves) {
+  if (!oppositeHasMoves) {
     state.gameOver = true;
+    render();
     pushTimeline();
-    setStatus('Stalemate Draw — no remaining legal positions available.', 'warn');
     setTimeout(() => showVictory('Draw'), 600);
     return;
   }
 
-  setStatus(`Player ${passedFrom} has no legal moves! Turn automatically passes.`, 'warn');
-  render();
-  if (vsAI && state.currentPlayer !== humanPlayerColor) triggerAIMove();
-}
-
-function currentPlayerHasLegalMoves(pieces, player, sneaking, sneakingSquare, history) {
-  const squares = sneaking ? [sneakingSquare] : LABELS;
-  for (const label of squares) {
-    const p = pieces[label];
-    if (!p || p.player !== player || !p.active) continue;
-    for (const m of computeAllSlides(label, pieces)) {
-      if (!history.has(hypotheticalKey(label, m.landing, pieces, player))) return true;
-    }
+  const passedFrom = state.currentPlayer;
+  for (const [sq, p] of Object.entries(state.pieces)) {
+    if (p.player === oppositePlayer) state.pieces[sq] = { ...p, active: true };
   }
-  return false;
-}
-
-function restartGame(forceResetColor = false) {
-  document.querySelector('.victory-overlay')?.remove();
-  clearResultBanner();
-
-  if (vsAI) {
-    if (forceResetColor) {
-      humanPlayerColor = 1;
-      humanStreak = 0;
-    } else {
-      humanPlayerColor = humanPlayerColor === 1 ? 2 : 1;
-    }
-  }
-
-  Object.assign(state, {
-    currentPlayer:  1,
-    selectedSquare: null,
-    currentMoves:   [],
-    gameOver:       false,
-    winLine:        null,
-    sneaking:       false,
-    sneakingSquare: null,
-    losSquares:     [],
-    animating:      false,
-    pieces:         makeInitialPieces(),
-    history:        new Set(),
-  });
-  
+  state.currentPlayer = oppositePlayer;
+  state.sneaking = false;
+  state.sneakingSquare = null;
   state.history.add(serialiseState(state.pieces, state.currentPlayer));
-  timeline.length = 0;
-  timelineIndex   = -1;
-  
-  pushTimeline();
-  updateMetaDisplay();
-  
-  if (vsAI && state.currentPlayer !== humanPlayerColor) {
-    setStatus('Computer is calculating opening moves…', 'highlight');
-    triggerAIMove();
-  } else {
-    setStatus('Select an active piece to move');
-  }
   render();
+  pushTimeline();
+
+  setStatus(t('noLegalMovesPass', { passedFrom: passedFrom }), 'warn');
+  setTimeout(() => {
+    if (!state.gameOver) {
+      if (vsAI && state.currentPlayer !== humanPlayerColor) triggerAIMove();
+      else setStatus(t('selectActive'));
+    }
+  }, 1400);
+}
+
+function showVictory(winner) {
+  window.isWaitingForContinue = false;
+  showResultBanner(winner);
+
+  if (!vsAI) {
+    if (state.winLine) state.winLine._winner = winner;
+    setStatus(winner === 'Draw' ? t('stalemateDraw') : t('playerWins', { winner: winner }), winner === 'Draw' ? 'warn' : true);
+    return;
+  }
+
+  if (winner === 'Draw') {
+    const overlay = document.createElement('div');
+    overlay.className = 'victory-overlay';
+    overlay.innerHTML = `
+      <div class="victory-title">${t('stalemateDraw')}</div>
+      <div class="victory-sub">${t('stalematePreserved', { humanStreak: humanStreak })}</div>
+      <button class="generic-btn" id="next-round-btn">${t('advanceNextRound')}</button>
+    `;
+    document.body.appendChild(overlay);
+    document.getElementById('next-round-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      restartGame(false);
+    });
+    return;
+  }
+
+  if (winner === humanPlayerColor) {
+    if (humanPlayerColor === 1) {
+      labelP1.textContent = currentLang === 'PT' ? "Jogador Venceu" : "Player Wins";
+      tagP1.classList.add('active'); tagP2.classList.remove('active');
+    } else {
+      labelP2.textContent = currentLang === 'PT' ? "Jogador Venceu" : "Player Wins";
+      tagP2.classList.add('active'); tagP1.classList.remove('active');
+    }
+
+    setStatus(currentLang === 'PT' ? "Clique em qualquer lugar para continuar." : "Click anywhere to continue.", true);
+
+    setTimeout(() => {
+      document.body.classList.add('clickable-restart');
+      window.isWaitingForContinue = true;
+    }, 100);
+
+    updateMetaDisplay();
+  } else {
+    // ─── COMPUTADOR VENCEU ───
+    if (humanPlayerColor === 1) {
+      labelP2.textContent = currentLang === 'PT' ? "Computador Venceu" : "Computer Wins";
+      tagP2.classList.add('active'); tagP1.classList.remove('active');
+    } else {
+      labelP1.textContent = currentLang === 'PT' ? "Computador Venceu" : "Computer Wins";
+      tagP1.classList.add('active'); tagP2.classList.remove('active');
+    }
+
+    setStatus(currentLang === 'PT' ? `Computador Venceu. Pontuação final: ${humanStreak}` : `Computer Wins. Final score: ${humanStreak}`, 'warn');
+
+    // Se o jogador tinha 1 ponto ou mais, exibe o novo banner overlay de derrota antes de resetar a pontuação
+    if (humanStreak >= 1) {
+      const overlay = document.createElement('div');
+      overlay.className = 'victory-overlay';
+      
+      const titleText = currentLang === 'PT' ? "Fim de Jogo" : "Game Over";
+      const pluralStr = humanStreak !== 1 ? 's' : '';
+      const subText = currentLang === 'PT' 
+        ? `Sua pontuação final é <strong>${humanStreak}</strong>` 
+        : `Your final score is <strong>${humanStreak}</strong>.`;
+      const btnText = currentLang === 'PT' ? "Tentar Novamente" : "Try Again";
+
+      overlay.innerHTML = `
+        <div class="victory-title" style="color: #c0704a; text-shadow: 0 0 60px var(--gold);">${titleText}</div>
+        <div class="victory-sub">${subText}</div>
+        <button class="generic-btn danger" id="defeat-restart-btn">${btnText}</button>
+      `;
+      document.body.appendChild(overlay);
+      
+      document.getElementById('defeat-restart-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        overlay.remove();
+        humanStreak = 0;
+        window.achievedNewBest = false;
+        restartGame(true);
+      });
+    } else {
+      // Caso o jogador tenha perdido logo no nível 0, apenas reseta normalmente sem o overlay completo
+      humanStreak = 0;
+      window.achievedNewBest = false;
+      updateMetaDisplay();
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
 //  SECTION 10 — TREE SEARCH ENGINE ADAPTATION (mcts.lua)
 // ═══════════════════════════════════════════════════════════════
-
 class SimState {
   constructor(pieces, currentPlayer, sneaking, sneakingSquare, history, isGameOver, winner) {
     this.pieces = pieces;
@@ -1098,7 +1213,6 @@ class SimState {
     this.isGameOver = isGameOver;
     this.winner = winner;
   }
-
   clone() {
     const cp = {};
     for (const sq in this.pieces) {
@@ -1106,7 +1220,6 @@ class SimState {
     }
     return new SimState(cp, this.currentPlayer, this.sneaking, this.sneakingSquare, this.history, this.isGameOver, this.winner);
   }
-
   getValidMoves() {
     const moves = [];
     const pool = this.sneaking ? [this.sneakingSquare] : LABELS;
@@ -1121,51 +1234,44 @@ class SimState {
     }
     return moves;
   }
-
-  makeMove(from, moveObj) {
+  makeMove(from, move) {
     for (const sq in this.pieces) {
-      if (this.pieces[sq].player === this.currentPlayer) this.pieces[sq].active = false;
+      if (this.pieces[sq].player === this.currentPlayer && sq !== from) this.pieces[sq].active = false;
     }
-    const moving = this.pieces[from];
+    const mv = { ...this.pieces[from], active: false };
     delete this.pieces[from];
-    this.pieces[moveObj.landing] = { player: moving.player, active: false };
+    this.pieces[move.landing] = mv;
 
-    const victory = checkVictory(this.pieces);
-    if (victory) {
-      this.isGameOver = true;
-      this.winner = victory.winner;
-      return;
-    }
+    const win = checkVictory(this.pieces);
+    if (win) { this.isGameOver = true; this.winner = win.winner; return; }
 
-    const visibleEnemies = computeVisibleMoveableEnemies(moveObj.landing, this.pieces, this.currentPlayer);
-    const enemy = this.currentPlayer === 1 ? 2 : 1;
-
-    if (visibleEnemies.length > 0) {
-      for (const sq in this.pieces) this.pieces[sq].active = false;
-      for (const sq of visibleEnemies) this.pieces[sq].active = true;
+    const visible = computeVisibleMoveableEnemies(move.landing, this.pieces, this.currentPlayer);
+    if (visible.length > 0) {
+      const enemy = this.currentPlayer === 1 ? 2 : 1;
+      for (const sq in this.pieces) this.pieces[sq].active = (this.pieces[sq].player === enemy && visible.includes(sq));
       this.currentPlayer = enemy;
       this.sneaking = false;
       this.sneakingSquare = null;
     } else {
       this.sneaking = true;
-      this.sneakingSquare = moveObj.landing;
-      this.pieces[moveObj.landing].active = true;
+      this.sneakingSquare = move.landing;
+      this.pieces[move.landing].active = true;
     }
-
     this.history.add(serialiseState(this.pieces, this.currentPlayer));
 
     if (!currentPlayerHasLegalMoves(this.pieces, this.currentPlayer, this.sneaking, this.sneakingSquare, this.history)) {
-      this.sneaking = false;
-      this.sneakingSquare = null;
-      this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
-      for (const sq in this.pieces) {
-        this.pieces[sq].active = this.pieces[sq].player === this.currentPlayer && computeAllSlides(sq, this.pieces).length > 0;
-      }
-      this.history.add(serialiseState(this.pieces, this.currentPlayer));
-
-      if (!currentPlayerHasLegalMoves(this.pieces, this.currentPlayer, false, null, this.history)) {
-        this.isGameOver = true;
-        this.winner = 'Draw';
+      const opp = this.currentPlayer === 1 ? 2 : 1;
+      if (currentPlayerHasLegalMoves(this.pieces, opp, false, null, this.history)) {
+        for (const sq in this.pieces) if (this.pieces[sq].player === opp) this.pieces[sq].active = true;
+        this.currentPlayer = opp;
+        this.sneaking = false;
+        this.sneakingSquare = null;
+        this.history.add(serialiseState(this.pieces, this.currentPlayer));
+        if (!currentPlayerHasLegalMoves(this.pieces, this.currentPlayer, false, null, this.history)) {
+          this.isGameOver = true; this.winner = 'Draw';
+        }
+      } else {
+        this.isGameOver = true; this.winner = 'Draw';
       }
     }
   }
@@ -1182,12 +1288,10 @@ class MCTSNode {
     this.untriedMoves = simState.getValidMoves();
     this.playerJustMoved = parent ? (simState.currentPlayer === 1 ? 2 : 1) : null;
   }
-
   ucb1(c = 1.41) {
     if (this.visits === 0) return Infinity;
     return (this.wins / this.visits) + c * Math.sqrt(Math.log(this.parent.visits) / this.visits);
   }
-
   isFullyExpanded() { return this.untriedMoves.length === 0; }
   hasChildren() { return this.children.length > 0; }
 }
@@ -1198,7 +1302,6 @@ class AdvancedEngineMCTS {
     this.iterations = iterations;
     this.aiPlayer = simState.currentPlayer;
   }
-
   findImmediateWin(simState, player) {
     const valid = simState.getValidMoves();
     for (const action of valid) {
@@ -1208,101 +1311,81 @@ class AdvancedEngineMCTS {
     }
     return null;
   }
-
   findWinIn2(simState, player) {
     const valid = simState.getValidMoves();
     for (const action of valid) {
       const temp = simState.clone();
       temp.makeMove(action.from, action.move);
       if (temp.isGameOver && temp.winner === player) return action;
-
       const opponent = player === 1 ? 2 : 1;
       const oppMoves = temp.getValidMoves();
-      let forced = true;
-
-      if (oppMoves.length > 0) {
-        for (const oppAction of oppMoves) {
-          const oppState = temp.clone();
-          oppState.makeMove(oppAction.from, oppAction.move);
-          if (!this.findImmediateWin(oppState, player)) {
-            forced = false;
-            break;
-          }
+      let oppCanBlockAll = true;
+      if (oppMoves.length === 0) continue;
+      for (const oppAct of oppMoves) {
+        const oppTemp = temp.clone();
+        oppTemp.makeMove(oppAct.from, oppAct.move);
+        if (oppTemp.isGameOver && oppTemp.winner === opponent) { oppCanBlockAll = false; break; }
+        const followUps = oppTemp.getValidMoves();
+        let extensionFound = false;
+        for (const fUp of followUps) {
+          const finalTemp = oppTemp.clone();
+          finalTemp.makeMove(fUp.from, fUp.move);
+          if (finalTemp.isGameOver && finalTemp.winner === player) { extensionFound = true; break; }
         }
-      } else {
-        forced = false; 
+        if (!extensionFound) { oppCanBlockAll = true; break; }
+        else { oppCanBlockAll = false; }
       }
-      if (forced) return action;
+      if (!oppCanBlockAll) return action;
     }
     return null;
   }
-
   findSafeMove(simState) {
     const valid = simState.getValidMoves();
-    const safeOptions = [];
+    const optimal = [];
     const opponent = this.aiPlayer === 1 ? 2 : 1;
-
     for (const action of valid) {
       const temp = simState.clone();
       temp.makeMove(action.from, action.move);
-
-      let opponentCanWin = false;
-      const oppMoves = temp.getValidMoves();
-
-      for (const oppAction of oppMoves) {
-        const oppState = temp.clone();
-        oppState.makeMove(oppAction.from, oppAction.move);
-        if (oppState.isGameOver && oppState.winner === opponent) {
-          opponentCanWin = true;
-          break;
-        }
+      let lethal = false;
+      for (const oppAct of temp.getValidMoves()) {
+        const oppTemp = temp.clone();
+        oppTemp.makeMove(oppAct.from, oppAct.move);
+        if (oppTemp.isGameOver && oppTemp.winner === opponent) { lethal = true; break; }
       }
-      if (!opponentCanWin) safeOptions.push(action);
+      if (!lethal) optimal.push(action);
     }
-    return safeOptions.length > 0 ? safeOptions[Math.floor(Math.random() * safeOptions.length)] : null;
+    return optimal.length > 0 ? optimal[Math.floor(Math.random() * optimal.length)] : null;
   }
-
-  search(streakLevel) {
-    const currentSimState = this.root.state;
-    if (currentSimState.getValidMoves().length === 0) return null;
-
-    // Lookahead Tier 1: Pull out immediate winning vectors (Always active)
-    const win1 = this.findImmediateWin(currentSimState, this.aiPlayer);
-    if (win1) return win1;
-
-    // DIFFICULTY THRESHOLD NERF MODULATION
-    // If streak is 0, skip deep safety logic to allow easy human wins
-    let win2 = null;
-    let safeMove = null;
-
-    if (streakLevel >= 2) {
-      win2 = this.findWinIn2(currentSimState, this.aiPlayer);
+  search(useImmediateWin, useWinIn2, useSafeMove) {
+    const currentSimRoot = this.root.state;
+    if (useImmediateWin) {
+      const imm = this.findImmediateWin(currentSimRoot, this.aiPlayer);
+      if (imm) return imm;
+      const opp = this.aiPlayer === 1 ? 2 : 1;
+      const counterBlock = this.findImmediateWin(currentSimRoot, opp);
+      if (counterBlock) return counterBlock;
+    }
+    if (useWinIn2) {
+      const win2 = this.findWinIn2(currentSimRoot, this.aiPlayer);
       if (win2) return win2;
     }
-
-    if (streakLevel >= 1) {
-      safeMove = this.findSafeMove(currentSimState);
+    let safeMove = null;
+    if (useSafeMove) {
+      safeMove = this.findSafeMove(currentSimRoot);
     }
-
-    // Tree Simulation Phase
     for (let i = 0; i < this.iterations; i++) {
       let node = this.select(this.root);
-      if (!node.state.isGameOver && !node.isFullyExpanded()) {
-        node = this.expand(node);
-      }
+      if (!node.state.isGameOver && !node.isFullyExpanded()) { node = this.expand(node); }
       const simulationWinner = this.simulate(node.state);
       this.backpropagate(node, simulationWinner);
     }
-
     const bestChildNode = this.getBestChild(this.root);
     if (safeMove && bestChildNode) {
-      const bestActionIsSafe = this.checkIfActionIsSafe(currentSimState, bestChildNode.move);
+      const bestActionIsSafe = this.checkIfActionIsSafe(currentSimRoot, bestChildNode.move);
       if (!bestActionIsSafe) return safeMove;
     }
-
-    return bestChildNode ? bestChildNode.move : (safeMove || currentSimState.getValidMoves()[0]);
+    return bestChildNode ? bestChildNode.move : (safeMove || currentSimRoot.getValidMoves()[0]);
   }
-
   checkIfActionIsSafe(simState, action) {
     const temp = simState.clone();
     temp.makeMove(action.from, action.move);
@@ -1314,7 +1397,6 @@ class AdvancedEngineMCTS {
     }
     return true;
   }
-
   select(node) {
     while (node.isFullyExpanded() && node.hasChildren()) {
       let bestScore = -Infinity;
@@ -1327,7 +1409,6 @@ class AdvancedEngineMCTS {
     }
     return node;
   }
-
   expand(node) {
     const idx = Math.floor(Math.random() * node.untriedMoves.length);
     const action = node.untriedMoves.splice(idx, 1)[0];
@@ -1337,7 +1418,6 @@ class AdvancedEngineMCTS {
     node.children.push(child);
     return child;
   }
-
   simulate(simState) {
     let current = simState.clone();
     const maxDepth = 12;
@@ -1351,61 +1431,52 @@ class AdvancedEngineMCTS {
     }
     return current.winner;
   }
-
   backpropagate(node, winner) {
-    let curr = node;
-    while (curr) {
-      curr.visits++;
-      if (winner === curr.playerJustMoved) {
-        curr.wins += 1.0;
-      } else if (winner === 'Draw' || winner === null) {
-        curr.wins += 0.5;
-      }
-      curr = curr.parent;
+    while (node !== null) {
+      node.visits++;
+      if (winner === 'Draw') node.wins += 0.5;
+      else if (node.playerJustMoved && winner === node.playerJustMoved) node.wins += 1;
+      node = node.parent;
     }
   }
-
   getBestChild(node) {
-    let bestChild = null;
     let maxVisits = -1;
+    let best = null;
     for (const child of node.children) {
-      if (child.visits > maxVisits) { maxVisits = child.visits; bestChild = child; }
+      if (child.visits > maxVisits) { maxVisits = child.visits; best = child; }
     }
-    return bestChild;
+    return best;
   }
+}
+
+function getDifficultyProfile(pair) {
+  const itersByPair = [15, 60, 160, 320, 500, 800, 1200, 1800, 2600, 3500];
+  const blunderChance = Math.max(0, 0.35 - (pair * 0.08));
+  const useImmediateWin = pair >= 0;
+  const useWinIn2 = pair >= 1;
+  const useSafeMove = pair >= 2;
+  const mctsIterations = itersByPair[Math.min(pair, itersByPair.length - 1)];
+  return { blunderChance, useImmediateWin, useWinIn2, useSafeMove, mctsIterations };
 }
 
 function triggerAIMove() {
   const computerColor = humanPlayerColor === 1 ? 2 : 1;
   if (!vsAI || state.currentPlayer !== computerColor || state.gameOver || state.animating) return;
 
-  setStatus('Computer is thinking…', 'highlight');
-
+  setStatus(t('thinking'), 'highlight');
   setTimeout(() => {
     const currentSimRoot = new SimState(state.pieces, state.currentPlayer, state.sneaking, state.sneakingSquare, state.history, state.gameOver, null);
     const validMoves = currentSimRoot.getValidMoves();
+    if (validMoves.length === 0) { checkTurnPassing(); return; }
 
-    if (validMoves.length === 0) {
-      checkTurnPassing();
-      return;
-    }
-
+    const profile = getDifficultyProfile(humanStreak);
     let optimalResult = null;
 
-    // Introduce human blundering frequencies at lower streaks
-    if (humanStreak === 0 && Math.random() < 0.40) {
-      // 40% chance of making an intentional casual mistake at Level 0
-      optimalResult = validMoves[Math.floor(Math.random() * validMoves.length)];
-    } else if (humanStreak === 1 && Math.random() < 0.15) {
-      // 15% chance of an error at Level 1
+    if (Math.random() < profile.blunderChance) {
       optimalResult = validMoves[Math.floor(Math.random() * validMoves.length)];
     } else {
-      // Standard deep tree simulation with progression budgeting
-      const structuralIterations = 80 + (humanStreak * 180);
-      const boundedIterations = Math.min(structuralIterations, 1200);
-
-      const processFinder = new AdvancedEngineMCTS(currentSimRoot, boundedIterations);
-      optimalResult = processFinder.search(humanStreak);
+      const processFinder = new AdvancedEngineMCTS(currentSimRoot, profile.mctsIterations);
+      optimalResult = processFinder.search(profile.useImmediateWin, profile.useWinIn2, profile.useSafeMove);
     }
 
     if (optimalResult) {
@@ -1422,89 +1493,85 @@ function triggerAIMove() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  SECTION 11 — TUTORIAL INTERACTIVE MODAL COMPONENT
+//  SECTION 11 — TUTORIAL INTERACTION DESIGNS
 // ═══════════════════════════════════════════════════════════════
-
-const TUTORIAL_PAGES = [
-  {
-    title: "The Goal",
-    text: "Create a straight line of <strong>three consecutive pieces</strong> of your color.<br></br> They can be oriented horizontally, vertically or diagonally, anywhere on the board."
-  },
-  {
-    title: "Movement Rules",
-    text: "Pieces move by <strong>sliding in straight lines</strong>. They slide until stopped by the edge of the board or some other piece.<br></br>  Only <strong> active pieces </strong>, outlined in yellow, can be moved."
-  },
-  {
-    title: "Line of Sight Rule",
-    text: "When your piece finishes its slide it halts. If it has direct <strong>line of sight</strong> to moveable enemy stones those enemy stones wake up and become <strong>active</strong>. <br></br> Your piece goes to sleep and turn passes to your opponent."
-  },
-  {
-    title: "Chain Rule",
-    text: "If your sliding piece halts and <strong>cannot see any enemies</strong>, you trigger a <strong>chain move</strong>. The piece remains active, your turn continues, and you must slide that same piece again immediately.<br></br>  You can chain multiple slides together until an enemy is spotted."
-  },
-  {
-    title: "The Novelty Rule",
-    text: "To prevent repetitive loops, you are forbidden from making a move that would repeat a previous game state. <br></br> If you have no legal moves, your turn ends and all enemy pieces activate. <br></br> Have fun!"
-  }
-];
-
-let currentTutorialPage = 0;
+let refreshTutorialPage = null;
 
 function launchTutorial(onCloseCallback) {
-  currentTutorialPage = 0;
-  
   const overlay = document.createElement('div');
   overlay.className = 'tutorial-overlay';
   overlay.id = 'tutorial-modal';
-  
+
   overlay.innerHTML = `
     <div class="tutorial-card">
       <div class="tutorial-header">
-        <span class="tutorial-title" id="tut-title"></span>
+        <div class="tutorial-title-area">
+          <span class="tutorial-title" id="tut-title"></span>
+          <button class="tutorial-lang-btn" id="tut-lang-toggle">PT</button>
+        </div>
         <span class="tutorial-pages" id="tut-page-indicator"></span>
       </div>
-      <div class="tutorial-body" id="tut-text"></div>
+      <div class="tutorial-body" id="tut-body"></div>
       <div class="tutorial-footer">
-        <button class="tut-nav" id="tut-prev-btn">&lt; Prev</button>
-        <button class="tut-nav" id="tut-next-btn">Next &gt;</button>
+        <button class="tut-nav" id="tut-prev-btn"></button>
+        <button class="tut-nav" id="tut-next-btn"></button>
       </div>
     </div>
   `;
-  
   document.body.appendChild(overlay);
-  
-  const prevBtn = document.getElementById('tut-prev-btn');
-  const nextBtn = document.getElementById('tut-next-btn');
-  
-  function refreshPage() {
-    const data = TUTORIAL_PAGES[currentTutorialPage];
-    document.getElementById('tut-title').textContent = data.title;
-    document.getElementById('tut-text').innerHTML = data.text;
-    document.getElementById('tut-page-indicator').textContent = `${currentTutorialPage + 1} / ${TUTORIAL_PAGES.length}`;
+
+  let currentTutorialPage = 0;
+  const titleEl = overlay.querySelector('#tut-title');
+  const bodyEl = overlay.querySelector('#tut-body');
+  const indicatorEl = overlay.querySelector('#tut-page-indicator');
+  const prevBtn = overlay.querySelector('#tut-prev-btn');
+  const nextBtn = overlay.querySelector('#tut-next-btn');
+  const innerLangBtn = overlay.querySelector('#tut-lang-toggle');
+
+  innerLangBtn.textContent = currentLang === 'EN' ? 'PT' : 'EN';
+  innerLangBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleLanguage();
+    innerLangBtn.textContent = currentLang === 'EN' ? 'PT' : 'EN';
+    refreshTutorialPage();
+  });
+
+  refreshTutorialPage = () => {
+    const pagesData = translations[currentLang].tutorialPages || translations['EN'].tutorialPages;
+    const page = pagesData[currentTutorialPage];
+    titleEl.textContent = page.title;
+    bodyEl.innerHTML = page.text;
+    indicatorEl.textContent = `${currentTutorialPage + 1} / ${pagesData.length}`;
     
     prevBtn.disabled = currentTutorialPage === 0;
-    if (currentTutorialPage === TUTORIAL_PAGES.length - 1) {
-      nextBtn.textContent = "Play Game!";
+    prevBtn.textContent = t('tutorialPrev');
+    
+    if (currentTutorialPage === pagesData.length - 1) {
+      nextBtn.textContent = t('tutorialPlay');
     } else {
-      nextBtn.textContent = "Next >";
+      nextBtn.textContent = t('tutorialNext');
     }
-  }
+  };
   
-  prevBtn.addEventListener('click', () => {
-    if (currentTutorialPage > 0) { currentTutorialPage--; refreshPage(); }
+  prevBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (currentTutorialPage > 0) { currentTutorialPage--; refreshTutorialPage(); }
   });
   
-  nextBtn.addEventListener('click', () => {
-    if (currentTutorialPage < TUTORIAL_PAGES.length - 1) {
+  nextBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const pagesData = translations[currentLang].tutorialPages || translations['EN'].tutorialPages;
+    if (currentTutorialPage < pagesData.length - 1) {
       currentTutorialPage++;
-      refreshPage();
+      refreshTutorialPage();
     } else {
       overlay.remove();
+      refreshTutorialPage = null;
       if (onCloseCallback) onCloseCallback();
     }
   });
   
-  refreshPage();
+  refreshTutorialPage();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1513,20 +1580,302 @@ function launchTutorial(onCloseCallback) {
 
 let unlockedTutorialTrigger = null;
 
-// Trigger automatically if user has never played before
 if (!localStorage.getItem('sambaqui_seen_tutorial')) {
   localStorage.setItem('sambaqui_seen_tutorial', 'true');
   unlockedTutorialTrigger = () => {
     pushTimeline();
     render();
+    updateMetaDisplay();
   };
-  launchTutorial(unlockedTutorialTrigger);
+  setTimeout(() => launchTutorial(unlockedTutorialTrigger), 200);
 } else {
   pushTimeline();
   render();
+  updateMetaDisplay();
 }
 
-updateMetaDisplay();
+function render() {
+  const humanTurn = state.currentPlayer === humanPlayerColor || !vsAI;
+  if (state.currentPlayer === 1) {
+    tagP1.classList.add('active');
+    tagP2.classList.remove('active');
+  } else {
+    tagP1.classList.remove('active');
+    tagP2.classList.add('active');
+  }
+  const pathSquares = new Set();
+  
+  for (const m of state.currentMoves) {
+    if (!m.blocked) {
+      for (const sq of m.path) pathSquares.add(sq);
+    }
+  }
+
+  for (const label of LABELS) {
+    const cell = cellEls[label];
+    const piece = state.pieces[label];
+    
+    cell.className = 'cell' + (((labelToRC(label)[0] + labelToRC(label)[1]) % 2 === 1) ? ' dark-sq' : '');
+    cell.innerHTML = '';
+
+    const coord = document.createElement('div');
+    coord.className = 'cell-label';
+    coord.textContent = label;
+    cell.appendChild(coord);
+
+    const isSelected = state.selectedSquare === label;
+    const move = state.currentMoves.find(m => m.landing === label);
+
+    if (state.winLine && state.winLine.includes(label)) {
+      cell.classList.add('win-line');
+    }
+    else if (state.losSquares.includes(label)) {
+      if (!move) cell.classList.add('los-target');
+    }
+    else if (move) {
+      cell.classList.add(move.blocked ? 'blocked-landing' : 'landing');
+    }
+    else if (pathSquares.has(label)) {
+      cell.classList.add('path');
+    }
+
+    if (piece) {
+      const el = document.createElement('div');
+      if (isSelected) {
+        el.className = `piece p${piece.player} selected-piece`;
+        cell.classList.add('selected');
+      } else if (state.sneaking && label === state.sneakingSquare) {
+        el.className = `piece p${piece.player} sneaking`;
+      } else if (piece.active) {
+        el.className = `piece p${piece.player} active-piece`;
+        if (piece.player === state.currentPlayer && !state.gameOver && humanTurn && !window.isWaitingForContinue) {
+          cell.classList.add('selectable');
+        }
+      } else {
+        el.className = `piece p${piece.player} inactive`;
+      }
+      cell.appendChild(el);
+    }
+
+    if (move && !piece && !state.gameOver) {
+      const arrow = document.createElement('div');
+      arrow.className = `arrow-hint${move.blocked ? ' blocked' : ''}`;
+      arrow.textContent = move.arrow;
+      cell.appendChild(arrow);
+      if (!move.blocked && humanTurn && !window.isWaitingForContinue) cell.classList.add('selectable');
+    }
+  }
+  updateNavButtons();
+}
+
+function setStatus(msg, variant = false) {
+  statusEl.textContent = msg;
+  statusEl.classList.remove('highlight', 'warn', 'sneaking');
+  if (variant === true) statusEl.classList.add('highlight');
+  if (variant === 'warn') statusEl.classList.add('warn');
+  if (variant === 'sneaking') statusEl.classList.add('sneaking');
+}
+
+function setMode(aiMode) {
+  if (state.animating) return;
+  vsAI = aiMode;
+  
+  window.isWaitingForContinue = false;
+  document.body.classList.remove('clickable-restart');
+
+  if (vsAI) {
+    modeAIBtn.classList.add('active');
+    mode2PBtn.classList.remove('active');
+  } else {
+    mode2PBtn.classList.add('active');
+    modeAIBtn.classList.remove('active');
+  }
+  restartGame(true);
+}
+
+function restartGame(forceResetColor) {
+  if (state.animating) return;
+  
+  window.isWaitingForContinue = false;
+  document.body.classList.remove('clickable-restart');
+
+  document.querySelector('.victory-overlay')?.remove();
+  clearResultBanner();
+
+  if (vsAI) {
+    if (forceResetColor) {
+      humanPlayerColor = 1;
+      humanStreak = 0;
+      window.achievedNewBest = true; // Força render correto dos labels de nível
+      window.achievedNewBest = false;
+    } else {
+      humanPlayerColor = humanPlayerColor === 1 ? 2 : 1;
+    }
+  }
+
+  Object.assign(state, {
+    currentPlayer: 1,
+    selectedSquare: null,
+    currentMoves: [],
+    gameOver: false,
+    winLine: null,
+    sneaking: false,
+    sneakingSquare: null,
+    losSquares: [],
+    animating: false,
+    pieces: makeInitialPieces(),
+    history: new Set(),
+  });
+  state.history.add(serialiseState(state.pieces, state.currentPlayer));
+
+  timeline.length = 0;
+  timelineIndex = -1;
+  pushTimeline();
+  updateMetaDisplay();
+
+  if (vsAI && state.currentPlayer !== humanPlayerColor) {
+    setStatus(t('calculatingOpening'), 'highlight');
+    triggerAIMove();
+  } else {
+    setStatus(t('selectActive'));
+  }
+  render();
+}
+
+function updateMetaDisplay() {
+  statStreakEl.textContent = humanStreak;
+  statHighEl.textContent = highScore;
+
+  if (vsAI) {
+    statsBarEl.style.visibility = 'visible';
+    
+    if (window.achievedNewBest) {
+      statLvlLabel.textContent = currentLang === 'PT' ? "Novo Melhor Nível" : "New Best Level";
+    } else {
+      statLvlLabel.textContent = t('level');
+    }
+    statBestLabel.textContent = t('best');
+
+    if (!state.gameOver) {
+      if (humanPlayerColor === 1) {
+        labelP1.textContent = t('playerYou');
+        labelP2.textContent = t('computer');
+      } else {
+        labelP1.textContent = t('computer');
+        labelP2.textContent = t('playerYou');
+      }
+    }
+  } else {
+    statsBarEl.style.visibility = 'hidden';
+    if (!state.gameOver) {
+      labelP1.textContent = t('player1');
+      labelP2.textContent = t('player2');
+    }
+  }
+
+  modeAIBtn.textContent = t('newGame');
+  mode2PBtn.textContent = t('practice');
+  langToggleBtn.textContent = currentLang === 'EN' ? 'PT' : 'EN';
+  footerSupportLink.textContent = t('supportLink');
+  footerShareLink.textContent = t('shareLink');
+}
+
+function toggleLanguage() {
+  currentLang = currentLang === 'EN' ? 'PT' : 'EN';
+  localStorage.setItem('sambaqui_lang', currentLang);
+  applyLanguageSwitch();
+}
+
+function applyLanguageSwitch() {
+  updateMetaDisplay();
+  if (state.gameOver) {
+    const victory = checkVictory(state.pieces);
+    if (victory && vsAI) {
+      if (victory.winner === humanPlayerColor) {
+        if (humanPlayerColor === 1) {
+          labelP1.textContent = currentLang === 'PT' ? "Jogador Venceu" : "Player Wins";
+        } else {
+          labelP2.textContent = currentLang === 'PT' ? "Jogador Venceu" : "Player Wins";
+        }
+        setStatus(currentLang === 'PT' ? "Clique em qualquer lugar para continuar." : "Click anywhere to continue.", true);
+      } else {
+        if (humanPlayerColor === 1) {
+          labelP2.textContent = currentLang === 'PT' ? "Computador Venceu" : "Computer Wins";
+        } else {
+          labelP1.textContent = currentLang === 'PT' ? "Computador Venceu" : "Computer Wins";
+        }
+        setStatus(currentLang === 'PT' ? `Computador Venceu. Pontuação final: ${humanStreak}` : `Computer Wins. Final score: ${humanStreak}`, 'warn');
+      }
+    } else if (!state.winLine) {
+      setStatus(t('stalemateDraw'));
+    }
+  } else if (state.sneaking) {
+    setStatus(t('chainNoEnemies'), 'sneaking');
+  } else if (vsAI && state.currentPlayer !== humanPlayerColor) {
+    setStatus(t('thinking'), 'highlight');
+  } else if (state.selectedSquare) {
+    selectPiece(state.selectedSquare);
+  } else {
+    setStatus(t('selectActive'));
+  }
+
+  const activeBanner = document.getElementById('result-banner');
+  if (activeBanner && timelineIndex !== -1) {
+    const winner = timeline[timelineIndex].winner;
+    const bannerTextEl = activeBanner.querySelector('.banner-text');
+    const bannerBtnEl = activeBanner.querySelector('.new-game-btn');
+    
+    if (bannerTextEl) {
+      if (vsAI && winner === humanPlayerColor) {
+        const pluralStr = humanStreak !== 1 ? 's' : '';
+        bannerTextEl.textContent = t('humanWinsStreakBanner', { streak: humanStreak, plural: pluralStr });
+      } else {
+        bannerTextEl.textContent = winner === 'Draw' ? t('stalemateNoPositions') : t('playerWinsBanner', { winner: winner });
+      }
+    }
+    if (bannerBtnEl) bannerBtnEl.textContent = t('newGame');
+  }
+
+  const openTutorial = document.getElementById('tutorial-modal');
+  if (openTutorial && typeof refreshTutorialPage === 'function') {
+    refreshTutorialPage();
+  }
+}
+
+document.addEventListener('click', (e) => {
+  if (window.isWaitingForContinue) {
+    if (e.target.closest('.menu-controls') || e.target.closest('.nav-btn') || e.target.closest('#result-banner')) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    
+    window.isWaitingForContinue = false;
+    document.body.classList.remove('clickable-restart');
+    
+    restartGame(false);
+  }
+});
+
+undoBtn.addEventListener('click', () => { if (!undoBtn.disabled && !vsAI) restoreTimeline(timelineIndex - 1); });
+redoBtn.addEventListener('click', () => { if (!redoBtn.disabled && !vsAI) restoreTimeline(timelineIndex + 1); });
+modeAIBtn.addEventListener('click', () => setMode(true));
+mode2PBtn.addEventListener('click', () => setMode(false));
+openTutorialBtn.addEventListener('click', () => launchTutorial(unlockedTutorialTrigger));
+langToggleBtn.addEventListener('click', toggleLanguage);
+
+footerShareLink.addEventListener('click', () => {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    toastMsgEl.textContent = t('linkCopied');
+    toastMsgEl.style.opacity = '1';
+    setTimeout(() => { toastMsgEl.style.opacity = '0'; }, 2000);
+  }).catch(() => {
+    toastMsgEl.textContent = window.location.href;
+    toastMsgEl.style.opacity = '1';
+    setTimeout(() => { toastMsgEl.style.opacity = '0'; }, 4000);
+  });
+});
+
+applyLanguageSwitch();
 </script>
 </body>
 </html>
