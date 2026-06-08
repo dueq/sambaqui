@@ -378,12 +378,14 @@
 
 <footer>
   <div class="links">
-    <a href="https://ko-fi.com/eduardoeller" target="_blank" id="footer-support-link">♥ Apoiar</a>
+    <a href="https://ko-fi.com/eduardoeller" target="_blank" id="footer-support-link">♥↪\uFE0E Apoiar o jogo</a>
     <div class="footer-divider"></div>
-    <span id="footer-share-link">↪ Compartilhar</span>
+    <span id="footer-share-link">↪\uFE0E Compartilhar</span>
   </div>
   <div id="toast-msg"></div>
-  <div class="author">@eduardoeller - sambaqui v.1.1</div>
+<div class="author">
+  Sambaqui • v1.2 • © 2026 Eduardo Eller
+</div>
 </footer>
 
 <script>
@@ -447,9 +449,9 @@ const translations = {
     nextRound: "Next Round",
     gamesWon: "Game{plural} Won!",
     bestScore: "Best Score: <strong>{highScore}</strong>",
-    share: "↪ Share the Game",
-    supportLink: "♥ Support the game",
-    shareLink: "↪ Share the Game",
+    share: "↪\uFE0E Share the Game",
+    supportLink: "♥\uFE0E Support the Game",
+    shareLink: "↪\uFE0E Share the Game",
     linkCopied: "Link copied to clipboard!",
     tutorialNext: "Next >",
     tutorialPrev: "< Prev",
@@ -496,10 +498,10 @@ const translations = {
     nextRound: "Próximo Nível",
     gamesWon: "Jogo{plural} Vencido{plural}!",
     bestScore: "Melhor Pontuação: <strong>{highScore}</strong>",
-    share: "↪ Compartilhar o jogo",
-    supportLink: "♥ Apoiar o jogo",
-    shareLink: "↪ Compartilhar",
-    linkCopied: "Link copiado para a área de transferência!",
+    share: "↪\uFE0E Compartilhar o Jogo",
+    supportLink: "♥\uFE0E Apoiar o Jogo",
+    shareLink: "↪\uFE0E Compartilhar o Jogo",
+    linkCopied: "Link copiado!",
     tutorialNext: "Próximo >",
     tutorialPrev: "< Anterior",
     tutorialPlay: "Jogar!",
@@ -703,6 +705,7 @@ const state = {
   sneakingSquare: null,
   losSquares: [],
   animating: false,
+  highlightingActive: false,
 };
 state.history.add(serialiseState(state.pieces, state.currentPlayer));
 
@@ -894,7 +897,7 @@ function updateNavButtons() {
 function handleSquareClick(label) {
   if (state.gameOver || state.animating) return;
   if (vsAI && state.currentPlayer !== humanPlayerColor) return;
-  if (window.isWaitingForContinue) return; // Trava interações se estiver aguardando clique para o próximo nível
+  if (window.isWaitingForContinue) return;
 
   const piece = state.pieces[label];
   const targetMove = state.currentMoves.find(m => m.landing === label && !m.blocked);
@@ -905,10 +908,17 @@ function handleSquareClick(label) {
     executeMove(src, targetMove);
   } else if (piece && piece.player === state.currentPlayer && piece.active) {
     if (state.sneaking && label !== state.sneakingSquare) return;
-    if (state.selectedSquare === label) clearSelection();
+    if (state.selectedSquare === label) { clearSelection(); state.highlightingActive = true; render(); }
     else selectPiece(label);
   } else {
-    clearSelection();
+    if (state.selectedSquare) {
+      clearSelection();
+      state.highlightingActive = true;
+      render();
+    } else {
+      state.highlightingActive = !state.highlightingActive;
+      render();
+    }
   }
 }
 
@@ -916,6 +926,7 @@ function handleSquareClick(label) {
 //  SECTION 6 — CORE STATE MODIFIERS
 // ═══════════════════════════════════════════════════════════════
 function selectPiece(label) {
+  state.highlightingActive = false;
   state.selectedSquare = label;
   state.losSquares = [];
   const raw = computeAllSlides(label, state.pieces);
@@ -940,6 +951,7 @@ function selectPiece(label) {
 }
 
 function clearSelection() {
+  if (state.selectedSquare) state.highlightingActive = false;
   state.selectedSquare = null;
   state.currentMoves = [];
   state.losSquares = [];
@@ -1617,6 +1629,9 @@ function render() {
     if (state.winLine && state.winLine.includes(label)) {
       cell.classList.add('win-line');
     }
+    else if (state.highlightingActive && piece && piece.player === state.currentPlayer && piece.active && !state.selectedSquare) {
+      cell.classList.add('landing');
+    }
     else if (state.losSquares.includes(label)) {
       if (!move) cell.classList.add('los-target');
     }
@@ -1711,6 +1726,7 @@ function restartGame(forceResetColor) {
     sneakingSquare: null,
     losSquares: [],
     animating: false,
+    highlightingActive: false,
     pieces: makeInitialPieces(),
     history: new Set(),
   });
