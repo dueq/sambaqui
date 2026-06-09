@@ -8,8 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Macondo:wght@400;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@600&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols+2:wght@700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -90,9 +89,9 @@
   .turn-bar { display: flex; align-items: center; gap: 1.4rem; font-size: clamp(0.7rem, 2vw, 0.85rem); letter-spacing: 0.15em; }
   .player-tag { display: flex; align-items: center; gap: 0.5rem; opacity: 0.35; transition: opacity 0.3s; }
   .player-tag.active { opacity: 1; }
-  .player-tag .dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid transparent; }
-  .player-tag.p1 .dot { background: #e8e0d0; border-color: var(--gold); }
-  .player-tag.p2 .dot { background: #2a1a0e; border-color: var(--sand3); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15); }
+  .player-tag .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; }
+  .player-tag.p1 .dot { background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90); border: 1.5px solid rgba(196,154,68,0.5); }
+  .player-tag.p2 .dot{ background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05); border: 1.5px solid rgba(184,169,138,0.3); }
   .turn-divider { width: 1px; height: 16px; background: var(--accent); opacity: 0.4; }
 
   /* ── Shared slot: turn-bar and result-banner occupy the same fixed-height area ── */
@@ -215,7 +214,7 @@
     position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
     font-size: clamp(28px, 6vw, 28px); color: rgba(233, 212, 169, 0.593);
     pointer-events: none; user-select: none; line-height: 1;
-   font-family: -apple-system, BlinkMacSystemFont, "Geist", sans-serif;
+   font-family: -apple-system, BlinkMacSystemFont,"Apple Symbols", "Noto Sans Symbols", sans-serif;
     font-weight: 600; /* Crisp and thick enough on all mobile screens without being overly bold */ }
   .arrow-hint.blocked { color: rgba(180,80,40,0.45); font-size: clamp(13px, 2.4vw, 17px); }
 
@@ -319,6 +318,14 @@
   .tut-nav:hover:not(:disabled) { border-color: var(--sand3); color: #fff; }
   .tut-nav:disabled { opacity: 0.2; cursor: not-allowed; }
 
+  /* ── Legend ── */
+  .legend { display: flex; gap: 2rem; font-size: 0.75rem; font-weight: 300; letter-spacing: 0.1em; color: var(--sand3); }
+  .legend-item { display: flex; align-items: center; gap: 0.5rem; }
+  .legend-piece { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; }
+  .legend-piece.p1 { background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90); border: 1.5px solid rgba(196,154,68,0.5); }
+  .legend-piece.p2 { background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05); border: 1.5px solid rgba(184,169,138,0.3); }
+
+
   /* ── Enhanced Footer ── */
   footer {
     font-size: 0.72rem; letter-spacing: 0.15em; color: var(--sand3);
@@ -388,7 +395,7 @@
   </div>
   <div id="toast-msg"></div>
 <div class="author">
-  Sambaqui • v1.2.1 • © 2026 Eduardo Eller
+  Sambaqui • v1.2.2 • © 2026 Eduardo Eller
 </div>
 </footer>
 
@@ -422,34 +429,35 @@ let currentLang = localStorage.getItem('sambaqui_lang') || 'PT';
 const translations = {
   EN: {
     newGame: "New Game",
-    practice: "Practice",
+    practice: "Solo",
     level: "Level",
     best: "Best",
-    playerYou: "You",
-    computer: "Computer",
+    playerYou: "Your Move",
+    computer: "Computer Moves",
     player1: "Player 1",
     player2: "Player 2",
-    selectActive: "Select an active piece to move",
+    selectActive: "Select an active piece to move.",
     calculating: "Computer is calculating moves…",
     calculatingOpening: "Computer is calculating opening moves…",
     thinking: "Computer is thinking…",
     playerWins: "Player {winner} wins!",
     playerWinsBanner: "Player {winner} wins",
-    humanWinsStreakBanner: "You won {streak} game{plural}.",
+    humanWinsStreakBanner: "You won {streak} round{plural}.",
+    humanLosesStreakBanner: "Game over. You won {streak} round{plural}.",
     gameOver: "Game Over!",
     moveAgain: "Move again!",
-    repeatForbidden: "That move would repeat a previous position — forbidden",
+    repeatForbidden: "That move would repeat a previous position. Forbidden.",
     chainMoveAgain: "Chain move. This piece must move again",
-    noMovesAvailable: "Piece on {label} — no moves available",
-    forbiddenByNovelty: "Piece on {label} — all {blocked} slides forbidden by Novelty Rule",
-    legalMoves: "{prefix}Piece on {label}. {free} legal move{plural}{suffix}",
+    noMovesAvailable: "Piece on {label}. No moves available.",
+    forbiddenByNovelty: "Piece on {label}. All {blocked} slides forbidden.",
+    legalMoves: "{prefix}Piece on {label}. {free} legal move{plural}{suffix}.",
     chainMovePrefix: "Chain move. ",
     forbiddenSuffix: " ({blocked} forbidden)",
     haltedEnemies: "Halted. {n} enemy piece{plural} spotted.",
     chainNoEnemies: "Chain Move: no enemies spotted, move again.",
     noLegalMovesPass: "Player {passedFrom} has no legal moves! Turn automatically passes.",
     victoryOverlayTitle: "Victory!",
-    victoryLevelComplete: "Level {humanStreak} Complete",
+    victoryLevelComplete: "Level {humanStreak} Complete!",
     nextRound: "Next Round",
     gamesWon: "Game{plural} Won!",
     bestScore: "Best Score: <strong>{highScore}</strong>",
@@ -471,35 +479,36 @@ const translations = {
   },
   PT: {
     newGame: "Novo Jogo",
-    practice: "Treinar",
+    practice: "Solo",
     level: "Nível",
     best: "Melhor",
-    playerYou: "Você",
-    computer: "Computador",
+    playerYou: "Sua Vez",
+    computer: "Computador Joga",
     player1: "Jogador 1",
     player2: "Jogador 2",
-    selectActive: "Selecione uma peça ativa para mover",
+    selectActive: "Selecione uma peça ativa para mover.",
     calculating: "Computador calculando movimentos…",
     calculatingOpening: "Computador calculando jogadas de abertura…",
     thinking: "Computador pensando…",
     playerWins: "Jogador {winner} venceu!",
     playerWinsBanner: "Jogador {winner} venceu",
-    humanWinsStreakBanner: "Você venceu {streak} jogo{plural}.",
+    humanWinsStreakBanner: "Você venceu {streak} partida{plural}.",
+    humanLosesStreakBanner: "Fim de jogo. Você venceu {streak} partida{plural}.",
     gameOver: "Fim de Jogo!",
-    moveAgain: "Mova novamente!",
+    moveAgain: "Mova novamente.",
     repeatForbidden: "Esse movimento repetiria uma posição anterior.",
-    chainMoveAgain: "Movimento em cadeia. Esta peça deve mover-se novamente",
-    noMovesAvailable: "Peça em {label}. sem movimentos disponíveis",
+    chainMoveAgain: "Movimento em cadeia. Esta peça deve ser movida novamente.",
+    noMovesAvailable: "Peça em {label}. sem movimentos disponíveis.",
     forbiddenByNovelty: "Peça em {label}. Todos os {blocked} deslizamentos proibidos pela Regra da Novidade",
     legalMoves: "{prefix}Peça em {label}. {free} movimento{plural} válido{plural}{suffix}",
     chainMovePrefix: "Movimento em cadeia. ",
     forbiddenSuffix: " ({blocked} proibido)",
     haltedEnemies: "Parado. {n} peça{plural} inimiga{plural} avistada{plural}.",
-    chainNoEnemies: "Movimento em Cadeia: nenhum inimigo avistado, mova novamente.",
-    noLegalMovesPass: "Jogador {passedFrom} não tem movimentos válidos! O turno passa automaticamente.",
+    chainNoEnemies: "Movimento em cadeia: nenhum inimigo avistado, mova novamente.",
+    noLegalMovesPass: "Jogador {passedFrom} não tem movimentos válidos.",
     victoryOverlayTitle: "Vitória!",
-    victoryLevelComplete: "Nível {humanStreak} Concluído",
-    nextRound: "Próximo Nível",
+    victoryLevelComplete: "Nível {humanStreak} Concluído.",
+    nextRound: "Próxima Rodada",
     gamesWon: "Jogo{plural} Vencido{plural}!",
     bestScore: "Melhor Pontuação: <strong>{highScore}</strong>",
     share: "↪\uFE0E Compartilhar o Jogo",
@@ -510,12 +519,12 @@ const translations = {
     tutorialPrev: "< Anterior",
     tutorialPlay: "Jogar!",
     tutorialPages: [
-      { title: "O Objetivo", text: "Alinhe <strong>três peças consecutivas</strong> da sua cor.<br></br> O trio pode ser colocado em qualquer lugar do tabuleiro, orientado horizontalmente, verticalmente ou diagonalmente." },
+      { title: "Objetivo", text: "Alinhe <strong>três peças consecutivas</strong> da sua cor.<br></br> O trio pode ser colocado em qualquer lugar do tabuleiro, orientado horizontalmente, verticalmente ou diagonalmente." },
       { title: "Regras de Movimento", text: "Apenas <strong>peças ativas</strong> podem se mover.<br></br> As peças movem-se <strong>deslizando em linha reta</strong> até serem paradas pela borda do tabuleiro ou por outra peça." },
-      { title: "Regra da Linha de Visão", text: "Assim que sua peça <strong>para</strong>, as pedras inimigas móveis na sua <strong>linha de visão</strong> acordam e tornam-se <strong>ativas</strong>.<br></br> Sua peça dorme e o turno passa para o oponente." },
-      { title: "Regra da Cadeia", text: "Se uma peça parar e <strong>não avistar nenhum inimigo</strong>, o <strong>movimento em cadeia</strong> é ativado. A peça continua ativa e deve ser movida novamente de imediato." },
+      { title: "Linha de Visão", text: "Assim que sua peça <strong>para</strong>, as pedras inimigas móveis na sua <strong>linha de visão</strong> acordam e tornam-se <strong>ativas</strong>.<br></br> Sua peça dorme e o turno passa para o oponente." },
+      { title: "Regra da Cadeia", text: "Se uma peça parar e <strong>não avistar nenhum inimigo</strong>, o <strong>movimento em cadeia</strong> é ativado. A peça continua ativa e deve ser movida novamente." },
       { title: "Regra da Novidade", text: "Movimentos que repetiriam um estado de jogo anterior não são permitidos. Se você ficar sem movimentos válidos, seu turno termina e todas as peças inimigas são ativadas." },
-      { title: "Sobre o Jogo", text: "Este jogo recebeu o nome dos antigos amontoados de conchas encontrados na costa do Brasil (Sambaquis). Inspira-se em jogos como Cidade Dorme, Bejeweled, Zuma e Ultimate Tic-Tac-Toe. Divirta-se jogando!" }
+      { title: "Sobre o Jogo", text: "Este jogo recebe o nome dos antigos amontoados de conchas encontrados na costa do Brasil. É inspirado em jogos como Cidade Dorme, Bejeweled, Zuma e Ultimate Tic-Tac-Toe. Divirta-se!" }
     ]
   }
 };
@@ -766,7 +775,7 @@ function restoreTimeline(idx) {
             document.getElementById('label-p2').textContent = currentLang === 'PT' ? "Jogador Venceu" : "Player Wins";
             tagP2.classList.add('active'); tagP1.classList.remove('active');
           }
-          setStatus(currentLang === 'PT' ? "Clique em qualquer lugar para continuar." : "Click anywhere to continue.", true);
+          setStatus(currentLang === 'PT' ? "" : "", true);
           document.body.classList.add('clickable-restart');
           window.isWaitingForContinue = true;
         } else {
@@ -777,7 +786,7 @@ function restoreTimeline(idx) {
             document.getElementById('label-p1').textContent = currentLang === 'PT' ? "Computador Venceu" : "Computer Wins";
             tagP1.classList.add('active'); tagP2.classList.remove('active');
           }
-          setStatus(currentLang === 'PT' ? `Computador Venceu. Pontuação final: ${humanStreak}` : `Computer Wins. Final score: ${humanStreak}`, 'warn');
+          setStatus(currentLang === 'PT' ? `Computador Venceu.` : `Computer Wins`, 'warn');
         }
       }
     }
@@ -817,9 +826,10 @@ function showResultBanner(winner) {
   if (vsAI && winner === humanPlayerColor) {
     const pluralStr = humanStreak !== 1 ? 's' : '';
     text = t('humanWinsStreakBanner', { streak: humanStreak, plural: pluralStr });
-    btnText = t('newGame');
+    btnText = t('nextRound');
   } else {
-    text = t('playerWinsBanner', { winner: winner });
+    const pluralStr = humanStreak !== 1 ? 's' : '';
+    text = t('humanLosesStreakBanner', { streak: humanStreak, plural: pluralStr, winner: winner });
   }
 
   banner.innerHTML = `
@@ -1160,7 +1170,7 @@ function showVictory(winner) {
       tagP2.classList.add('active'); tagP1.classList.remove('active');
     }
 
-    setStatus(currentLang === 'PT' ? "Clique em qualquer lugar para continuar." : "Click anywhere to continue.", true);
+    setStatus(currentLang === 'PT' ? "" : "", true);
 
     setTimeout(() => {
       document.body.classList.add('clickable-restart');
@@ -1178,7 +1188,7 @@ function showVictory(winner) {
       tagP1.classList.add('active'); tagP2.classList.remove('active');
     }
 
-    setStatus(currentLang === 'PT' ? `Computador Venceu. Pontuação final: ${humanStreak}` : `Computer Wins. Final score: ${humanStreak}`, 'warn');
+    setStatus(currentLang === 'PT' ? `Computador venceu.` : `Computer wins.`, 'warn');
 
     humanStreak = 0;
     window.achievedNewBest = false;
@@ -1777,14 +1787,14 @@ function applyLanguageSwitch() {
         } else {
           labelP2.textContent = currentLang === 'PT' ? "Jogador Venceu" : "Player Wins";
         }
-        setStatus(currentLang === 'PT' ? "Clique em qualquer lugar para continuar." : "Click anywhere to continue.", true);
+        setStatus(currentLang === 'PT' ? "" : "", true);
       } else {
         if (humanPlayerColor === 1) {
           labelP2.textContent = currentLang === 'PT' ? "Computador Venceu" : "Computer Wins";
         } else {
           labelP1.textContent = currentLang === 'PT' ? "Computador Venceu" : "Computer Wins";
         }
-        setStatus(currentLang === 'PT' ? `Computador Venceu. Pontuação final: ${humanStreak}` : `Computer Wins. Final score: ${humanStreak}`, 'warn');
+        setStatus(currentLang === 'PT' ? `Computador Venceu.` : `Computer Wins.`, 'warn');
       }
     } else if (!vsAI) {
       setStatus(t('playerWins', { winner: checkVictory(state.pieces)?.winner ?? '' }), true);
