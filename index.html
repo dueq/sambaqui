@@ -210,8 +210,9 @@
 
   .arrow-hint {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-    font-size: clamp(16px, 3vw, 22px); color: rgba(196,154,68,0.75);
+    font-size: clamp(28px, 6vw, 28px); color: rgba(233, 212, 169, 0.593);
     pointer-events: none; user-select: none; line-height: 1;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
   .arrow-hint.blocked { color: rgba(180,80,40,0.45); font-size: clamp(13px, 2.4vw, 17px); }
 
@@ -231,15 +232,15 @@
     border: 2px solid rgba(184,169,138,0.3);
     box-shadow: 0 3px 8px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.12), inset 0 -2px 4px rgba(0,0,0,0.4);
   }
-  .piece.inactive       { opacity: 0.9; transform: scale(0.95); }
+  .piece.inactive       { opacity: 1; transform: scale(1); }
   .piece.active-piece   { opacity: 1; transform: scale(1); }
   .piece.p1.active-piece {
-    border: 4px solid rgba(231, 221, 196, 0.82);
+    border: 2px solid rgba(231, 221, 196, 0.82);
     box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.6),
       0 0 0 3px rgba(232,220,200,0.3), 0 0 14px rgba(232,220,200,0.15);
   }
   .piece.p2.active-piece {
-    border: 4px solid rgba(165, 118, 8, 0.474);
+    border: 2px solid rgba(165, 118, 8, 0.474);
     box-shadow: 0 3px 8px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.12),
       0 0 0 3px rgba(232,220,200,0.3), 0 0 14px rgba(232,220,200,0.15);
   }
@@ -346,7 +347,7 @@
     <button class="mode-btn active" id="mode-ai">Novo Jogo</button>
     <button class="mode-btn"        id="mode-2p">Treinar</button>
     <button class="mode-btn"        id="lang-toggle-btn">EN</button>
-    <button class="help-btn" id="open-tutorial-btn">Tutorial</button>
+    <button class="mode-btn" id="open-tutorial-btn">Tutorial</button>
   </div>
 </div>
 
@@ -369,7 +370,7 @@
   <div class="banner-zone">
     <div id="result-banner-slot"></div>
     <div class="turn-bar">
-      <div class="player-tag p1 active" id="tag-p1"><div class="dot"></div><span id="label-p1">Jogador (Você)</span></div>
+      <div class="player-tag p1 active" id="tag-p1"><div class="dot"></div><span id="label-p1">Você</span></div>
       <div class="turn-divider"></div>
       <div class="player-tag p2" id="tag-p2"><div class="dot"></div><span id="label-p2">Computador</span></div>
     </div>
@@ -384,7 +385,7 @@
   </div>
   <div id="toast-msg"></div>
 <div class="author">
-  Sambaqui • v1.2 • © 2026 Eduardo Eller
+  Sambaqui • v1.2.1 • © 2026 Eduardo Eller
 </div>
 </footer>
 
@@ -421,7 +422,7 @@ const translations = {
     practice: "Practice",
     level: "Level",
     best: "Best",
-    playerYou: "Player (You)",
+    playerYou: "You",
     computer: "Computer",
     player1: "Player 1",
     player2: "Player 2",
@@ -470,7 +471,7 @@ const translations = {
     practice: "Treinar",
     level: "Nível",
     best: "Melhor",
-    playerYou: "Jogador (Você)",
+    playerYou: "Você",
     computer: "Computador",
     player1: "Jogador 1",
     player2: "Jogador 2",
@@ -825,7 +826,8 @@ function showResultBanner(winner) {
   resultBannerSlot.appendChild(banner);
   document.getElementById('banner-new-game').addEventListener('click', (e) => {
     e.stopPropagation(); // Impede o clique fantasma de reiniciar duas vezes
-    restartGame(false);
+    const isDefeat = vsAI && winner !== humanPlayerColor;
+    restartGame(isDefeat);
   });
 }
 
@@ -1175,38 +1177,9 @@ function showVictory(winner) {
 
     setStatus(currentLang === 'PT' ? `Computador Venceu. Pontuação final: ${humanStreak}` : `Computer Wins. Final score: ${humanStreak}`, 'warn');
 
-    // Se o jogador tinha 1 ponto ou mais, exibe o novo banner overlay de derrota antes de resetar a pontuação
-    if (humanStreak >= 1) {
-      const overlay = document.createElement('div');
-      overlay.className = 'victory-overlay';
-      
-      const titleText = currentLang === 'PT' ? "Fim de Jogo" : "Game Over";
-      const pluralStr = humanStreak !== 1 ? 's' : '';
-      const subText = currentLang === 'PT' 
-        ? `Sua pontuação final é <strong>${humanStreak}</strong>` 
-        : `Your final score is <strong>${humanStreak}</strong>.`;
-      const btnText = currentLang === 'PT' ? "Tentar Novamente" : "Try Again";
-
-      overlay.innerHTML = `
-        <div class="victory-title" style="color: #c0704a; text-shadow: 0 0 60px var(--gold);">${titleText}</div>
-        <div class="victory-sub">${subText}</div>
-        <button class="generic-btn danger" id="defeat-restart-btn">${btnText}</button>
-      `;
-      document.body.appendChild(overlay);
-      
-      document.getElementById('defeat-restart-btn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        overlay.remove();
-        humanStreak = 0;
-        window.achievedNewBest = false;
-        restartGame(true);
-      });
-    } else {
-      // Caso o jogador tenha perdido logo no nível 0, apenas reseta normalmente sem o overlay completo
-      humanStreak = 0;
-      window.achievedNewBest = false;
-      updateMetaDisplay();
-    }
+    humanStreak = 0;
+    window.achievedNewBest = false;
+    updateMetaDisplay();
   }
 }
 
@@ -1538,11 +1511,11 @@ function launchTutorial(onCloseCallback) {
   const nextBtn = overlay.querySelector('#tut-next-btn');
   const innerLangBtn = overlay.querySelector('#tut-lang-toggle');
 
-  innerLangBtn.textContent = currentLang === 'EN' ? 'PT' : 'EN';
+  innerLangBtn.textContent = currentLang === 'EN' ? 'Português' : 'English';
   innerLangBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     toggleLanguage();
-    innerLangBtn.textContent = currentLang === 'EN' ? 'PT' : 'EN';
+    innerLangBtn.textContent = currentLang === 'EN' ? 'Português' : 'English';
     refreshTutorialPage();
   });
 
@@ -1754,7 +1727,7 @@ function updateMetaDisplay() {
     statsBarEl.style.visibility = 'visible';
     
     if (window.achievedNewBest) {
-      statLvlLabel.textContent = currentLang === 'PT' ? "Novo Melhor Nível" : "New Best Level";
+      statLvlLabel.textContent = currentLang === 'PT' ? "★\uFE0E Nível" : "★\uFE0E Level";
     } else {
       statLvlLabel.textContent = t('level');
     }
