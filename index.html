@@ -149,7 +149,7 @@
  
   .nav-btn {
     background: var(--mid); border: 1px solid var(--accent); color: var(--gold);
-    border-radius: 4px; width: 39px; height: 39px;
+    border-radius: 4px; width: 35px; height: 35px;
     display: flex; align-items: center; justify-content: center;
     font-size: 0.72rem; cursor: pointer; transition: all 0.2s;
     box-shadow: 0 2px 6px rgba(0,0,0,0.4);
@@ -353,7 +353,7 @@
 <body>
 
 <header>
-  <h1>sambaqui</h1>
+  <h1>Sambaqui</h1>
 </header>
 
   <div class="board-controls" id="nav-controls">
@@ -408,7 +408,7 @@
 
 
 <div class="author">
-  Sambaqui • v1.2.4 • © 2026 Eduardo Eller
+  Sambaqui • v1.2.5 • © 2026 Eduardo Eller
 </div>
 </footer>
 
@@ -529,9 +529,9 @@ const translations = {
     gamesWon: "Jogo{plural} Vencido{plural}!",
     startNewGame: "Novo Jogo",
     bestScore: "Melhor Pontuação: <strong>{highScore}</strong>",
-    share: "↪\uFE0E Compartilhar o Jogo",
-    supportLink: "♥\uFE0E Apoiar o Jogo",
-    shareLink: "↪\uFE0E Compartilhar o Jogo",
+    share: "↪\uFE0E Compartilhar",
+    supportLink: "♥\uFE0E Apoie o Jogo",
+    shareLink: "↪\uFE0E Compartilhe",
     linkCopied: "Link copiado!",
     tutorialNext: "Próximo >",
     tutorialPrev: "< Anterior",
@@ -1743,7 +1743,7 @@ function restartGame(forceResetColor) {
 }
 
 function updateMetaDisplay() {
-  statStreakEl.textContent = humanStreak;
+  statStreakEl.textContent = humanStreak+1;
   statHighEl.textContent = highScore;
 
   if (vsAI) {
