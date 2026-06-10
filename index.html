@@ -9,7 +9,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Macondo:wght@400;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols+2:wght@700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="/kim_naces_shell.png">
+
 <style>
+
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
@@ -400,7 +403,12 @@
     <span id="footer-share-link">↪\uFE0E Compartilhar</span>
   </div>
   <div id="toast-msg"></div>
+
+  <div class="links">
+
+
 <div class="author">
+<a href="https://thenounproject.com/creator/kim2262/" target="_blank" title="shell Icons"> Icon by Kim Naces </a>•
   Sambaqui • v1.2.4 • © 2026 Eduardo Eller
 </div>
 </footer>
@@ -468,6 +476,7 @@ const translations = {
     victoryLevelComplete: "Level {humanStreak} Complete!",
     nextRound: "Next Round",
     gamesWon: "Game{plural} Won!",
+    startNewGame: "New Game",
     bestScore: "Best Score: <strong>{highScore}</strong>",
     share: "↪\uFE0E Share the Game",
     supportLink: "♥\uFE0E Support the Game",
@@ -512,13 +521,14 @@ const translations = {
     legalMoves: "{prefix}Peça em {label}. {free} movimento{plural} válido{plural}{suffix}",
     chainMovePrefix: "Movimento em cadeia. ",
     forbiddenSuffix: " ({blocked} proibido)",
-    haltedEnemies: "Parado. {n} peça{plural} inimiga{plural} avistada{plural}.",
+    haltedEnemies: "Parado. {n} peça{plural} inimiga{plural} à vista.",
     chainNoEnemies: "Movimento em cadeia: nenhum inimigo avistado, mova novamente.",
     noLegalMovesPass: "Jogador {passedFrom} não tem movimentos válidos.",
     victoryOverlayTitle: "Vitória!",
     victoryLevelComplete: "Nível {humanStreak} Concluído.",
     nextRound: "Próxima Rodada",
     gamesWon: "Jogo{plural} Vencido{plural}!",
+    startNewGame: "Novo Jogo",
     bestScore: "Melhor Pontuação: <strong>{highScore}</strong>",
     share: "↪\uFE0E Compartilhar o Jogo",
     supportLink: "♥\uFE0E Apoiar o Jogo",
@@ -829,7 +839,7 @@ function showResultBanner(winner) {
   banner.id = 'result-banner';
   
   let text = '';
-  let btnText = t('newGame');
+  let btnText = t('startNewGame');
   
   if (vsAI && winner === humanPlayerColor) {
     const pluralStr = humanStreak !== 1 ? 's' : '';
@@ -1837,7 +1847,7 @@ function applyLanguageSwitch() {
         bannerTextEl.textContent = t('playerWinsBanner', { winner: winner });
       }
     }
-    if (bannerBtnEl) bannerBtnEl.textContent = t('newGame');
+    if (bannerBtnEl) bannerBtnEl.textContent = t('startNewGame');
   }
 
   const openTutorial = document.getElementById('tutorial-modal');
