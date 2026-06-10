@@ -47,7 +47,7 @@
   /* ── Header ── */
   header { text-align: center; }
   h1 {
-    font-size: clamp(2.2rem, 12vw, 3.8rem); font-weight: 100;
+    font-size: clamp(2.2rem, 12vw, 4.6rem); font-weight: 100;
     letter-spacing: 0.06em; color: var(--gold);
     text-shadow: 0 0 40px rgba(196,154,68,0.3); line-height: 1;
     font-family: 'Macondo';
@@ -55,10 +55,10 @@
 
   /* ── Stats Bar ── */
   .stats-bar {
-    font-family: 'Macondo';
-    display: flex; gap: 2rem; font-size: clamp(1rem, 1rem);
+    font-family: 'Macondo'; min-height: 4vh;
+    display: flex; gap: 1.3rem; font-size: clamp(1rem, 2.2rem, 2.2vw);
     letter-spacing: 0.1em; background: rgba(0,0,0,0.2);
-    padding: 0.4rem 1.2rem; border-radius: 20px; border: 2px solid rgba(211, 105, 23, 0.3);
+    padding: 0.4rem 1.2rem; border-radius: 10px; border: 2px solid rgba(211, 105, 23, 0.3);
   }
   .stats-bar strong { color: var(--gold); }
 
@@ -146,7 +146,7 @@
  
   .nav-btn {
     background: var(--mid); border: 1px solid var(--accent); color: var(--gold);
-    border-radius: 4px; width: 35px; height: 35px;
+    border-radius: 4px; width: 39px; height: 39px;
     display: flex; align-items: center; justify-content: center;
     font-size: 0.72rem; cursor: pointer; transition: all 0.2s;
     box-shadow: 0 2px 6px rgba(0,0,0,0.4);
@@ -355,10 +355,9 @@
 
 <div class="menu-controls">
   <div class="mode-bar">
-    <button class="mode-btn active" id="mode-ai">Novo Jogo</button>
-    <button class="mode-btn"        id="mode-2p">Treinar</button>
+    <button class="mode-btn" id="mode-toggle">Treinar</button>
+    <button class="mode-btn" id="open-tutorial-btn">Como Jogar</button>
     <button class="mode-btn"        id="lang-toggle-btn">EN</button>
-    <button class="mode-btn" id="open-tutorial-btn">Tutorial</button>
   </div>
 </div>
   <div class="board-controls" id="nav-controls">
@@ -397,7 +396,7 @@
   </div>
   <div id="toast-msg"></div>
 <div class="author">
-  Sambaqui • v1.2.3 • © 2026 Eduardo Eller
+  Sambaqui • v1.2.4 • © 2026 Eduardo Eller
 </div>
 </footer>
 
@@ -430,8 +429,10 @@ let currentLang = localStorage.getItem('sambaqui_lang') || 'PT';
 
 const translations = {
   EN: {
-    newGame: "New Game",
-    practice: "Solo",
+    newGame: "vs Machine",
+    practice: "Solo Mode",
+    tutorial: "How to Play",
+    language: "Português",
     level: "Level",
     best: "Best",
     playerYou: "Your Move",
@@ -448,7 +449,7 @@ const translations = {
     humanLosesStreakBanner: "Game over. You won {streak} round{plural}.",
     gameOver: "Game Over!",
     moveAgain: "Move again!",
-    repeatForbidden: "That move would repeat a previous position. Forbidden.",
+    repeatForbidden: "That move would repeat a previous position. Choose another move.",
     chainMoveAgain: "Chain move. This piece must move again",
     noMovesAvailable: "Piece on {label}. No moves available.",
     forbiddenByNovelty: "Piece on {label}. All {blocked} slides forbidden.",
@@ -480,8 +481,10 @@ const translations = {
     ]
   },
   PT: {
-    newGame: "Novo Jogo",
-    practice: "Solo",
+    newGame: "vs Máquina",
+    practice: "Modo Solo",
+    tutorial: "Como Jogar",
+    language: "English",
     level: "Nível",
     best: "Melhor",
     playerYou: "Sua Vez",
@@ -498,7 +501,7 @@ const translations = {
     humanLosesStreakBanner: "Fim de jogo. Você venceu {streak} partida{plural}.",
     gameOver: "Fim de Jogo!",
     moveAgain: "Mova novamente.",
-    repeatForbidden: "Esse movimento repetiria uma posição anterior.",
+    repeatForbidden: "Esse movimento repetiria uma posição anterior. Escolha outro.",
     chainMoveAgain: "Movimento em cadeia. Esta peça deve ser movida novamente.",
     noMovesAvailable: "Peça em {label}. sem movimentos disponíveis.",
     forbiddenByNovelty: "Peça em {label}. Todos os {blocked} deslizamentos proibidos pela Regra da Novidade",
@@ -863,8 +866,7 @@ const undoBtn = document.getElementById('undo-btn');
 const redoBtn = document.getElementById('redo-btn');
 const navControls = document.getElementById('nav-controls');
 const resultBannerSlot = document.getElementById('result-banner-slot');
-const modeAIBtn = document.getElementById('mode-ai');
-const mode2PBtn = document.getElementById('mode-2p');
+const modeToggleBtn = document.getElementById('mode-toggle');
 const langToggleBtn = document.getElementById('lang-toggle-btn');
 const openTutorialBtn = document.getElementById('open-tutorial-btn');
 const statStreakEl = document.getElementById('stat-streak');
@@ -1674,13 +1676,7 @@ function setMode(aiMode) {
   window.isWaitingForContinue = false;
   document.body.classList.remove('clickable-restart');
 
-  if (vsAI) {
-    modeAIBtn.classList.add('active');
-    mode2PBtn.classList.remove('active');
-  } else {
-    mode2PBtn.classList.add('active');
-    modeAIBtn.classList.remove('active');
-  }
+  modeToggleBtn.textContent = vsAI ? t('practice') : t('newGame');
   restartGame(true);
 }
 
@@ -1765,9 +1761,9 @@ function updateMetaDisplay() {
     }
   }
 
-  modeAIBtn.textContent = t('newGame');
-  mode2PBtn.textContent = t('practice');
-  langToggleBtn.textContent = currentLang === 'EN' ? 'PT' : 'EN';
+  modeToggleBtn.textContent = vsAI ? t('practice') : t('newGame');
+  openTutorialBtn.textContent = t('tutorial');
+  langToggleBtn.textContent = t('language');
   footerSupportLink.textContent = t('supportLink');
   footerShareLink.textContent = t('shareLink');
 }
@@ -1863,8 +1859,7 @@ document.addEventListener('click', (e) => {
 
 undoBtn.addEventListener('click', () => { if (!undoBtn.disabled && !vsAI) restoreTimeline(timelineIndex - 1); });
 redoBtn.addEventListener('click', () => { if (!redoBtn.disabled && !vsAI) restoreTimeline(timelineIndex + 1); });
-modeAIBtn.addEventListener('click', () => setMode(true));
-mode2PBtn.addEventListener('click', () => setMode(false));
+modeToggleBtn.addEventListener('click', () => setMode(!vsAI));
 openTutorialBtn.addEventListener('click', () => launchTutorial(unlockedTutorialTrigger));
 langToggleBtn.addEventListener('click', toggleLanguage);
 
