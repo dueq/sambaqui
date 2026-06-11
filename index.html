@@ -102,7 +102,7 @@ body {
 
   /* ── Turn bar ── */
   .turn-bar { display: flex; align-items: center; gap: 1.4rem; font-size: clamp(0.7rem, 2vw, 1rem); letter-spacing: 0.15em; }
-  .player-tag { display: flex; align-items: center; gap: 0.5rem; opacity: 0.35; transition: opacity 0.3s; }
+  .player-tag { display: flex; align-items: center; gap: 0.5rem; opacity: 0.35; transition: opacity 0s; }
   .player-tag.active { opacity: 1; }
   .player-tag .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; }
   .player-tag.p1 .dot { background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90); border: 1.5px solid rgba(196,154,68,0.5); }
@@ -176,7 +176,7 @@ body {
     scrollbar-width: none;
     -ms-overflow-style: none;
     height: 35px;
-    background: rgba(0,0,0,0.18); border: 1px solid rgba(122,79,46,0.35);
+    background: rgba(86, 70, 39, 0.869); border: 1px solid rgba(122,79,46,0.35);
     border-radius: 6px; box-shadow: inset 0 1px 4px rgba(0,0,0,0.3);
     min-width: 0;
   }
@@ -187,15 +187,15 @@ body {
   }
   .move-log-entry {
     display: flex; align-items: center; gap: 0.22rem;
-    font-size: 0.68rem; letter-spacing: 0.08em; color: var(--sand);
+    font-size: 0.9rem; letter-spacing: 0.08em; color: var(--sand);
     white-space: nowrap; flex-shrink: 0;
     padding: 0.1rem 0.28rem; border-radius: 4px;
-    transition: opacity 0.15s;
+    transition: opacity 0.2s;
   }
-  .move-log-entry.future { opacity: 0.28; }
+  .move-log-entry.future { opacity: 1; }
   .move-log-entry.current { background: rgba(196,154,68,0.12); }
   .move-log-dot {
-    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0;
   }
   .move-log-dot.p1 {
     background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90);
@@ -203,10 +203,10 @@ body {
   }
   .move-log-dot.p2 {
     background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05);
-    border: 1px solid rgba(184,169,138,0.3);
+    border: 1px solid var(--accent);
   }
   .move-log-divider {
-    width: 1px; height: 14px; background: var(--accent); opacity: 0.25; flex-shrink: 0;
+    width: 1px; height: 14px; background: var(--sand); opacity: 0.25; flex-shrink: 0;
   }
 
   /* ── Result banner ── */
@@ -398,7 +398,7 @@ body {
   footer .footer-divider { width: 1px; height: 12px; background: var(--accent); opacity: 0.4; }
   #toast-msg {
     font-size: 0.65rem; color: var(--teal); letter-spacing: 0.1em;
-    min-height: 1.2em; opacity: 0; transition: opacity 0.3s;
+    min-height: 1.2em; opacity: 0; transition: opacity 0.2s;
   }
 </style>
 </head>
@@ -461,7 +461,7 @@ body {
 
 
 <div class="author">
-  Sambaqui • v1.2.6 • © 2026 Eduardo Eller
+  Sambaqui • v1.2.7 • © 2026 Eduardo Eller
 </div>
 </footer>
 
@@ -494,7 +494,7 @@ let currentLang = localStorage.getItem('sambaqui_lang') || 'PT';
 
 const translations = {
   EN: {
-    newGame: "Vs Machine",
+    newGame: "Computer",
     practice: "Solo Mode",
     tutorial: "How to Play",
     language: "Português",
@@ -510,7 +510,7 @@ const translations = {
     thinking: "Computer is thinking…",
     playerWins: "Player {winner} wins!",
     playerWinsBanner: "Player {winner} wins",
-    humanWinsStreakBanner: "Final Score: {streak}.",
+    humanWinsStreakBanner: "You won {streak} round{plural}.",
     humanLosesStreakBanner: "Final Score: {streak}.",
     gameOver: "Game Over!",
     moveAgain: "Move again!",
@@ -538,7 +538,7 @@ const translations = {
     tutorialPrev: "< Prev",
     tutorialPlay: "Play Game!",
     tutorialPages: [
-      { title: "The Goal", text: "Align <strong>three consecutive pieces</strong> of your color.<br></br> The triple can be placed anywhere on the board. It can be oriented horizontally, vertically or diagonally." },
+      { title: "The Goal", text: "Align <strong>three consecutive pieces</strong> of your color anywhere on the board.<br></br> They can be oriented in horizontal, vertical or diagonal directions." },
       { title: "Movement Rules", text: "Only <strong>active pieces</strong> are allowed to move.<br></br> Pieces move by <strong>sliding in straight lines</strong>. Pieces slide until stopped by the edge of the board or some other piece." },
       { title: "Line of Sight Rule", text: "As soon as your piece <strong>stops</strong>, moveable enemy stones in its <strong>line of sight</strong> wake up and become <strong>active</strong>. <br></br> Your piece goes to sleep and turn passes to your opponent." },
       { title: "The Chain Rule", text: "If a sliding piece halts and <strong>cannot see any enemies</strong> the <strong>chain move</strong> is triggered. The piece remains active and must be moved again immediately." },
@@ -546,7 +546,7 @@ const translations = {
    ]
   },
   PT: {
-    newGame: "Vs Máquina",
+    newGame: "Computador",
     practice: "Modo Solo",
     tutorial: "Como Jogar",
     language: "English",
@@ -590,11 +590,11 @@ const translations = {
     tutorialPrev: "< Anterior",
     tutorialPlay: "Jogar!",
     tutorialPages: [
-      { title: "Objetivo", text: "Alinhe <strong>três peças consecutivas</strong> da sua cor.<br></br> O trio pode ser colocado em qualquer lugar do tabuleiro, orientado horizontalmente, verticalmente ou diagonalmente." },
-      { title: "Regras de Movimento", text: "Apenas <strong>peças ativas</strong> podem se mover.<br></br> As peças <strong>deslizam em linha reta</strong> até serem bloqueadas pela borda do tabuleiro ou por outra peça." },
-      { title: "Linha de Visão", text: "Assim que sua peça <strong>para</strong>, as pedras inimigas móveis na sua <strong>linha de visão</strong> acordam e tornam-se <strong>ativas</strong>.<br></br> Sua peça dorme e o turno passa para o oponente." },
-      { title: "Regra da Cadeia", text: "Se uma peça parar e <strong>não avistar nenhum inimigo</strong>, o <strong>movimento em cadeia</strong> é ativado. A peça continua ativa e deve ser movida novamente." },
-      { title: "Regra da Novidade", text: "Movimentos que repetiriam um estado de jogo anterior não são permitidos. Se você ficar sem movimentos válidos, seu turno termina e todas as peças inimigas são ativadas." },   
+      { title: "Objetivo", text: "Junte <strong>três peças</strong> da sua cor lado a lado em qualquer lugar do tabuleiro. Elas podem estar orientadas na horizontal, vertical ou diagonal." },
+      { title: "Movimento", text: "Apenas <strong>peças ativas</strong> podem se mover. As peças <strong>deslizam em linha reta</strong> até serem bloqueadas pela borda do tabuleiro ou por outra peça." },
+      { title: "Linha de Visão", text: "Assim que sua peça <strong>para</strong>, pedras inimigas móveis na sua <strong>linha de visão</strong> acordam e tornam-se <strong>ativas</strong>. Sua peça dorme e a vez passa para o oponente. A <strong>linha de visão</strong> segue as oito direções principais e é obstruída por qualquer peça." },
+      { title: "Regra da Cadeia", text: "Se uma peça parar e <strong>não avistar</strong> um inimigo, o <strong>movimento em cadeia</strong> é ativado. A peça continua ativa e deve ser movida novamente." },
+      { title: "Originalidade", text: "Movimentos que <strong>repetiriam</strong> um estado de jogo anterior, incluindo atividade das peças, <strong>não são permitidos</strong>. Se você ficar sem movimentos válidos, sua vez termina e <strong>todas</strong> as peças inimigas são ativadas." },   
     ]
   }
 };
@@ -990,7 +990,7 @@ function renderMoveLog() {
   if (moveLog.length === 0) {
     const empty = document.createElement('span');
     empty.className = 'move-log-empty';
-    empty.textContent = '—';
+    empty.textContent = '';
     moveLogEl.appendChild(empty);
     return;
   }
