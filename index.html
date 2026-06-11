@@ -50,7 +50,7 @@ body {
     );
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   font-family: 'Lato', serif; color: var(--sand);
-  padding: 2rem 1rem; gap: 1.2rem;
+  padding: 2rem 1rem; gap: 1.1rem;
 }
 
   body.clickable-restart {
@@ -65,17 +65,17 @@ body {
   h1 {
     font-size: clamp(2.2rem, 12vw, 4.5rem);
     letter-spacing: 0.02em; color: var(--sand3); line-height: 0.8;
-    font-family: 'Molle';  font-family: "Molle", cursive; font-weight: 300; font-style: italic;
+     font-family: "Molle", cursive; font-weight: 300; font-style: italic;
   }
 
   /* ── Stats Bar ── */
   .stats-bar {
-    font-family: 'Lato';
-    display: flex; gap: 2rem; font-size: clamp(1rem, 1rem);
-    letter-spacing: 0.1em; background: rgba(0,0,0,0.2);
+    font-family: 'Lato'; scale:1.2;
+    display: flex; gap: 2.3rem; font-size: 1rem; line-height: 0.8;
+    letter-spacing: 0.1em; background: rgba(175, 153, 28, 0.2);
     padding: 0.4rem 1.2rem; border-radius: 20px; border: 2px solid rgba(211, 105, 23, 0.3);
   }
-  .stats-bar strong { color: var(--gold); }
+  .stats-bar strong { color: var(--gold);      font-family: "Molle", cursive; font-weight: 300; font-style: italic;}
   
   /* ── Mode & Help toggles ── */
   .menu-controls { scale:1.1; font-size: 2rem; display: flex; flex-direction: column; align-items: center; gap: 0.6rem; }
@@ -107,7 +107,7 @@ body {
   .player-tag .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; }
   .player-tag.p1 .dot { background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90); border: 1.5px solid rgba(196,154,68,0.5); }
   .player-tag.p2 .dot{ background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05); border: 1.5px solid rgba(184,169,138,0.3); }
-  .turn-divider { width: 1px; height: 16px; background: var(--accent); opacity: 0.4; }
+  .turn-divider { width: 2px; height: 16px; background: var(--accent); opacity: 0.6; }
 
   /* ── Shared slot: turn-bar and result-banner occupy the same fixed-height area ── */
   .banner-zone {
@@ -153,7 +153,7 @@ body {
 
   /* ── Board nav controls ── */
   .board-controls {
-    display: flex; justify-content: space-between; align-items: center; width: 100%;
+    display: flex; justify-content: space-between; align-items: center; width: 100%; 
     max-width: calc(var(--cell-size) * 5 + var(--gap) * 4 + clamp(20px, 4vw, 36px) + 4px);
     padding: 0 2px; min-height: 28px;
   }
@@ -388,7 +388,7 @@ body {
     text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
     margin-top: 1rem; text-align: center;
   }
-  footer .author { opacity: 0.5; font-size: 0.8rem; letter-spacing: 0.2em; line-height: 0.01rem}
+  footer .author { opacity: 0.5; font-size: 0.7rem; letter-spacing: 0.2em; line-height: 0.01rem}
   footer .links { display: flex; align-items: center; gap: 1rem; line-height: 0.01rem }
   footer .links a, footer .links span {
     color: var(--gold); text-decoration: none; cursor: pointer;
@@ -461,7 +461,7 @@ body {
 
 
 <div class="author">
-  Sambaqui • v1.2.5 • © 2026 Eduardo Eller
+  Sambaqui • v1.2.6 • © 2026 Eduardo Eller
 </div>
 </footer>
 
@@ -494,12 +494,12 @@ let currentLang = localStorage.getItem('sambaqui_lang') || 'PT';
 
 const translations = {
   EN: {
-    newGame: "Computer",
+    newGame: "Vs Machine",
     practice: "Solo Mode",
     tutorial: "How to Play",
     language: "Português",
-    level: "Level",
-    best: "Best",
+    level: "Level⠀",
+    best: "Best⠀",
     playerYou: "Your Move",
     computer: "Computer Moves",
     player1: "Player 1",
@@ -511,19 +511,19 @@ const translations = {
     playerWins: "Player {winner} wins!",
     playerWinsBanner: "Player {winner} wins",
     humanWinsStreakBanner: "You won {streak} round{plural}.",
-    humanLosesStreakBanner: "Game over. You won {streak} round{plural}.",
+    humanLosesStreakBanner: "Final Score: {streak}.",
     gameOver: "Game Over!",
     moveAgain: "Move again!",
     repeatForbidden: "That move would repeat a previous position. Choose another move.",
-    chainMoveAgain: "Chain move. This piece must move again",
-    noMovesAvailable: "Piece on {label}. No moves available.",
-    forbiddenByNovelty: "Piece on {label}. All {blocked} slides forbidden.",
+    chainMoveAgain: "Move again.",
+    noMovesAvailable: "No moves available.",
+    forbiddenByNovelty: "All {blocked} slides forbidden.",
     legalMoves: "{prefix}Piece on {label}. {free} legal move{plural}{suffix}.",
     chainMovePrefix: "Chain move. ",
     forbiddenSuffix: " ({blocked} forbidden)",
     haltedEnemies: "Halted. {n} enemy piece{plural} spotted.",
     chainNoEnemies: "Chain Move: no enemies spotted, move again.",
-    noLegalMovesPass: "Player {passedFrom} has no legal moves! Turn automatically passes.",
+    noLegalMovesPass: "Player {passedFrom} has no legal moves! Turn passes.",
     victoryOverlayTitle: "Victory!",
     victoryLevelComplete: "Level {humanStreak} Complete!",
     nextRound: "Next Round",
@@ -532,7 +532,7 @@ const translations = {
     bestScore: "Best Score: <strong>{highScore}</strong>",
     share: "↪\uFE0E Share the Game",
     supportLink: "♥\uFE0E Support the Game",
-    shareLink: "↪\uFE0E Share the Game",
+    shareLink: "↪\uFE0E Share",
     linkCopied: "Link copied to clipboard!",
     tutorialNext: "Next >",
     tutorialPrev: "< Prev",
@@ -546,12 +546,12 @@ const translations = {
    ]
   },
   PT: {
-    newGame: "Computador",
+    newGame: "Vs Máquina",
     practice: "Modo Solo",
     tutorial: "Como Jogar",
     language: "English",
-    level: "Nível",
-    best: "Melhor",
+    level: "Nível⠀",
+    best: "Melhor⠀",
     playerYou: "Sua Vez",
     computer: "Computador Joga",
     player1: "Jogador 1",
@@ -562,7 +562,7 @@ const translations = {
     thinking: "Computador pensando…",
     playerWins: "Jogador {winner} venceu.",
     playerWinsBanner: "Jogador {winner} venceu.",
-    humanWinsStreakBanner: "Você venceu {streak} partida{plural}.",
+    humanWinsStreakBanner: "Pontuação Final: {streak}.",
     humanLosesStreakBanner: "Fim de jogo. Você venceu {streak} partida{plural}.",
     gameOver: "Fim de Jogo!",
     moveAgain: "Mova novamente.",
@@ -1897,7 +1897,7 @@ function updateMetaDisplay() {
     statsBarEl.classList.remove('hidden');
     
     if (window.achievedNewBest) {
-      statLvlLabel.textContent = currentLang === 'PT' ? "★\uFE0E Nível" : "★\uFE0E Level";
+      statLvlLabel.textContent = currentLang === 'PT' ? "★\uFE0E Nível " : "★\uFE0E Level ";
     } else {
       statLvlLabel.textContent = t('level');
     }
