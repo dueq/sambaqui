@@ -6,7 +6,8 @@
 <title>Sambaqui</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Macondo:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Molle:ital@1&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols+2:wght@700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" href="./favicon.png">
@@ -16,8 +17,8 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --sand:       #e8dcc8;
-    --sand2:      #d2c0a0;
+    --sand:       #b9a788;
+    --sand2:      #b8a789eb;
     --sand3:      #988a6c;
     --dark:       #1c1510;
     --mid:        #6c623e;
@@ -62,15 +63,14 @@ body {
   /* ── Header ── */
   header { text-align: center; }
   h1 {
-    font-size: clamp(2.2rem, 12vw, 4.6rem);
-    letter-spacing: 0.06em; color: var(--gold);
-    text-shadow: 0 0 40px rgba(196,154,68,0.3); line-height: 1;
-    font-family: 'Macondo';
+    font-size: clamp(2.2rem, 12vw, 4.5rem);
+    letter-spacing: 0.02em; color: var(--sand3); line-height: 0.8;
+    font-family: 'Molle';  font-family: "Molle", cursive; font-weight: 300; font-style: italic;
   }
 
   /* ── Stats Bar ── */
   .stats-bar {
-    font-family: 'Macondo';
+    font-family: 'Lato';
     display: flex; gap: 2rem; font-size: clamp(1rem, 1rem);
     letter-spacing: 0.1em; background: rgba(0,0,0,0.2);
     padding: 0.4rem 1.2rem; border-radius: 20px; border: 2px solid rgba(211, 105, 23, 0.3);
@@ -78,7 +78,7 @@ body {
   .stats-bar strong { color: var(--gold); }
   
   /* ── Mode & Help toggles ── */
-  .menu-controls { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; }
+  .menu-controls { scale:1.1; font-size: 2rem; display: flex; flex-direction: column; align-items: center; gap: 0.6rem; }
   .mode-bar {
     display: flex; align-items: center; gap: 0.8rem;
     font-size: clamp(0.65rem, 1.8vw, 0.78rem); letter-spacing: 0.12em; color: var(--sand3);
@@ -101,7 +101,7 @@ body {
   .help-btn:hover { background: rgba(196,154,68,0.15); border-color: var(--gold); color: var(--gold); }
 
   /* ── Turn bar ── */
-  .turn-bar { display: flex; align-items: center; gap: 1.4rem; font-size: clamp(0.7rem, 2vw, 0.85rem); letter-spacing: 0.15em; }
+  .turn-bar { display: flex; align-items: center; gap: 1.4rem; font-size: clamp(0.7rem, 2vw, 1rem); letter-spacing: 0.15em; }
   .player-tag { display: flex; align-items: center; gap: 0.5rem; opacity: 0.35; transition: opacity 0.3s; }
   .player-tag.active { opacity: 1; }
   .player-tag .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; }
@@ -134,7 +134,7 @@ body {
 
   /* ── Status bar ── */
   .status {
-    font-size: clamp(0.65rem, 1.8vw, 0.78rem); letter-spacing: 0.12em;
+    font-size: clamp(1rem, 1.8vw, 0.78rem); letter-spacing: 0.12em;
     color: var(--sand3); min-height: 1.2em; text-align: center; transition: color 0.2s;
   }
   .status.highlight { color: var(--gold); }
@@ -160,21 +160,21 @@ body {
   .hidden { display: none !important; }
  
   .nav-btn {
-    background: var(--mid); border: 1px solid var(--accent); color: var(--gold);
-    border-radius: 4px; width: 35px; height: 35px;
+    background: var(--mid); border: 1px solid var(--accent); color: var(--sand2);
+    border-radius: 6px; width: 35px; height: 35px;
     display: flex; align-items: center; justify-content: center;
     font-size: 0.72rem; cursor: pointer; transition: all 0.2s;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    box-shadow: 0 2px 6px rgba(71, 42, 2, 0.722);
   }
   .nav-btn:hover:not(:disabled) { background: var(--accent); border-color: var(--gold); color: #fff; }
-  .nav-btn:disabled { opacity: 0.15; cursor: not-allowed; box-shadow: none; }
+  .nav-btn:disabled { opacity: 1; cursor: not-allowed; box-shadow: none; }
 
   /* ── Result banner ── */
   .result-banner {
     display: flex; align-items: center; justify-content: center; gap: 1.2rem;
     border: 1px solid var(--accent); border-radius: 6px;
     background: rgba(28,21,16,0.85); padding: 0.55rem 1.2rem;
-    font-size: clamp(0.7rem, 1.8vw, 0.85rem); letter-spacing: 0.15em;
+    font-size: clamp(1rem, 1.8vw, 0.85rem); letter-spacing: 0.15em;
     color: var(--gold); animation: fade-in 0.4s ease;
     width: 100%;
     max-width: calc(var(--cell-size) * 5 + var(--gap) * 4 + clamp(20px, 4vw, 36px) + 4px);
@@ -230,7 +230,7 @@ body {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
     font-size: clamp(28px, 6vw, 28px); color: rgba(233, 212, 169, 0.593);
     pointer-events: none; user-select: none; line-height: 1;
-   font-family: -apple-system, BlinkMacSystemFont,"Apple Symbols", "Noto Sans Symbols", sans-serif;
+   font-family: -apple-system, BlinkMacSystemFont,"Apple Symbols", "Google Sans", sans-serif;
     font-weight: 600; /* Crisp and thick enough on all mobile screens without being overly bold */ }
   .arrow-hint.blocked { color: rgba(180,80,40,0.45); font-size: clamp(13px, 2.4vw, 17px); }
 
@@ -344,12 +344,12 @@ body {
 
   /* ── Enhanced Footer ── */
   footer {
-    font-size: 0.72rem; letter-spacing: 0.15em; color: var(--sand3);
+    font-size: 0.8rem; letter-spacing: 0.15em; color: var(--sand3);
     text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
     margin-top: 1rem; text-align: center;
   }
-  footer .author { opacity: 0.5; font-size: 0.65rem; letter-spacing: 0.2em; }
-  footer .links { display: flex; align-items: center; gap: 1rem; }
+  footer .author { opacity: 0.5; font-size: 0.8rem; letter-spacing: 0.2em; line-height: 0.01rem}
+  footer .links { display: flex; align-items: center; gap: 1rem; line-height: 0.01rem }
   footer .links a, footer .links span {
     color: var(--gold); text-decoration: none; cursor: pointer;
     transition: color 0.2s, opacity 0.2s; font-weight: bold;
@@ -453,7 +453,7 @@ let currentLang = localStorage.getItem('sambaqui_lang') || 'PT';
 
 const translations = {
   EN: {
-    newGame: "vs Machine",
+    newGame: "Vs Machine",
     practice: "Solo Mode",
     tutorial: "How to Play",
     language: "Português",
@@ -505,7 +505,7 @@ const translations = {
    ]
   },
   PT: {
-    newGame: "vs Máquina",
+    newGame: "Vs Máquina",
     practice: "Modo Solo",
     tutorial: "Como Jogar",
     language: "English",
@@ -519,8 +519,8 @@ const translations = {
     calculating: "Computador calculando movimentos…",
     calculatingOpening: "Computador calculando jogadas de abertura…",
     thinking: "Computador pensando…",
-    playerWins: "Jogador {winner} venceu!",
-    playerWinsBanner: "Jogador {winner} venceu",
+    playerWins: "Jogador {winner} venceu.",
+    playerWinsBanner: "Jogador {winner} venceu.",
     humanWinsStreakBanner: "Você venceu {streak} partida{plural}.",
     humanLosesStreakBanner: "Fim de jogo. Você venceu {streak} partida{plural}.",
     gameOver: "Fim de Jogo!",
@@ -1525,7 +1525,7 @@ function launchTutorial(onCloseCallback) {
       <div class="tutorial-header">
         <div class="tutorial-title-area">
           <span class="tutorial-title" id="tut-title"></span>
-          <button class="tutorial-lang-btn" id="tut-lang-toggle">PT</button>
+          <button class="tutorial-lang-btn" id="tut-lang-toggle"></button>
         </div>
         <span class="tutorial-pages" id="tut-page-indicator"></span>
       </div>
