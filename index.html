@@ -23,6 +23,7 @@
     --dark:       #1c1510;
     --mid:        #6c623e;
     --accent:     #7a4f2e;
+    --accent2:    rgba(72, 49, 2, 0.646);
     --gold:       #c49a44;
     --teal:       #7ab8c0;
     --cell-size:  clamp(60px, 12vw, 90px);
@@ -46,25 +47,41 @@ body {
     cursor: pointer !important;
   }
 
-  /* ── Header ── */
+/* ── Header ── */
   header { text-align: center; }
   h1 {
     font-size: clamp(2.2rem, 12vw, 4.5rem);
     letter-spacing: 0.02em; color: var(--sand3); line-height: 0.8;
-     font-family: "Molle", cursive; font-weight: 300; font-style: italic;
+    font-family: "Molle", cursive; font-weight: 300; font-style: italic;
+    cursor: pointer; /* Makes it clear the title is clickable */
+    user-select: none; /* Prevents accidentally highlighting the text */
+    transition: color 0.2s;
+  }
+  h1:hover {
+    color: var(--gold); /* Adds a subtle hover effect */
+  }
+
+  /* ── Mode & Help toggles ── */
+  .menu-controls { 
+    scale: 1.1; font-size: 2rem; 
+    display: none; /* Hidden by default */
+    flex-direction: column; align-items: center; gap: 0.6rem;
+  }
+  .menu-controls.visible {
+    display: flex; /* Applied by JavaScript to reveal the menu */
   }
 
   /* ── Stats Bar ── */
   .stats-bar {
     font-family: 'Lato'; scale:1.15;
     display: flex; gap: 2.3rem; font-size: 1rem; line-height: 1.2;
-    letter-spacing: 0.1em; background: rgba(72, 49, 2, 0.646);
-    padding: 0.4rem 1.2rem; border-radius: 40px; border: 1px solid rgba(199, 131, 3, 0.3);
+    letter-spacing: 0.1em; background: var(--accent2);
+    padding: 0.4rem 1.2rem; border-radius: 40px; border: 1px solid rgba(199, 131, 3, 0.3); 
+    box-shadow: inset 0 1px 4px rgba(0,0,0,0.3);
   }
   .stats-bar strong { color: var(--gold);      font-family: "Molle", cursive; font-weight: 300; font-style: italic;}
   
   /* ── Mode & Help toggles ── */
-  .menu-controls { scale:1.1; font-size: 2rem; display: flex; flex-direction: column; align-items: center; gap: 0.6rem;}
   .mode-bar {
     display: flex; align-items: center; gap: 0.8rem;
     font-size: clamp(0.65rem, 1.8vw, 0.78rem); letter-spacing: 0.12em; color: var(--sand3);
@@ -163,7 +180,7 @@ body {
     scrollbar-width: none;
     -ms-overflow-style: none;
     height: 40px;
-    border: 2px solid rgba(122, 79, 46, 0.765); border-radius: 20px;
+    border: 1px solid rgba(122, 79, 46, 0.765); border-radius: 20px;
     box-shadow: inset 0 1px 4px rgba(0,0,0,0.3);
     background: rgba(72, 49, 2, 0.646);
     min-width: 0;
@@ -175,7 +192,7 @@ body {
   }
   .move-log-entry {
     display: flex; align-items: center; gap: 0.22rem;
-    font-size: 1.1rem; letter-spacing: 0.08em; color: var(--sand);
+    font-size: 1rem; letter-spacing: 0.08em; color: var(--sand);
     white-space: nowrap; flex-shrink: 0;
     padding: 0.5rem 0.4rem; border-radius: 0px;
     transition: opacity 0.2s;
@@ -219,7 +236,7 @@ body {
   /* ── Cells ── */
   .cell {
     width: var(--cell-size); height: var(--cell-size);
-    background-color: var(--sand2);
+    background-color: var(--sand);
     background-image:
       radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.18) 0%, transparent 60%),
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='40' height='40' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
@@ -362,6 +379,56 @@ body {
   .tut-nav:hover:not(:disabled) { border-color: var(--sand3); color: #fff; }
   .tut-nav:disabled { opacity: 0.2; cursor: not-allowed; }
 
+  /* ── Custom Game Mode ── */
+  .custom-toolbar {
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    padding: 0.55rem 1.1rem; border: 1px solid var(--gold);
+    border-radius: 6px; background: var(--accent2);
+    width: 100%;
+    max-width: calc(var(--cell-size) * 5 + var(--gap) * 4 + clamp(20px, 4vw, 36px) + 4px);
+  }
+  .custom-phase-label {
+    font-size: clamp(0.62rem, 1.7vw, 0.76rem); letter-spacing: 0.13em;
+    color: var(--sand2); text-align: center;
+  }
+  .custom-phase-label strong { color: var(--gold); }
+  .custom-phase-dots {
+    display: flex; gap: 0.5rem; align-items: center;
+  }
+  .custom-phase-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent2); border: 1px solid var(--sand);
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .custom-phase-dot.filled-p1 { background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90); border-color: rgba(196,154,68,0.5); }
+  .custom-phase-dot.filled-p2 { background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05); border-color: rgba(184,169,138,0.3); }
+  .custom-phase-dot.active-step { border-color: var(--sand); box-shadow: 0 0 5px rgba(122,184,192,0.5); }
+  .custom-actions {
+    display: flex; gap: 0.6rem;
+  }
+  .custom-action-btn {
+    background: transparent; border: 1px solid rgba(122,184,192,0.4);
+    border-radius: 4px; color: var(--teal);
+    padding: 0.25rem 0.75rem; cursor: pointer;
+    font-family: 'Lato', serif; font-size: clamp(0.6rem, 1.6vw, 0.72rem); letter-spacing: 0.1em;
+    transition: all 0.2s;
+  }
+  .custom-action-btn:hover { background: rgba(122,184,192,0.1); border-color: var(--gold); }
+  .custom-action-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .custom-action-btn.primary { border-color: var(--gold); color: var(--gold); }
+  .custom-action-btn.primary:hover { background: rgba(196,154,68,0.12); }
+  .custom-action-btn.danger { border-color: rgba(192,112,74,0.5); color: #c0704a; }
+  .custom-action-btn.danger:hover { background: rgba(192,112,74,0.1); }
+
+  /* cell states in custom placement mode */
+  .cell.custom-place-p1:hover { border-color: rgba(240,220,180,0.8); background-color: rgba(240,220,180,0.15); cursor: pointer; }
+  .cell.custom-place-p2:hover { border-color: rgba(184,169,138,0.6); background-color: rgba(90,62,40,0.25); cursor: pointer; }
+  .cell.custom-select-last:hover { border-color: var(--teal); background-color: rgba(122,184,192,0.12); cursor: pointer; }
+  .cell.custom-occupied-p1 { cursor: pointer; }
+  .cell.custom-occupied-p2 { cursor: pointer; }
+  .cell.custom-last-candidate { border-color: rgba(122,184,192,0.5) !important; box-shadow: inset 0 0 0 1px rgba(122,184,192,0.3); }
+  .cell.custom-last-selected { border-color: var(--teal) !important; box-shadow: inset 0 0 0 2px rgba(122,184,192,0.5); }
+
   /* ── Legend ── */
   .legend { display: flex; gap: 2rem; font-size: 0.75rem; font-weight: 300; letter-spacing: 0.1em; color: var(--sand3); }
   .legend-item { display: flex; align-items: center; gap: 0.5rem; }
@@ -398,8 +465,9 @@ body {
 
 <div class="menu-controls">
   <div class="mode-bar">
-    <button class="mode-btn" id="mode-toggle">Treinar</button>
     <button class="mode-btn" id="open-tutorial-btn">Como Jogar</button>
+        <button class="mode-btn" id="mode-toggle">Treinar</button>
+    <button class="mode-btn" id="custom-mode-btn">Custom</button>
     <button class="mode-btn"        id="lang-toggle-btn">EN</button>
   </div>
 </div>
@@ -408,6 +476,16 @@ body {
     <button id="undo-btn" class="nav-btn" title="Undo" disabled>◀</button>
     <div class="move-log" id="move-log"></div>
     <button id="redo-btn" class="nav-btn" title="Redo" disabled>▶</button>
+  </div>
+
+  <div class="custom-toolbar hidden" id="custom-toolbar">
+    <div class="custom-phase-label" id="custom-phase-label"></div>
+    <div class="custom-phase-dots" id="custom-phase-dots"></div>
+    <div class="custom-actions">
+      <button class="custom-action-btn danger" id="custom-undo-btn">Undo</button>
+      <button class="custom-action-btn danger" id="custom-clear-btn">Clear</button>
+      <button class="custom-action-btn primary hidden" id="custom-play-btn">▶ Play</button>
+    </div>
   </div>
 
 <div class="stats-bar" id="stats-bar">
@@ -432,7 +510,7 @@ body {
   </div>
 </div>
 
-  <div class="status" id="status">Selecione uma peça ativa para mover</div>
+  <div class="status" id="status">Selecione uma peça ativa para mover.</div>
 
 
 
@@ -449,12 +527,24 @@ body {
 
 
 <div class="author">
-  Sambaqui • v1.2.8 • © 2026 Eduardo Eller
+  Sambaqui • v1.2.9 • © 2026 Eduardo Eller
 </div>
 </footer>
 
 <script>
+
 'use strict';
+
+// Elements
+const gameTitle = document.querySelector('h1');
+const menuControls = document.querySelector('.menu-controls');
+
+// Toggle menu visibility when clicking the title
+gameTitle.addEventListener('click', () => {
+  menuControls.classList.toggle('visible');
+});
+
+
 
 // ═══════════════════════════════════════════════════════════════
 //  SECTION 1 — CONSTANTS, COORDINATE HELPERS & LOCALIZATION
@@ -483,7 +573,7 @@ let currentLang = localStorage.getItem('sambaqui_lang') || 'PT';
 const translations = {
   EN: {
     newGame: "Computer",
-    practice: "Solo Mode",
+    practice: "Free Play",
     tutorial: "How to Play",
     language: "Português",
     level: "Level⠀",
@@ -498,8 +588,8 @@ const translations = {
     thinking: "Computer is thinking…",
     playerWins: "Player {winner} wins!",
     playerWinsBanner: "Player {winner} wins",
-    humanWinsStreakBanner: "You won {streak} round{plural}.",
-    humanLosesStreakBanner: "Final Score: {streak}.",
+    humanWinsStreakBanner: "You won {streak} round{plural}",
+    humanLosesStreakBanner: "Final Score: {streak}",
     gameOver: "Game Over!",
     moveAgain: "Move again!",
     repeatForbidden: "That move would repeat a previous position. Choose another move.",
@@ -510,7 +600,7 @@ const translations = {
     chainMovePrefix: "Chain move. ",
     forbiddenSuffix: " ({blocked} forbidden)",
     haltedEnemies: "Halted. {n} enemy piece{plural} spotted.",
-    chainNoEnemies: "Chain Move: no enemies spotted, move again.",
+    chainNoEnemies: "Move again.",
     noLegalMovesPass: "Player {passedFrom} has no legal moves! Turn passes.",
     victoryOverlayTitle: "Victory!",
     victoryLevelComplete: "Level {humanStreak} Complete!",
@@ -535,7 +625,7 @@ const translations = {
   },
   PT: {
     newGame: "Computador",
-    practice: "Modo Solo",
+    practice: "Jogo Livre",
     tutorial: "Como Jogar",
     language: "English",
     level: "Nível⠀",
@@ -550,11 +640,11 @@ const translations = {
     thinking: "Computador pensando…",
     playerWins: "Jogador {winner} venceu.",
     playerWinsBanner: "Jogador {winner} venceu.",
-    humanWinsStreakBanner: "Pontuação: {streak}.",
-    humanLosesStreakBanner: "Pontuação Final: {streak}.",
+    humanWinsStreakBanner: "Pontuação: {streak}",
+    humanLosesStreakBanner: "Pontuação Final: {streak}",
     gameOver: "Fim de Jogo!",
     moveAgain: "Mova novamente.",
-    repeatForbidden: "Esse movimento repetiria uma posição anterior. Escolha outro.",
+    repeatForbidden: "Esse movimento repetiria uma posição anterior.",
     chainMoveAgain: "Movimento em cadeia. Esta peça deve ser movida novamente.",
     noMovesAvailable: "Peça em {label}. sem movimentos disponíveis.",
     forbiddenByNovelty: "Peça em {label}. Todos os {blocked} deslizamentos proibidos pela Regra da Novidade",
@@ -562,7 +652,7 @@ const translations = {
     chainMovePrefix: "Movimento em cadeia. ",
     forbiddenSuffix: " ({blocked} proibido)",
     haltedEnemies: "Parado. {n} peça{plural} inimiga{plural} à vista.",
-    chainNoEnemies: "Movimento em cadeia: nenhum inimigo avistado, mova novamente.",
+    chainNoEnemies: "Mova novamente.",
     noLegalMovesPass: "Jogador {passedFrom} não tem movimentos válidos.",
     victoryOverlayTitle: "Vitória!",
     victoryLevelComplete: "Nível {humanStreak} Concluído.",
@@ -934,6 +1024,15 @@ const footerSupportLink = document.getElementById('footer-support-link');
 const footerShareLink = document.getElementById('footer-share-link');
 const toastMsgEl = document.getElementById('toast-msg');
 
+// Custom Game Mode elements
+const customModeBtn = document.getElementById('custom-mode-btn');
+const customToolbar = document.getElementById('custom-toolbar');
+const customPhaseLabel = document.getElementById('custom-phase-label');
+const customPhaseDots = document.getElementById('custom-phase-dots');
+const customUndoBtn = document.getElementById('custom-undo-btn');
+const customClearBtn = document.getElementById('custom-clear-btn');
+const customPlayBtn = document.getElementById('custom-play-btn');
+
 const cellEls = {};
 
 for (let r = 0; r < 5; r++) {
@@ -1048,6 +1147,12 @@ function renderMoveLog() {
 //  SECTION 5 — INTERACTION RULES
 // ═══════════════════════════════════════════════════════════════
 function handleSquareClick(label) {
+  // Custom game setup mode takes over all board clicks
+  if (customMode && customMode !== 'ready') {
+    handleCustomClick(label);
+    return;
+  }
+
   if (state.gameOver || state.animating) return;
   if (vsAI && state.currentPlayer !== humanPlayerColor) return;
   if (window.isWaitingForContinue) return;
@@ -1720,6 +1825,402 @@ function launchTutorial(onCloseCallback) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+//  SECTION 11b — CUSTOM GAME MODE
+// ═══════════════════════════════════════════════════════════════
+
+// customMode: false | 'place-p1' | 'place-p2' | 'select-last' | 'ready'
+let customMode = false;
+
+// custom placement state
+const customSetup = {
+  pieces: {},       // label → { player }  (no active flag yet)
+  lastMoved: null,  // label of "last moved" piece
+};
+
+const MAX_PIECES_PER_PLAYER = 4;
+
+function enterCustomMode() {
+  if (state.animating) return;
+  customMode = 'place-p1';
+  customSetup.pieces = {};
+  customSetup.lastMoved = null;
+
+  // Pause regular game
+  vsAI = false;   // disable AI interference while setting up
+  window.isWaitingForContinue = false;
+  document.body.classList.remove('clickable-restart');
+  clearResultBanner();
+
+  // UI changes
+  customModeBtn.classList.add('active');
+  modeToggleBtn.classList.remove('active');
+  customToolbar.classList.remove('hidden');
+  navControls.classList.add('hidden');
+  statsBarEl.classList.add('hidden');
+  customPlayBtn.classList.add('hidden');
+
+  updateCustomPhaseUI();
+  renderCustomBoard();
+  setStatus(currentLang === 'PT'
+    ? 'Modo Custom: coloque 4 peças brancas no tabuleiro.'
+    : 'Custom Mode: place 4 white pieces on the board.', 'sneaking');
+}
+
+function exitCustomMode() {
+  customMode = false;
+  customSetup.pieces = {};
+  customSetup.lastMoved = null;
+
+  customModeBtn.classList.remove('active');
+  customToolbar.classList.add('hidden');
+  customPlayBtn.classList.add('hidden');
+
+  // Return to whatever mode was active, reset the game
+  restartGame(true);
+}
+
+function countCustomPieces(player) {
+  return Object.values(customSetup.pieces).filter(p => p.player === player).length;
+}
+
+function updateCustomPhaseUI() {
+  // Phase label
+  const p1Count = countCustomPieces(1);
+  const p2Count = countCustomPieces(2);
+
+  let labelHTML = '';
+  if (customMode === 'place-p1') {
+    const need = MAX_PIECES_PER_PLAYER - p1Count;
+    labelHTML = '';
+  }
+  customPhaseLabel.innerHTML = labelHTML;
+
+  // Phase dots: 8 slots (4 white, 4 black), then a star for last-moved marker
+  customPhaseDots.innerHTML = '';
+  for (let i = 0; i < MAX_PIECES_PER_PLAYER; i++) {
+    const dot = document.createElement('div');
+    const filled = i < p1Count;
+    dot.className = 'custom-phase-dot' + (filled ? ' filled-p1' : '');
+    if (!filled && customMode === 'place-p1') dot.classList.add('active-step');
+    customPhaseDots.appendChild(dot);
+  }
+  // small divider
+  const sep = document.createElement('div');
+  sep.style.cssText = 'width:1px;height:10px;background:rgba(122,184,192,0.25);flex-shrink:0;';
+  customPhaseDots.appendChild(sep);
+  for (let i = 0; i < MAX_PIECES_PER_PLAYER; i++) {
+    const dot = document.createElement('div');
+    const filled = i < p2Count;
+    dot.className = 'custom-phase-dot' + (filled ? ' filled-p2' : '');
+    if (!filled && customMode === 'place-p2') dot.classList.add('active-step');
+    customPhaseDots.appendChild(dot);
+  }
+
+  // Show/hide Play button
+  if (customMode === 'ready') {
+    customPlayBtn.classList.remove('hidden');
+    customPlayBtn.textContent = currentLang === 'PT' ? '▶ Jogar' : '▶ Play';
+  } else {
+    customPlayBtn.classList.add('hidden');
+  }
+}
+
+function renderCustomBoard() {
+  for (const label of LABELS) {
+    const cell = cellEls[label];
+    const piece = customSetup.pieces[label];
+
+    // reset classes
+    cell.className = 'cell' + (((labelToRC(label)[0] + labelToRC(label)[1]) % 2 === 1) ? ' dark-sq' : '');
+    cell.innerHTML = '';
+
+    // Always show coordinate labels in custom mode
+    const coord = document.createElement('div');
+    coord.className = 'cell-label';
+    coord.textContent = label;
+    cell.appendChild(coord);
+
+    if (customMode === 'place-p1' || customMode === 'place-p2') {
+      if (piece) {
+        const el = document.createElement('div');
+        el.className = `piece p${piece.player} active-piece`;
+        cell.classList.add('selectable');
+        cell.appendChild(el);
+      } else {
+        if (customMode === 'place-p1' && countCustomPieces(1) < MAX_PIECES_PER_PLAYER) {
+          cell.classList.add('custom-place-p1', 'selectable');
+        } else if (customMode === 'place-p2' && countCustomPieces(2) < MAX_PIECES_PER_PLAYER) {
+          cell.classList.add('custom-place-p2', 'selectable');
+        }
+      }
+    } else if (customMode === 'select-last' || customMode === 'ready') {
+      if (piece) {
+        const el = document.createElement('div');
+        const isLastSelected = customSetup.lastMoved === label;
+        if (isLastSelected) {
+          el.className = `piece p${piece.player} selected-piece`;
+          cell.classList.add('custom-last-selected');
+        } else {
+          el.className = `piece p${piece.player} active-piece`;
+          cell.classList.add('custom-last-candidate', 'selectable', 'custom-select-last');
+        }
+        cell.appendChild(el);
+      }
+    }
+  }
+}
+
+function handleCustomClick(label) {
+  if (!customMode) return;
+
+  // In 'ready' state, allow re-clicking any piece to change the last-moved selection
+  if (customMode === 'ready') {
+    const piece = customSetup.pieces[label];
+    if (!piece) return;
+    customSetup.lastMoved = label;
+    updateCustomPhaseUI();
+    renderCustomBoard();
+    const owner = piece.player === 1 ? (currentLang === 'PT' ? 'branca' : 'white') : (currentLang === 'PT' ? 'preta' : 'black');
+    setStatus(currentLang === 'PT'
+      ? `Peça ${owner} em ${label} jogou por último. Pronto!`
+      : `${owner.charAt(0).toUpperCase() + owner.slice(1)} piece on ${label} moved last. Ready!`, true);
+    return;
+  }
+
+  const piece = customSetup.pieces[label];
+
+  if (customMode === 'place-p1') {
+    if (piece) {
+      // Remove piece (only own-color pieces)
+      if (piece.player === 1) {
+        delete customSetup.pieces[label];
+        updateCustomPhaseUI();
+        renderCustomBoard();
+        setStatus(currentLang === 'PT'
+          ? `Peça removida de ${label}.`
+          : `Piece removed from ${label}.`, 'sneaking');
+      }
+      return;
+    }
+    // Place white piece
+    customSetup.pieces[label] = { player: 1 };
+    const count = countCustomPieces(1);
+    if (count === MAX_PIECES_PER_PLAYER) {
+      customMode = 'place-p2';
+      setStatus(currentLang === 'PT'
+        ? 'Agora coloque 4 peças pretas.'
+        : 'Now place 4 black pieces.', 'sneaking');
+    } else {
+      const need = MAX_PIECES_PER_PLAYER - count;
+      setStatus(currentLang === 'PT'
+        ? `${need} peça${need !== 1 ? 's' : ''} branca${need !== 1 ? 's' : ''} restante${need !== 1 ? 's' : ''}.`
+        : `${need} white piece${need !== 1 ? 's' : ''} remaining.`, 'sneaking');
+    }
+    updateCustomPhaseUI();
+    renderCustomBoard();
+
+  } else if (customMode === 'place-p2') {
+    if (piece) {
+      // Allow removing placed pieces (either color for flexibility)
+      if (piece.player === 2) {
+        delete customSetup.pieces[label];
+        updateCustomPhaseUI();
+        renderCustomBoard();
+        setStatus(currentLang === 'PT'
+          ? `Peça removida de ${label}.`
+          : `Piece removed from ${label}.`, 'sneaking');
+      } else if (piece.player === 1) {
+        // clicking a white piece while placing black — go back to removing it
+        delete customSetup.pieces[label];
+        customMode = 'place-p1';
+        updateCustomPhaseUI();
+        renderCustomBoard();
+        setStatus(currentLang === 'PT'
+          ? 'Voltou para colocação de peças brancas.'
+          : 'Back to placing white pieces.', 'sneaking');
+      }
+      return;
+    }
+    // Place black piece
+    customSetup.pieces[label] = { player: 2 };
+    const count = countCustomPieces(2);
+    if (count === MAX_PIECES_PER_PLAYER) {
+      customMode = 'select-last';
+      setStatus(currentLang === 'PT'
+        ? 'Clique na peça que jogou por último para definir atividade.'
+        : 'Click the last moved piece to define which pieces are active.', 'sneaking');
+    } else {
+      const need = MAX_PIECES_PER_PLAYER - count;
+      setStatus(currentLang === 'PT'
+        ? `${need} peça${need !== 1 ? 's' : ''} preta${need !== 1 ? 's' : ''} restante${need !== 1 ? 's' : ''}.`
+        : `${need} black piece${need !== 1 ? 's' : ''} remaining.`, 'sneaking');
+    }
+    updateCustomPhaseUI();
+    renderCustomBoard();
+
+  } else if (customMode === 'select-last') {
+    if (!piece) return;
+    customSetup.lastMoved = label;
+    customMode = 'ready';
+    updateCustomPhaseUI();
+    renderCustomBoard();
+    const owner = piece.player === 1 ? (currentLang === 'PT' ? 'branca' : 'white') : (currentLang === 'PT' ? 'preta' : 'black');
+    setStatus(currentLang === 'PT'
+      ? `Peça ${owner} em ${label} jogou por último. Pronto!`
+      : `${owner.charAt(0).toUpperCase() + owner.slice(1)} piece on ${label} moved last. Ready!`, true);
+  }
+}
+
+function customUndoPlacement() {
+  if (!customMode || customMode === 'ready') return;
+
+  // Find last placed piece and remove it
+  const labels = LABELS.split('').filter ? [...LABELS].filter(l => customSetup.pieces[l]) : [];
+  // LABELS is a string of 25 chars, iterate in reverse order of board
+  let lastPlaced = null;
+  if (customMode === 'place-p1' || customMode === 'place-p2') {
+    // Find last placed piece of current color phase
+    const targetPlayer = customMode === 'place-p1' ? 1 : 2;
+    for (const lbl of LABELS) {
+      if (customSetup.pieces[lbl] && customSetup.pieces[lbl].player === targetPlayer) {
+        lastPlaced = lbl;
+      }
+    }
+    if (lastPlaced) {
+      delete customSetup.pieces[lastPlaced];
+    } else if (customMode === 'place-p2') {
+      // Undo back to place-p1 phase
+      customMode = 'place-p1';
+      // remove last white piece
+      for (const lbl of LABELS) {
+        if (customSetup.pieces[lbl] && customSetup.pieces[lbl].player === 1) lastPlaced = lbl;
+      }
+      if (lastPlaced) delete customSetup.pieces[lastPlaced];
+    }
+  } else if (customMode === 'select-last') {
+    // Go back to placing black pieces — remove last black piece
+    customMode = 'place-p2';
+    for (const lbl of LABELS) {
+      if (customSetup.pieces[lbl] && customSetup.pieces[lbl].player === 2) lastPlaced = lbl;
+    }
+    if (lastPlaced) delete customSetup.pieces[lastPlaced];
+  }
+
+  updateCustomPhaseUI();
+  renderCustomBoard();
+  const phaseMsg = customMode === 'place-p1'
+    ? (currentLang === 'PT' ? 'Colocando peças brancas.' : 'Placing white pieces.')
+    : customMode === 'place-p2'
+      ? (currentLang === 'PT' ? 'Colocando peças pretas.' : 'Placing black pieces.')
+      : (currentLang === 'PT' ? 'Selecione a última peça movida.' : 'Select the last moved piece.');
+  setStatus(phaseMsg, 'sneaking');
+}
+
+function commitCustomPosition() {
+  // Build the pieces object with correct active flags based on LOS from lastMoved piece
+  if (!customSetup.lastMoved || !customSetup.pieces[customSetup.lastMoved]) return;
+
+  const rawPieces = customSetup.pieces;
+  const lastMovedLabel = customSetup.lastMoved;
+  const lastMovedPlayer = rawPieces[lastMovedLabel].player;
+  const opponent = lastMovedPlayer === 1 ? 2 : 1;
+
+  // Build pieces dict with all inactive first
+  const builtPieces = {};
+  for (const [lbl, p] of Object.entries(rawPieces)) {
+    builtPieces[lbl] = { player: p.player, active: false };
+  }
+
+  // Simulate post-move state: what happens after lastMovedPlayer moved to lastMovedLabel?
+  // Compute visible moveable enemies from that landing square
+  const visibleEnemies = computeVisibleMoveableEnemies(lastMovedLabel, builtPieces, lastMovedPlayer);
+
+  let nextPlayer;
+  if (visibleEnemies.length > 0) {
+    // Normal case: enemies wake up, turn passes
+    for (const sq of visibleEnemies) {
+      builtPieces[sq] = { ...builtPieces[sq], active: true };
+    }
+    nextPlayer = opponent;
+  } else {
+    // Chain move: the piece that moved stays active, same player moves again
+    builtPieces[lastMovedLabel] = { ...builtPieces[lastMovedLabel], active: true };
+    nextPlayer = lastMovedPlayer;
+  }
+
+  // Exit custom mode, set up game state
+  customMode = false;
+  customModeBtn.classList.remove('active');
+  customToolbar.classList.add('hidden');
+  customPlayBtn.classList.add('hidden');
+
+  // Reset the game state with the custom position
+  window.isWaitingForContinue = false;
+  document.body.classList.remove('clickable-restart');
+  document.querySelector('.victory-overlay')?.remove();
+  clearResultBanner();
+
+  vsAI = false;  // custom positions play as 2-player (no AI) by default
+  modeToggleBtn.textContent = t('newGame');
+  humanStreak = 0;
+
+  Object.assign(state, {
+    currentPlayer: nextPlayer,
+    selectedSquare: null,
+    currentMoves: [],
+    gameOver: false,
+    winLine: null,
+    sneaking: visibleEnemies.length === 0,
+    sneakingSquare: visibleEnemies.length === 0 ? lastMovedLabel : null,
+    losSquares: [],
+    animating: false,
+    highlightingActive: false,
+    pieces: builtPieces,
+    history: new Set(),
+  });
+  state.history.add(serialiseState(state.pieces, state.currentPlayer));
+
+  timeline.length = 0;
+  timelineIndex = -1;
+  moveLog.length = 0;
+  pushTimeline();
+  updateMetaDisplay();
+
+  navControls.classList.remove('hidden');
+
+  if (state.sneaking) {
+    setStatus(t('chainNoEnemies'), 'sneaking');
+    selectPiece(state.sneakingSquare);
+  } else {
+    setStatus(t('selectActive'));
+  }
+  render();
+}
+
+customModeBtn.addEventListener('click', () => {
+  if (customMode) {
+    exitCustomMode();
+  } else {
+    // Deactivate other mode buttons visually
+    modeToggleBtn.classList.remove('active');
+    enterCustomMode();
+  }
+});
+
+customUndoBtn.addEventListener('click', () => customUndoPlacement());
+customClearBtn.addEventListener('click', () => {
+  customSetup.pieces = {};
+  customSetup.lastMoved = null;
+  customMode = 'place-p1';
+  updateCustomPhaseUI();
+  renderCustomBoard();
+  setStatus(currentLang === 'PT'
+    ? 'Tabuleiro limpo. Coloque 4 peças brancas.'
+    : 'Board cleared. Place 4 white pieces.', 'sneaking');
+});
+customPlayBtn.addEventListener('click', () => commitCustomPosition());
+
+// ═══════════════════════════════════════════════════════════════
 //  SECTION 12 — INITIALIZATION LOOP
 // ═══════════════════════════════════════════════════════════════
 
@@ -1730,6 +2231,12 @@ render();
 updateMetaDisplay();
 
 function render() {
+  // Delegate to custom mode renderer when active
+  if (customMode) {
+    renderCustomBoard();
+    return;
+  }
+
   const humanTurn = state.currentPlayer === humanPlayerColor || !vsAI;
   if (state.currentPlayer === 1) {
     tagP1.classList.add('active');
@@ -1817,6 +2324,15 @@ function setStatus(msg, variant = false) {
 
 function setMode(aiMode) {
   if (state.animating) return;
+
+  // If in custom mode, exit it cleanly first
+  if (customMode) {
+    customMode = false;
+    customModeBtn.classList.remove('active');
+    customToolbar.classList.add('hidden');
+    customPlayBtn.classList.add('hidden');
+  }
+
   vsAI = aiMode;
   
   window.isWaitingForContinue = false;
@@ -1913,6 +2429,9 @@ function updateMetaDisplay() {
   langToggleBtn.textContent = t('language');
   footerSupportLink.textContent = t('supportLink');
   footerShareLink.textContent = t('shareLink');
+
+  // Keep Custom button label stable
+  customModeBtn.textContent = currentLang === 'PT' ? 'Custom' : 'Custom';
 }
 
 function toggleLanguage() {
@@ -1994,6 +2513,7 @@ function applyLanguageSwitch() {
 }
 
 document.addEventListener('click', (e) => {
+  if (customMode) return;  // custom mode handles its own clicks
   if (window.isWaitingForContinue) {
     if (e.target.closest('.menu-controls') || e.target.closest('.nav-btn') || e.target.closest('#result-banner')) return;
 
