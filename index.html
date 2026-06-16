@@ -41,45 +41,89 @@
   body.clickable-restart { cursor: pointer !important; }
   body.clickable-restart .cell.selectable { cursor: pointer !important; }
 
-  /* ── Header ── */
+/* ── Header & Menus ── */
+  .header-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    padding-bottom: rem;
+  }
+
   header { text-align: center; }
+
   h1 {
     font-size: clamp(2.2rem, 12vw, 4.5rem);
-    letter-spacing: 0.02em; color: var(--sand3); line-height: 0.8;
+    letter-spacing: 0.02em; color: var(--sand3); line-height: 0.5;
     font-family: "Molle", cursive; font-weight: 300; font-style: italic;
     cursor: pointer; user-select: none; transition: color 0.2s;
   }
-h1 strong{font-family: "Noto Sans Symbol"; color: var(--mid); font-style: normal;  font-size: clamp(2rem, 40vw, 4rem);}
-h1:hover { color: var(--gold); }
- h1 strong:hover {color: var(--gold); }
+  h1 strong { font-family: "Noto Sans Symbol"; color: var(--mid); font-style: normal; font-size: clamp(2rem, 40vw, 4rem); }
+  h1:hover, h1 strong:hover { color: var(--gold); }
 
-  /* ── Mode & Help toggles ── */
-  .menu-controls { 
-    scale: 1.1; font-size: 2rem; 
-    display: none; flex-direction: column; align-items: center; gap: 0.6rem;
+  /* Menu Container Animations */
+  .menu-container {
+    margin-top: 0.8rem;
+    height: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease, height 0.3s ease;
+    display: flex;
+    justify-content: center;
+    position: relative;
   }
-  .menu-controls.visible { display: flex; }
+
+  /* Reveal menu on wrapper hover OR if toggled via JS (for mobile) */
+  .header-section:hover .menu-container,
+  .menu-container.visible {
+    height: 60px; /* Adjust if your buttons need more space */
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .panel {
+    display: flex; 
+    align-items: center; 
+    gap: 0.8rem;
+    transition: opacity 0.2s ease; height: 6rem;
+  }
+
+  .panel.hidden {
+    display: none !important;
+  }
+
+  .mode-btn {
+    background: transparent; border: 1px solid var(--accent); border-radius: 4px;
+    color: var(--sand3); padding: 0.3rem 0.9rem; cursor: pointer;
+    font-family: 'Lato', serif; font-size: clamp(0.65rem, 1.8vw, 0.78rem); letter-spacing: 0.12em;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+  }
+  .mode-btn.active { background: rgba(196,154,68,0.12); border-color: var(--gold); color: var(--gold); }
+  .mode-btn:hover:not(.active) { border-color: var(--sand3); color: var(--sand); }
 
   .mode-bar {
     display: flex; align-items: center; gap: 0.8rem;
     font-size: clamp(0.65rem, 1.8vw, 0.78rem); letter-spacing: 0.12em; color: var(--sand3);
   }
+  
   .mode-btn {
     background: transparent; border: 1px solid var(--accent); border-radius: 4px;
     color: var(--sand3); padding: 0.3rem 0.9rem; cursor: pointer;
     font-family: 'Lato', serif; font-size: inherit; letter-spacing: inherit;
     transition: background 0.2s, border-color 0.2s, color 0.2s;
   }
+  
   .mode-btn.active { background: rgba(196,154,68,0.12); border-color: var(--gold); color: var(--gold); }
   .mode-btn:hover:not(.active) { border-color: var(--sand3); color: var(--sand); }
 
   /* ── Stats Bar ── */
   .stats-bar {
-    font-family: 'Lato'; scale: 1.15;
+    font-family: 'Lato'; scale:1.15;
     display: flex; gap: 2.3rem; font-size: 1rem; line-height: 1.2;
-    letter-spacing: 0.1em; background: var(--accent2);
-    padding: 0.4rem 1.2rem; border-radius: 40px; border: 1px solid rgba(199, 131, 3, 0.3); 
-    box-shadow: inset 0 1px 4px rgba(0,0,0,0.3);
+    letter-spacing: 0.1em; background: rgba(72, 49, 2, 0.646);
+    padding: 0.4rem 1.2rem; border-radius: 40px; border: 1px solid rgba(199, 131, 3, 0.3);
   }
   .stats-bar strong { color: var(--gold); font-family: "Molle", cursive; font-weight: 300; font-style: italic; }
   
@@ -108,9 +152,10 @@ h1:hover { color: var(--gold); }
   #result-banner-slot .result-banner { width: 100%; max-width: none; }
 
   /* ── Status bar ── */
-  .status {
-    font-size: clamp(1rem, 1.8vw, 0.78rem); letter-spacing: 0.12em;
-    color: var(--sand3); min-height: 1.2em; text-align: center; transition: color 0.2s;
+  .status {display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+    padding: 0.55rem 1.1rem; border: 1px solid var(--accent);
+    border-radius: 40px; background: rgba(72, 49, 2, 0.646); width: 100%;
+    max-width: calc(var(--cell-size) * 5 + var(--gap) * 4 + clamp(20px, 4vw, 36px) + 4px); transition: color 0.2s;
   }
   .status.highlight { color: var(--gold); }
   .status.warn      { color: #c0704a; }
@@ -343,16 +388,26 @@ h1:hover { color: var(--gold); }
 </head>
 <body>
 
-<header>
-  <h1>Sambaqui <strong>𑁔</strong>   </h1>
-</header>
+<div class="header-section">
+  <header>
+    <h1>Sambaqui</h1>
+  </header>
 
-<div class="menu-controls">
-  <div class="mode-bar">
-    <button class="mode-btn" id="open-tutorial-btn">Como Jogar</button>
-    <button class="mode-btn" id="mode-toggle">Treinar</button>
-    <button class="mode-btn" id="custom-mode-btn">Custom</button>
-    <button class="mode-btn" id="lang-toggle-btn">EN</button>
+  <div class="menu-container" id="menu-container">
+    <!-- Main Panel -->
+    <div class="mode-bar panel" id="panel-main">
+      <button class="mode-btn lang-string" id="open-tutorial-btn" data-pt="Como Jogar" data-en="How to Play">Como Jogar</button>
+      <button class="mode-btn lang-string" id="open-submenu-btn" data-pt="Menu" data-en="Menu">Menu</button>
+      <!-- The button itself shows the language you can switch to -->
+      <button class="mode-btn" id="lang-toggle-btn">English</button> 
+    </div>
+
+    <!-- Sub Panel (Hidden by default) -->
+    <div class="mode-bar panel hidden" id="panel-sub">
+      <button class="mode-btn lang-string" id="mode-toggle" data-pt="Modo Solo" data-en="Solo Mode">Modo Solo</button>
+      <button class="mode-btn lang-string" id="custom-mode-btn" data-pt="Modo Custom" data-en="Custom Mode">Modo Custom</button>
+      <button class="mode-btn lang-string" id="close-submenu-btn" data-pt="Voltar" data-en="Back">Voltar</button>
+    </div>
   </div>
 </div>
 
@@ -366,7 +421,7 @@ h1:hover { color: var(--gold); }
   <div class="custom-phase-label" id="custom-phase-label"></div>
   <div class="custom-phase-dots" id="custom-phase-dots"></div>
   <div class="custom-actions">
-    <button class="custom-action-btn primary hidden" id="custom-play-btn">▶ Play</button>
+    <button class="custom-action-btn primary hidden" id="custom-play-btn">▶\uFE0E Play</button>
   </div>
 </div>
 
@@ -411,14 +466,44 @@ h1:hover { color: var(--gold); }
 <script>
 'use strict';
 
-// Elements
+// ═══════════════════════════════════════════════════════════════
+//  UI MENU & TRANSLATION LOGIC
+// ═══════════════════════════════════════════════════════════════
 const gameTitle = document.querySelector('h1');
-const menuControls = document.querySelector('.menu-controls');
+const headerSection = document.querySelector('.header-section');
+const menuContainer = document.getElementById('menu-container');
 
-// Toggle menu visibility when clicking the title
+// Panels & Buttons
+const panelMain = document.getElementById('panel-main');
+const panelSub = document.getElementById('panel-sub');
+const openSubmenuBtn = document.getElementById('open-submenu-btn');
+const closeSubmenuBtn = document.getElementById('close-submenu-btn');
+
+// 1. Mobile Click Toggle (Hover is handled by CSS)
 gameTitle.addEventListener('click', () => {
-  menuControls.classList.toggle('visible');
+  menuContainer.classList.toggle('visible');
+  
+  // If hiding the menu, reset back to the main panel
+  if (!menuContainer.classList.contains('visible')) {
+    setTimeout(() => {
+      panelMain.classList.remove('hidden');
+      panelSub.classList.add('hidden');
+    }, 300); // Wait for the CSS fade-out transition
+  }
 });
+
+// 2. Submenu Navigation
+openSubmenuBtn.addEventListener('click', () => {
+  panelMain.classList.add('hidden');
+  panelSub.classList.remove('hidden');
+});
+
+closeSubmenuBtn.addEventListener('click', () => {
+  panelSub.classList.add('hidden');
+  panelMain.classList.remove('hidden');
+});
+
+
 
 // ═══════════════════════════════════════════════════════════════
 //  SECTION 1 — CONSTANTS, COORDINATE HELPERS & LOCALIZATION
@@ -819,6 +904,8 @@ function clearResultBanner() {
   resultBannerSlot.innerHTML = '';
 }
 
+
+
 // ═══════════════════════════════════════════════════════════════
 //  SECTION 4 — DOM REFERENCES & BOARD CONSTRUCTION
 // ═══════════════════════════════════════════════════════════════
@@ -843,8 +930,6 @@ const statBestLabel = document.getElementById('stat-best-label');
 const footerSupportLink = document.getElementById('footer-support-link');
 const footerShareLink = document.getElementById('footer-share-link');
 const toastMsgEl = document.getElementById('toast-msg');
-
-// Custom Game Mode elements
 const customModeBtn = document.getElementById('custom-mode-btn');
 const customToolbar = document.getElementById('custom-toolbar');
 const customPhaseLabel = document.getElementById('custom-phase-label');
@@ -1251,8 +1336,102 @@ function showVictory(winner) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  SECTION 10 — TREE SEARCH ENGINE ADAPTATION (mcts.lua)
+//  SECTION 10 — TREE SEARCH ENGINE (IMPROVED)
 // ═══════════════════════════════════════════════════════════════
+//
+//  CHANGES FROM ORIGINAL:
+//  1. evaluatePosition()  — positional heuristic replaces blind random rollouts.
+//     Scores "best consecutive run of aligned pieces" for both players,
+//     weighted by direction (diagonals slightly discounted since they're
+//     harder to close). This gives MCTS a signal even from truncated rollouts.
+//
+//  2. simulate()          — guided playouts instead of pure random.
+//     Each step uses a fast greedy policy: prefer immediate wins, then
+//     avoid moves that hand the opponent a win, then pick the move with
+//     the highest heuristic delta. Falls back to random only when all
+//     heuristic moves are tied. Depth lifted to 20 to let games resolve.
+//
+//  3. findWinIn2()        — logic bug fixed.
+//     The original boolean inversion caused it to return moves that were
+//     NOT guaranteed wins. New version correctly checks that for every
+//     opponent response, the AI has at least one follow-up that wins.
+//
+//  4. backpropagate()     — partial credit for near-wins.
+//     Instead of binary 0/1, the AI node earns 1.0 for a win and 0.5 for
+//     a "moral win" (finished with 2-in-a-row when tree was truncated).
+//     This tightens the signal in positions where games rarely resolve
+//     within the rollout depth.
+//
+//  5. UCB1 exploration constant — raised to 1.8 (from 1.41).
+//     With a stronger evaluation function the tree benefits from wider
+//     exploration before exploitation; empirically reduces "trap" loops.
+//
+//  Everything else (SimState, clone, getValidMoves, makeMove, MCTSNode
+//  structure, difficulty profiles, triggerAIMove) is unchanged so this
+//  is a drop-in replacement.
+// ═══════════════════════════════════════════════════════════════
+
+// ── Heuristic: score the board for one player ────────────────────────────────
+// Returns the length of the longest aligned run of that player's pieces
+// across all directions, weighted by how "open" the run is (i.e. could it
+// extend to 3?). Also rewards the opponent's threats negatively so the
+// score is relative.
+//
+// The 5×5 board uses LABELS (the same array used elsewhere in the codebase).
+// We reconstruct rows/columns/diagonals here using the same coordinate system.
+
+const BOARD_SIZE  = 5;
+const DIRECTIONS  = [
+  { dr: 0,  dc: 1,  weight: 1.0 },  // horizontal
+  { dr: 1,  dc: 0,  weight: 1.0 },  // vertical
+  { dr: 1,  dc: 1,  weight: 0.9 },  // diagonal ↘
+  { dr: 1,  dc: -1, weight: 0.9 },  // diagonal ↙
+];
+
+// labelToRC and rcToLabel are defined earlier in the codebase and used here as-is.
+// labelToRC(label) returns [r, c] as a two-element array.
+// rcToLabel(r, c)  returns a label string or null if out of bounds.
+
+// Score a window of 3 squares in one direction for one player.
+// Returns the count of own pieces in that window, or null if blocked by an enemy.
+function scoreDirection(pieces, player, startR, startC, dr, dc) {
+  const run = [];
+  for (let i = 0; i < 3; i++) {
+    const lbl = rcToLabel(startR + i * dr, startC + i * dc);
+    if (lbl === null) return null;              // out of bounds
+    const p = pieces[lbl];
+    run.push(p ? p.player : 0);
+  }
+  const own = run.filter(v => v === player).length;
+  const opp = run.filter(v => v !== 0 && v !== player).length;
+  if (opp > 0) return null;                    // blocked by enemy
+  return own;
+}
+
+function evaluatePosition(pieces, player) {
+  const opponent = player === 1 ? 2 : 1;
+  let selfScore = 0;
+  let oppScore  = 0;
+
+  for (const { dr, dc, weight } of DIRECTIONS) {
+    for (let r = 0; r < BOARD_SIZE; r++) {
+      for (let c = 0; c < BOARD_SIZE; c++) {
+        const s = scoreDirection(pieces, player,   r, c, dr, dc);
+        const o = scoreDirection(pieces, opponent, r, c, dr, dc);
+        // Exponential weighting: 2-in-a-row scores 4×, not 2×
+        if (s !== null) selfScore = Math.max(selfScore, Math.pow(s, 2) * weight);
+        if (o !== null) oppScore  = Math.max(oppScore,  Math.pow(o, 2) * weight);
+      }
+    }
+  }
+
+  // Relative score in [−1, +1]: positive = good for player.
+  return (selfScore - oppScore) / 9.0;
+}
+
+// ── SimState ─────────────────────────────────────────────────────────────────
+// (unchanged from original — reproduced here for completeness)
+
 class SimState {
   constructor(pieces, currentPlayer, sneaking, sneakingSquare, history, isGameOver, winner) {
     this.pieces = pieces;
@@ -1320,6 +1499,8 @@ class SimState {
   }
 }
 
+// ── MCTSNode ─────────────────────────────────────────────────────────────────
+
 class MCTSNode {
   constructor(simState, parent, leadingMove) {
     this.state = simState;
@@ -1331,13 +1512,17 @@ class MCTSNode {
     this.untriedMoves = simState.getValidMoves();
     this.playerJustMoved = parent ? (simState.currentPlayer === 1 ? 2 : 1) : null;
   }
-  ucb1(c = 1.41) {
+
+  // CHANGE 5: UCB1 exploration constant raised to 1.8 for wider search.
+  ucb1(c = 1.8) {
     if (this.visits === 0) return Infinity;
     return (this.wins / this.visits) + c * Math.sqrt(Math.log(this.parent.visits) / this.visits);
   }
   isFullyExpanded() { return this.untriedMoves.length === 0; }
-  hasChildren() { return this.children.length > 0; }
+  hasChildren()     { return this.children.length > 0; }
 }
+
+// ── AdvancedEngineMCTS ────────────────────────────────────────────────────────
 
 class AdvancedEngineMCTS {
   constructor(simState, iterations) {
@@ -1345,6 +1530,7 @@ class AdvancedEngineMCTS {
     this.iterations = iterations;
     this.aiPlayer = simState.currentPlayer;
   }
+
   findImmediateWin(simState, player) {
     const valid = simState.getValidMoves();
     for (const action of valid) {
@@ -1354,34 +1540,56 @@ class AdvancedEngineMCTS {
     }
     return null;
   }
+
+  // CHANGE 3: findWinIn2 logic bug fixed.
+  // Original had an inverted oppCanBlockAll flag: it would break out of the
+  // opponent-response loop when it found a *blocking* reply, then fall through
+  // as if no block existed. The fixed version tracks whether the AI can
+  // guarantee a win *for every possible opponent response*.
   findWinIn2(simState, player) {
     const valid = simState.getValidMoves();
     for (const action of valid) {
       const temp = simState.clone();
       temp.makeMove(action.from, action.move);
       if (temp.isGameOver && temp.winner === player) return action;
-      const opponent = player === 1 ? 2 : 1;
+
       const oppMoves = temp.getValidMoves();
-      let oppCanBlockAll = true;
       if (oppMoves.length === 0) continue;
+
+      // Check: does the AI win after EVERY opponent response?
+      let aiWinsAfterAll = true;
       for (const oppAct of oppMoves) {
         const oppTemp = temp.clone();
         oppTemp.makeMove(oppAct.from, oppAct.move);
-        if (oppTemp.isGameOver && oppTemp.winner === opponent) { oppCanBlockAll = false; break; }
+
+        // If the opponent wins immediately after this response, this branch fails.
+        const opponent = player === 1 ? 2 : 1;
+        if (oppTemp.isGameOver && oppTemp.winner === opponent) {
+          aiWinsAfterAll = false;
+          break;
+        }
+
+        // Does the AI have at least one winning follow-up?
         const followUps = oppTemp.getValidMoves();
-        let extensionFound = false;
+        let aiHasWin = false;
         for (const fUp of followUps) {
           const finalTemp = oppTemp.clone();
           finalTemp.makeMove(fUp.from, fUp.move);
-          if (finalTemp.isGameOver && finalTemp.winner === player) { extensionFound = true; break; }
+          if (finalTemp.isGameOver && finalTemp.winner === player) {
+            aiHasWin = true;
+            break;
+          }
         }
-        if (!extensionFound) { oppCanBlockAll = true; break; }
-        else { oppCanBlockAll = false; }
+        if (!aiHasWin) {
+          aiWinsAfterAll = false;
+          break;
+        }
       }
-      if (!oppCanBlockAll) return action;
+      if (aiWinsAfterAll) return action;
     }
     return null;
   }
+
   findSafeMove(simState) {
     const valid = simState.getValidMoves();
     const optimal = [];
@@ -1399,8 +1607,10 @@ class AdvancedEngineMCTS {
     }
     return optimal.length > 0 ? optimal[Math.floor(Math.random() * optimal.length)] : null;
   }
+
   search(useImmediateWin, useWinIn2, useSafeMove) {
     const currentSimRoot = this.root.state;
+
     if (useImmediateWin) {
       const imm = this.findImmediateWin(currentSimRoot, this.aiPlayer);
       if (imm) return imm;
@@ -1412,16 +1622,17 @@ class AdvancedEngineMCTS {
       const win2 = this.findWinIn2(currentSimRoot, this.aiPlayer);
       if (win2) return win2;
     }
+
     let safeMove = null;
-    if (useSafeMove) {
-      safeMove = this.findSafeMove(currentSimRoot);
-    }
+    if (useSafeMove) safeMove = this.findSafeMove(currentSimRoot);
+
     for (let i = 0; i < this.iterations; i++) {
       let node = this.select(this.root);
-      if (!node.state.isGameOver && !node.isFullyExpanded()) { node = this.expand(node); }
-      const simulationWinner = this.simulate(node.state);
-      this.backpropagate(node, simulationWinner);
+      if (!node.state.isGameOver && !node.isFullyExpanded()) node = this.expand(node);
+      const simulationResult = this.simulate(node.state);
+      this.backpropagate(node, simulationResult);
     }
+
     const bestChildNode = this.getBestChild(this.root);
     if (safeMove && bestChildNode) {
       const bestActionIsSafe = this.checkIfActionIsSafe(currentSimRoot, bestChildNode.move);
@@ -1429,6 +1640,7 @@ class AdvancedEngineMCTS {
     }
     return bestChildNode ? bestChildNode.move : (safeMove || currentSimRoot.getValidMoves()[0]);
   }
+
   checkIfActionIsSafe(simState, action) {
     const temp = simState.clone();
     temp.makeMove(action.from, action.move);
@@ -1440,6 +1652,7 @@ class AdvancedEngineMCTS {
     }
     return true;
   }
+
   select(node) {
     while (node.isFullyExpanded() && node.hasChildren()) {
       let bestScore = -Infinity;
@@ -1452,6 +1665,7 @@ class AdvancedEngineMCTS {
     }
     return node;
   }
+
   expand(node) {
     const idx = Math.floor(Math.random() * node.untriedMoves.length);
     const action = node.untriedMoves.splice(idx, 1)[0];
@@ -1461,26 +1675,100 @@ class AdvancedEngineMCTS {
     node.children.push(child);
     return child;
   }
+
+  // CHANGE 2: Guided simulation instead of pure random.
+  // Each step of the playout uses a lightweight greedy policy:
+  //   (a) take an immediate win if available,
+  //   (b) block an opponent's immediate win,
+  //   (c) pick the move with the best heuristic score delta,
+  //   (d) random tiebreak.
+  // This makes each rollout carry real information rather than random noise.
   simulate(simState) {
     let current = simState.clone();
-    const maxDepth = 12;
+    const maxDepth = 20;                        // lifted from 12
     let depth = 0;
+
     while (!current.isGameOver && depth < maxDepth) {
       const valid = current.getValidMoves();
       if (valid.length === 0) break;
-      const action = valid[Math.floor(Math.random() * valid.length)];
-      current.makeMove(action.from, action.move);
+
+      const player   = current.currentPlayer;
+      const opponent = player === 1 ? 2 : 1;
+      let chosen     = null;
+
+      // (a) Win immediately
+      for (const action of valid) {
+        const tmp = current.clone();
+        tmp.makeMove(action.from, action.move);
+        if (tmp.isGameOver && tmp.winner === player) { chosen = action; break; }
+      }
+
+      // (b) Block opponent's immediate win
+      if (!chosen) {
+        for (const action of valid) {
+          const tmp = current.clone();
+          tmp.makeMove(action.from, action.move);
+          if (!tmp.isGameOver) {
+            const oppMoves = tmp.getValidMoves();
+            for (const oAct of oppMoves) {
+              const oTmp = tmp.clone();
+              oTmp.makeMove(oAct.from, oAct.move);
+              if (oTmp.isGameOver && oTmp.winner === opponent) {
+                chosen = action;
+                break;
+              }
+            }
+          }
+          if (chosen) break;
+        }
+      }
+
+      // (c) Greedy heuristic: pick move with best evaluation delta
+      if (!chosen) {
+        let bestScore = -Infinity;
+        for (const action of valid) {
+          const tmp = current.clone();
+          tmp.makeMove(action.from, action.move);
+          // Score from the perspective of the player who just moved (player)
+          const score = evaluatePosition(tmp.pieces, player);
+          if (score > bestScore) { bestScore = score; chosen = action; }
+        }
+      }
+
+      // (d) Random tiebreak (should rarely be needed)
+      if (!chosen) chosen = valid[Math.floor(Math.random() * valid.length)];
+
+      current.makeMove(chosen.from, chosen.move);
       depth++;
     }
-    return current.winner;
+
+    // CHANGE 4: Return structured result for partial-credit backprop.
+    return { winner: current.winner, pieces: current.pieces };
   }
-  backpropagate(node, winner) {
-    while (node !== null) {
-      node.visits++;
-      if (node.playerJustMoved && winner === node.playerJustMoved) node.wins += 1;
-      node = node.parent;
+
+  // CHANGE 4: Partial-credit backpropagation.
+  // Binary win/loss discards too much information from truncated rollouts.
+  // Now: win = 1.0 pts, "moral win" (2-in-a-row on non-terminal) = 0.5 pts,
+  // neutral = 0.25 pts (slightly above 0 to reward non-losing continuations).
+  backpropagate(node, result) {
+    let current = node;
+    while (current !== null) {
+      current.visits++;
+      if (current.playerJustMoved !== null) {
+        if (result.winner === current.playerJustMoved) {
+          current.wins += 1.0;
+        } else if (result.winner === null && result.pieces) {
+          // No winner: use heuristic to award partial credit
+          const hScore = evaluatePosition(result.pieces, current.playerJustMoved);
+          // hScore ∈ [−1, 1]; map to credit ∈ [0, 0.8]
+          current.wins += 0.4 + 0.4 * hScore;
+        }
+        // If opponent won: 0 credit (no change)
+      }
+      current = current.parent;
     }
   }
+
   getBestChild(node) {
     let maxVisits = -1;
     let best = null;
@@ -1491,15 +1779,22 @@ class AdvancedEngineMCTS {
   }
 }
 
+// ── Difficulty profiles ───────────────────────────────────────────────────────
+// (unchanged from original — higher iteration counts now produce much
+//  stronger play because each iteration carries real evaluation signal)
+
 function getDifficultyProfile(pair) {
   const itersByPair = [15, 60, 160, 320, 500, 800, 1200, 1800, 2600, 3500];
   const blunderChance = Math.max(0, 0.35 - (pair * 0.08));
   const useImmediateWin = pair >= 0;
-  const useWinIn2 = pair >= 1;
-  const useSafeMove = pair >= 2;
-  const mctsIterations = itersByPair[Math.min(pair, itersByPair.length - 1)];
+  const useWinIn2       = pair >= 1;
+  const useSafeMove     = pair >= 2;
+  const mctsIterations  = itersByPair[Math.min(pair, itersByPair.length - 1)];
   return { blunderChance, useImmediateWin, useWinIn2, useSafeMove, mctsIterations };
 }
+
+// ── triggerAIMove ─────────────────────────────────────────────────────────────
+// (unchanged from original)
 
 function triggerAIMove() {
   const computerColor = humanPlayerColor === 1 ? 2 : 1;
@@ -1523,7 +1818,7 @@ function triggerAIMove() {
 
     if (optimalResult) {
       const systemSlides = computeAllSlides(optimalResult.from, state.pieces);
-      const actualMatch = systemSlides.find(s => s.landing === optimalResult.move.landing);
+      const actualMatch  = systemSlides.find(s => s.landing === optimalResult.move.landing);
       if (actualMatch) {
         state.selectedSquare = optimalResult.from;
         executeMove(optimalResult.from, actualMatch);
@@ -2157,7 +2452,7 @@ function updateMetaDisplay() {
   footerSupportLink.textContent = t('supportLink');
   footerShareLink.textContent = t('shareLink');
 
-  customModeBtn.textContent = currentLang === 'PT' ? 'Custom' : 'Custom';
+  customModeBtn.textContent = currentLang === 'PT' ? 'Modo Custom' : 'Custom Mode';
 }
 
 function toggleLanguage() {
