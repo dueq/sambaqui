@@ -13,7 +13,6 @@
 <link rel="icon" type="image/png" href="./favicon.png">
 
 <style>
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
@@ -30,58 +29,37 @@
     --gap:        clamp(3px, 0.6vw, 6px);
   }
 
-body {
-  min-height: 100vh;
-  background-color: #241a0e;
-  background-image:
-      radial-gradient(ellipse 60% 30% at 50% 0%, #5d3d073d 0%, transparent 100%);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  font-family: 'Lato', serif; color: var(--sand);
-  padding: 2rem 1rem; gap: 1.1rem;
-}
-
-  body.clickable-restart {
-    cursor: pointer !important;
-  }
-  body.clickable-restart .cell.selectable {
-    cursor: pointer !important;
+  body {
+    min-height: 100vh;
+    background-color: #241a0e;
+    background-image: radial-gradient(ellipse 60% 30% at 50% 0%, #5d3d073d 0%, transparent 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: 'Lato', serif; color: var(--sand);
+    padding: 2rem 1rem; gap: 1.1rem;
   }
 
-/* ── Header ── */
+  body.clickable-restart { cursor: pointer !important; }
+  body.clickable-restart .cell.selectable { cursor: pointer !important; }
+
+  /* ── Header ── */
   header { text-align: center; }
   h1 {
     font-size: clamp(2.2rem, 12vw, 4.5rem);
     letter-spacing: 0.02em; color: var(--sand3); line-height: 0.8;
     font-family: "Molle", cursive; font-weight: 300; font-style: italic;
-    cursor: pointer; /* Makes it clear the title is clickable */
-    user-select: none; /* Prevents accidentally highlighting the text */
-    transition: color 0.2s;
+    cursor: pointer; user-select: none; transition: color 0.2s;
   }
-  h1:hover {
-    color: var(--gold); /* Adds a subtle hover effect */
-  }
+h1 strong{font-family: "Noto Sans Symbol"; color: var(--mid); font-style: normal;  font-size: clamp(2rem, 40vw, 4rem);}
+h1:hover { color: var(--gold); }
+ h1 strong:hover {color: var(--gold); }
 
   /* ── Mode & Help toggles ── */
   .menu-controls { 
     scale: 1.1; font-size: 2rem; 
-    display: none; /* Hidden by default */
-    flex-direction: column; align-items: center; gap: 0.6rem;
+    display: none; flex-direction: column; align-items: center; gap: 0.6rem;
   }
-  .menu-controls.visible {
-    display: flex; /* Applied by JavaScript to reveal the menu */
-  }
+  .menu-controls.visible { display: flex; }
 
-  /* ── Stats Bar ── */
-  .stats-bar {
-    font-family: 'Lato'; scale:1.15;
-    display: flex; gap: 2.3rem; font-size: 1rem; line-height: 1.2;
-    letter-spacing: 0.1em; background: var(--accent2);
-    padding: 0.4rem 1.2rem; border-radius: 40px; border: 1px solid rgba(199, 131, 3, 0.3); 
-    box-shadow: inset 0 1px 4px rgba(0,0,0,0.3);
-  }
-  .stats-bar strong { color: var(--gold);      font-family: "Molle", cursive; font-weight: 300; font-style: italic;}
-  
-  /* ── Mode & Help toggles ── */
   .mode-bar {
     display: flex; align-items: center; gap: 0.8rem;
     font-size: clamp(0.65rem, 1.8vw, 0.78rem); letter-spacing: 0.12em; color: var(--sand3);
@@ -95,44 +73,38 @@ body {
   .mode-btn.active { background: rgba(196,154,68,0.12); border-color: var(--gold); color: var(--gold); }
   .mode-btn:hover:not(.active) { border-color: var(--sand3); color: var(--sand); }
 
-  .help-btn {
-    background: rgba(196,154,68,0.06); border: 1px dashed rgba(196,154,68,0.4);
-    border-radius: 4px; color: var(--sand2); padding: 0.25rem 0.8rem; cursor: pointer;
-    font-family: 'Lato', serif; font-size: clamp(0.65rem, 1.8vw, 0.75rem); letter-spacing: 0.1em;
-    transition: all 0.2s;
+  /* ── Stats Bar ── */
+  .stats-bar {
+    font-family: 'Lato'; scale: 1.15;
+    display: flex; gap: 2.3rem; font-size: 1rem; line-height: 1.2;
+    letter-spacing: 0.1em; background: var(--accent2);
+    padding: 0.4rem 1.2rem; border-radius: 40px; border: 1px solid rgba(199, 131, 3, 0.3); 
+    box-shadow: inset 0 1px 4px rgba(0,0,0,0.3);
   }
-  .help-btn:hover { background: rgba(196,154,68,0.15); border-color: var(--gold); color: var(--gold); }
-
+  .stats-bar strong { color: var(--gold); font-family: "Molle", cursive; font-weight: 300; font-style: italic; }
+  
   /* ── Turn bar ── */
   .turn-bar { display: flex; align-items: center; gap: 1.4rem; font-size: clamp(0.7rem, 2vw, 1rem); letter-spacing: 0.15em; }
   .player-tag { display: flex; align-items: center; gap: 0.5rem; opacity: 0.2; transition: opacity 0s; }
   .player-tag.active { opacity: 1; }
   .player-tag .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; }
   .player-tag.p1 .dot { background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90); border: 1.5px solid var(--accent); }
-  .player-tag.p2 .dot{ background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05); border: 1.5px solid var(--accent); }
-  .turn-divider { width: 2px; height: 16px; background: var(--accent); opacity: 0.6; }
+  .player-tag.p2 .dot { background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05); border: 1.5px solid var(--accent); }
+  .turn-divider { width: 2px; height: 20px; background: var(--accent); opacity: 0.5; }
 
-  /* ── Shared slot: turn-bar and result-banner occupy the same fixed-height area ── */
+  /* ── Shared slot ── */
   .banner-zone {
-    position: relative;
-    width: 100%;
+    position: relative; width: 100%;
     max-width: calc(var(--cell-size) * 5 + var(--gap) * 4 + clamp(20px, 4vw, 36px) + 4px);
-    height: calc(1.2em + 1.1rem); /* tall enough for the result-banner */
+    height: calc(1.2em + 1.1rem);
     display: flex; align-items: center; justify-content: center;
   }
   .banner-zone .turn-bar,
   .banner-zone #result-banner-slot {
-    position: absolute;
-    inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    width: 100%;
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; width: 100%;
   }
-  /* Banner slot is invisible when empty; turn-bar shows through */
-  .banner-zone #result-banner-slot:empty ~ .turn-bar,
-  .banner-zone .turn-bar { opacity: 1; }
-  /* When a banner is present, hide the turn-bar behind it */
+  .banner-zone #result-banner-slot:empty ~ .turn-bar, .banner-zone .turn-bar { opacity: 1; }
   .banner-zone #result-banner-slot:not(:empty) ~ .turn-bar { opacity: 0; pointer-events: none; }
-  /* result-banner fills the slot width */
   #result-banner-slot .result-banner { width: 100%; max-width: none; }
 
   /* ── Status bar ── */
@@ -164,90 +136,57 @@ body {
  
   .nav-btn {
     background: var(--sand3); border: 1px solid var(--sand); color: var(--mid);
-    border-radius: 38px; width: 38px; height: 38px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.72rem; cursor: pointer; transition: all 0.2s; 
-    box-shadow: 0 2px 6px rgba(71, 42, 2, 0.722);
+    border-radius: 4px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 6px rgba(71, 42, 2, 0.722);
   }
   .nav-btn:hover:not(:disabled) { background: var(--mid); border-color: var(--sand); color: var(--sand); }
   .nav-btn:disabled { opacity: 1; cursor: not-allowed; box-shadow: none; }
 
   /* ── Move log ── */
   .move-log {
-    scale:0.95;
-    flex: 1; overflow-x: auto; display: flex; align-items: center;
-    gap: 0.35rem; padding: 0 0.5rem; 
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    height: 40px;
-    border: 1px solid rgba(122, 79, 46, 0.765); border-radius: 20px;
-    box-shadow: inset 0 1px 4px rgba(0,0,0,0.3);
-    background: rgba(72, 49, 2, 0.646);
-    min-width: 0;
+    scale: 0.95; flex: 1; overflow-x: auto; display: flex; align-items: center;
+    gap: 0.35rem; padding: 0 0.5rem; scrollbar-width: none; -ms-overflow-style: none;
+    height: 40px; border: 1px solid rgba(122, 79, 46, 0.765); border-radius: 20px;
+    box-shadow: inset 0 1px 4px rgba(0,0,0,0.3); background: rgba(72, 49, 2, 0.646); min-width: 0;
   }
   .move-log::-webkit-scrollbar { display: none; }
-  .move-log-empty {
-    font-size: 0.62rem; letter-spacing: 0.1em; color: var(--accent); opacity: 0.5;
-    white-space: nowrap; padding: 0 0.3rem;
-  }
+  .move-log-empty { font-size: 0.62rem; letter-spacing: 0.1em; color: var(--accent); opacity: 0.5; white-space: nowrap; padding: 0 0.3rem; }
   .move-log-entry {
-    display: flex; align-items: center; gap: 0.22rem;
-    font-size: 1rem; letter-spacing: 0.08em; color: var(--sand);
-    white-space: nowrap; flex-shrink: 0;
-    padding: 0.5rem 0.4rem; border-radius: 0px;
-    transition: opacity 0.2s;
+    display: flex; align-items: center; gap: 0.22rem; font-size: 1rem; letter-spacing: 0.08em;
+    color: var(--sand); white-space: nowrap; flex-shrink: 0; padding: 0.5rem 0.4rem; border-radius: 0px; transition: opacity 0.2s;
   }
   .move-log-entry.future { opacity: 1; }
-  .move-log-entry.current { background: rgba(36, 24, 1, 0.898); border-color: var(--gold);}
-  .move-log-dot {
-    width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0;
-  }
-  .move-log-dot.p1 {
-    background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90);
-    border: 1px solid rgba(196,154,68,0.5);
-  }
-  .move-log-dot.p2 {
-    background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05);
-    border: 1px solid var(--accent);
-  }
-  .move-log-divider {
-    width: 1px; height: 15px; background: var(--accent); opacity: 0.4; flex-shrink: 0;
-  }
+  .move-log-entry.current { background: rgba(36, 24, 1, 0.898); border-color: var(--gold); }
+  .move-log-dot { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; }
+  .move-log-dot.p1 { background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90); border: 1px solid rgba(196,154,68,0.5); }
+  .move-log-dot.p2 { background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05); border: 1px solid var(--accent); }
+  .move-log-divider { width: 1px; height: 15px; background: var(--accent); opacity: 0.4; flex-shrink: 0; }
 
   /* ── Result banner ── */
   .result-banner {
     display: flex; align-items: center; justify-content: center; gap: 1.2rem;
-    border: 1px solid var(--accent); border-radius: 6px;
-    background: rgba(28,21,16,0.85); padding: 0.55rem 1.2rem;
-    font-size: clamp(1rem, 1.8vw, 0.85rem); letter-spacing: 0.15em;
-    color: var(--gold); animation: fade-in 0.4s ease;
-    width: 100%;
-    max-width: calc(var(--cell-size) * 5 + var(--gap) * 4 + clamp(20px, 4vw, 36px) + 4px);
+    border: 1px solid var(--accent); border-radius: 6px; background: rgba(28,21,16,0.85); padding: 0.55rem 1.2rem;
+    font-size: clamp(1rem, 1.8vw, 0.85rem); letter-spacing: 0.15em; color: var(--gold); animation: fade-in 0.4s ease;
+    width: 100%; max-width: calc(var(--cell-size) * 5 + var(--gap) * 4 + clamp(20px, 4vw, 36px) + 4px);
   }
   .result-banner .banner-text { flex: 1; text-align: center; }
   .result-banner .new-game-btn {
     background: transparent; border: 1px solid rgba(196,154,68,0.45); border-radius: 4px;
     color: var(--gold); padding: 0.25rem 0.75rem; cursor: pointer; white-space: nowrap;
-    font-family: 'Lato', serif; font-size: inherit; letter-spacing: inherit;
-    transition: background 0.2s, border-color 0.2s; flex-shrink: 0;
+    font-family: 'Lato', serif; font-size: inherit; letter-spacing: inherit; transition: background 0.2s, border-color 0.2s; flex-shrink: 0;
   }
   .result-banner .new-game-btn:hover { background: rgba(196,154,68,0.12); border-color: var(--gold); }
 
   /* ── Cells ── */
   .cell {
-    width: var(--cell-size); height: var(--cell-size);
-    background-color: var(--sand);
+    width: var(--cell-size); height: var(--cell-size); background-color: var(--sand);
     background-image:
       radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.18) 0%, transparent 60%),
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='40' height='40' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
-    border: 1.5px solid var(--sand3); border-radius: 4px;
-    display: flex; align-items: center; justify-content: center;
+    border: 1.5px solid var(--sand3); border-radius: 4px; display: flex; align-items: center; justify-content: center;
     position: relative; cursor: default; transition: border-color 0.15s, background-color 0.15s;
   }
-  .cell.dark-sq {
-    background-color: var(--sand3);
-    background-image: radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.12) 0%, transparent 60%);
-  }
+  .cell.dark-sq { background-color: var(--sand3); background-image: radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.12) 0%, transparent 60%); }
   .cell.selectable            { cursor: pointer; }
   .cell.selectable:hover      { border-color: var(--gold); }
   .cell.selected              { border-color: var(--gold); box-shadow: inset 0 0 0 2px rgba(196,154,68,0.5); cursor: pointer; }
@@ -266,57 +205,48 @@ body {
   }
 
   .cell-label {
-    position: absolute; bottom: 4px; left: 6px;
-    font-size: clamp(0.55rem, 1.5vw, 0.7rem); color: var(--accent);
-    line-height: 1; user-select: none; opacity: 0.7;
+    position: absolute; bottom: 4px; left: 6px; font-size: clamp(0.55rem, 1.5vw, 0.7rem);
+    color: var(--accent); line-height: 1; user-select: none; opacity: 0.7;
   }
 
   .arrow-hint {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
     font-size: clamp(28px, 6vw, 28px); color: rgba(233, 212, 169, 0.593);
     pointer-events: none; user-select: none; line-height: 1;
-   font-family: -apple-system, BlinkMacSystemFont,"Apple Symbols", "Google Sans", sans-serif;
-    font-weight: 600; /* Crisp and thick enough on all mobile screens without being overly bold */ }
+    font-family: -apple-system, BlinkMacSystemFont,"Apple Symbols", "Google Sans", sans-serif; font-weight: 600;
+  }
   .arrow-hint.blocked { color: rgba(180,80,40,0.00); font-size: clamp(13px, 2.4vw, 17px); }
 
   /* ── Pieces ── */
   .piece {
-    width: 68%; height: 68%; border-radius: 50%; flex-shrink: 0;
-    transition: transform 0.15s, opacity 0.15s;
-    position: relative; z-index: 1; pointer-events: none; /* Evita que cliques caiam no elemento interno da peça */
+    width: 68%; height: 68%; border-radius: 50%; flex-shrink: 0; transition: transform 0.15s, opacity 0.15s;
+    position: relative; z-index: 1; pointer-events: none;
   }
   .piece.p1 {
-    background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90);
-    border: 2px solid rgba(196,154,68,0.5);
+    background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90); border: 2px solid rgba(196,154,68,0.5);
     box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.15);
   }
   .piece.p2 {
-    background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05);
-    border: 2px solid rgba(184,169,138,0.3);
+    background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05); border: 2px solid rgba(184,169,138,0.3);
     box-shadow: 0 3px 8px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.12), inset 0 -2px 4px rgba(0,0,0,0.4);
   }
   .piece.inactive       { opacity: 1; transform: scale(1); }
   .piece.active-piece   { opacity: 1; transform: scale(1); }
   .piece.p1.active-piece {
     border: 2px solid rgba(231, 221, 196, 0.82);
-    box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.6),
-      0 0 0 3px rgba(232,220,200,0.3), 0 0 14px rgba(232,220,200,0.15);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.6), 0 0 0 3px rgba(232,220,200,0.3), 0 0 14px rgba(232,220,200,0.15);
   }
   .piece.p2.active-piece {
     border: 2px solid rgba(165, 118, 8, 0.474);
-    box-shadow: 0 3px 8px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.12),
-      0 0 0 3px rgba(232,220,200,0.3), 0 0 14px rgba(232,220,200,0.15);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.12), 0 0 0 3px rgba(232,220,200,0.3), 0 0 14px rgba(232,220,200,0.15);
   }
   .piece.selected-piece {
     transform: scale(1.05); border-color: var(--gold) !important;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.7),
-      0 0 0 4px rgba(196,154,68,0.6), 0 0 24px rgba(196,154,68,0.5) !important;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.7), 0 0 0 4px rgba(196,154,68,0.6), 0 0 24px rgba(196,154,68,0.5) !important;
   }
   .piece.sneaking {
-    animation: pulse-sneak 1.2s ease-in-out infinite !important;
-    border-color: var(--teal) !important;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.5),
-      0 0 0 3px rgba(122,184,192,0.4), 0 0 16px rgba(122,184,192,0.3) !important;
+    animation: pulse-sneak 1.2s ease-in-out infinite !important; border-color: var(--teal) !important;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.5), 0 0 0 3px rgba(122,184,192,0.4), 0 0 16px rgba(122,184,192,0.3) !important;
   }
   @keyframes pulse-sneak {
     0%,100% { box-shadow: 0 3px 8px rgba(0,0,0,0.5), 0 0 0 3px rgba(122,184,192,0.4), 0 0 12px rgba(122,184,192,0.25); }
@@ -326,51 +256,29 @@ body {
   /* ── Piece ghost ── */
   .piece-ghost { position: fixed; border-radius: 50%; pointer-events: none; z-index: 50; }
   .piece-ghost.p1 {
-    background: radial-gradient(circle at 38% 32%, #f5f0e8b1, #c8bfad 55%, #a89f90);
-    border: 2px solid var(--gold);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.55), inset 0 1px 3px rgba(255,255,255,0.7),
-      0 0 0 3px rgba(196,154,68,0.5), 0 0 18px rgba(196,154,68,0.35);
+    background: radial-gradient(circle at 38% 32%, #f5f0e8b1, #c8bfad 55%, #a89f90); border: 2px solid var(--gold);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.55), inset 0 1px 3px rgba(255,255,255,0.7), 0 0 0 3px rgba(196,154,68,0.5), 0 0 18px rgba(196,154,68,0.35);
   }
   .piece-ghost.p2 {
-    background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05);
-    border: 2px solid var(--accent);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.65), inset 0 1px 3px rgba(255,255,255,0.15),
-      0 0 0 3px rgba(232,220,200,0.35), 0 0 18px rgba(232,220,200,0.2);
+    background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05); border: 2px solid var(--accent);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.65), inset 0 1px 3px rgba(255,255,255,0.15), 0 0 0 3px rgba(232,220,200,0.35), 0 0 18px rgba(232,220,200,0.2);
   }
 
-  /* ── Modals & Overlays ── */
-  .victory-overlay, .tutorial-overlay {
-    position: fixed; inset: 0; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    background: rgba(10,6,3,0.88); z-index: 100; gap: 1.2rem;
-    animation: fade-in 0.4s ease;
+  /* ── Tutorial Modal & Overlays ── */
+  .tutorial-overlay {
+    position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(10,6,3,0.88); z-index: 100; gap: 1.2rem; animation: fade-in 0.4s ease;
   }
   @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-  .victory-title { font-size: clamp(2rem, 8vw, 3.5rem); font-weight: 700; color: var(--gold); letter-spacing: 0.1em; text-shadow: 0 0 60px rgba(196,154,68,0.6); text-align: center; }
-  .victory-sub   { font-size: clamp(0.8rem, 2.5vw, 1.1rem); letter-spacing: 0.15em; color: var(--sand3); text-align: center; padding: 0 1rem; }
   
-  .generic-btn   { font-family: 'Lato', serif; font-size: clamp(0.75rem,2vw,0.85rem); letter-spacing: 0.15em; color: var(--gold); background: transparent; border: 1px solid rgba(196,154,68,0.5); border-radius: 4px; padding: 0.6rem 1.8rem; cursor: pointer; transition: all 0.2s; }
-  .generic-btn:hover { background: rgba(196,154,68,0.12); border-color: var(--gold); }
-  .generic-btn.danger { color: #c0704a; border-color: rgba(192,112,74,0.5); }
-  .generic-btn.danger:hover { background: rgba(192,112,74,0.1); border-color: #c0704a; }
-
-  /* ── Tutorial Card ── */
   .tutorial-card {
-    background: #241a12; border: 2px solid var(--accent); border-radius: 8px;
-    width: 90%; max-width: 440px; padding: 1.8rem; display: flex; flex-direction: column; gap: 1.2rem;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.4);
-    position: relative;
+    background: #241a12; border: 2px solid var(--accent); border-radius: 8px; width: 90%; max-width: 440px;
+    padding: 1.8rem; display: flex; flex-direction: column; gap: 1.2rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.4); position: relative;
   }
   .tutorial-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(122,79,46,0.3); padding-bottom: 0.6rem; gap: 0.5rem; }
   .tutorial-title-area { display: flex; align-items: center; gap: 0.6rem; }
   .tutorial-title { color: var(--gold); font-size: 1.4rem; font-weight: bold; letter-spacing: 0.05em; }
-  .tutorial-lang-btn {
-    background: transparent; border: 1px solid rgba(196,154,68,0.3); border-radius: 4px;
-    color: var(--sand3); padding: 0.15rem 0.4rem; cursor: pointer;
-    font-family: 'Lato', serif; font-size: 0.65rem; letter-spacing: 0.05em;
-    transition: all 0.2s;
-  }
-  .tutorial-lang-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(196,154,68,0.08); }
   .tutorial-pages { font-size: 0.8rem; color: var(--sand3); letter-spacing: 0.1em; white-space: nowrap; }
   .tutorial-body { font-family:"Lato"; font-size: 0.95rem; line-height: 1.5; color: var(--sand); min-height: 120px; }
   .tutorial-body strong { color: var(--gold); }
@@ -381,37 +289,24 @@ body {
 
   /* ── Custom Game Mode ── */
   .custom-toolbar {
-    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-    padding: 0.55rem 1.1rem; border: 1px solid var(--gold);
-    border-radius: 6px; background: var(--accent2);
-    width: 100%;
+    display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+    padding: 0.55rem 1.1rem; border: 1px solid var(--accent);
+    border-radius: 40px; background: rgba(72, 49, 2, 0.646); width: 100%;
     max-width: calc(var(--cell-size) * 5 + var(--gap) * 4 + clamp(20px, 4vw, 36px) + 4px);
   }
-  .custom-phase-label {
-    font-size: clamp(0.62rem, 1.7vw, 0.76rem); letter-spacing: 0.13em;
-    color: var(--sand2); text-align: center;
-  }
+  .custom-phase-label { font-size: clamp(0.62rem, 1.7vw, 0.76rem); letter-spacing: 0.13em; color: var(--sand2); text-align: center; }
   .custom-phase-label strong { color: var(--gold); }
-  .custom-phase-dots {
-    display: flex; gap: 0.5rem; align-items: center;
-  }
+  .custom-phase-dots { display: flex; gap: 0.5rem; align-items: center; }
   .custom-phase-dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: var(--accent2); border: 1px solid var(--sand);
-    transition: background 0.2s, border-color 0.2s;
+    width: 24px; height: 24px; border-radius: 100%; background: var(--accent2); border: 1px solid var(--mid); transition: background 0.2s, border-color 0.2s;
   }
-  .custom-phase-dot.filled-p1 { background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90); border-color: rgba(196,154,68,0.5); }
-  .custom-phase-dot.filled-p2 { background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05); border-color: rgba(184,169,138,0.3); }
-  .custom-phase-dot.active-step { border-color: var(--sand); box-shadow: 0 0 5px rgba(122,184,192,0.5); }
-  .custom-actions {
-    display: flex; gap: 0.6rem;
-  }
+  .custom-phase-dot.filled-p1 { background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90); border-color: var(--gold); }
+  .custom-phase-dot.filled-p2 { background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05); border-color: var(--accent); }
+  .custom-phase-dot.active-step { border-color: var(--sand3); box-shadow: 0 0 2px var(--gold); }
+  .custom-actions { display: flex; gap: 0.6rem; }
   .custom-action-btn {
-    background: transparent; border: 1px solid rgba(122,184,192,0.4);
-    border-radius: 4px; color: var(--teal);
-    padding: 0.25rem 0.75rem; cursor: pointer;
-    font-family: 'Lato', serif; font-size: clamp(0.6rem, 1.6vw, 0.72rem); letter-spacing: 0.1em;
-    transition: all 0.2s;
+    background: transparent; border: 1px solid rgba(122,184,192,0.4); border-radius: 4px; color: var(--teal);
+    padding: 0.25rem 0.75rem; cursor: pointer; font-family: 'Lato', serif; font-size: clamp(0.6rem, 1.6vw, 0.72rem); letter-spacing: 0.1em; transition: all 0.2s;
   }
   .custom-action-btn:hover { background: rgba(122,184,192,0.1); border-color: var(--gold); }
   .custom-action-btn:disabled { opacity: 0.35; cursor: not-allowed; }
@@ -429,71 +324,57 @@ body {
   .cell.custom-last-candidate { border-color: rgba(122,184,192,0.5) !important; box-shadow: inset 0 0 0 1px rgba(122,184,192,0.3); }
   .cell.custom-last-selected { border-color: var(--teal) !important; box-shadow: inset 0 0 0 2px rgba(122,184,192,0.5); }
 
-  /* ── Legend ── */
-  .legend { display: flex; gap: 2rem; font-size: 0.75rem; font-weight: 300; letter-spacing: 0.1em; color: var(--sand3); }
-  .legend-item { display: flex; align-items: center; gap: 0.5rem; }
-  .legend-piece { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; }
-  .legend-piece.p1 { background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90); border: 1.5px solid rgba(196,154,68,0.5); }
-  .legend-piece.p2 { background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05); border: 1.5px solid rgba(184,169,138,0.3); }
-
-
   /* ── Enhanced Footer ── */
   footer {
-    font-size: 0.8rem; letter-spacing: 0.15em; color: var(--sand3);
-    text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
-    margin-top: 1rem; text-align: center;
+    font-size: 0.8rem; letter-spacing: 0.15em; color: var(--sand3); text-transform: uppercase;
+    display: flex; flex-direction: column; align-items: center; gap: 0.6rem; margin-top: 1rem; text-align: center;
   }
-  footer .author { opacity: 0.5; font-size: 0.7rem; letter-spacing: 0.2em; line-height: 0.01rem}
-  footer .links { display: flex; align-items: center; gap: 1rem; line-height: 0.01rem }
+  footer .author { opacity: 0.5; font-size: 0.7rem; letter-spacing: 0.2em; line-height: 0.01rem; }
+  footer .links { display: flex; align-items: center; gap: 1rem; line-height: 0.01rem; }
   footer .links a, footer .links span {
-    color: var(--gold); text-decoration: none; cursor: pointer;
-    transition: color 0.2s, opacity 0.2s; font-weight: bold;
+    color: var(--gold); text-decoration: none; cursor: pointer; transition: color 0.2s, opacity 0.2s; font-weight: bold;
   }
   footer .links a:hover, footer .links span:hover { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.2); }
   footer .footer-divider { width: 1px; height: 12px; background: var(--accent); opacity: 0.4; }
   #toast-msg {
-    font-size: 0.65rem; color: var(--teal); letter-spacing: 0.1em;
-    min-height: 1.2em; opacity: 0; transition: opacity 0.2s;
+    font-size: 0.65rem; color: var(--teal); letter-spacing: 0.1em; min-height: 1.2em; opacity: 0; transition: opacity 0.2s;
   }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Sambaqui</h1>
+  <h1>Sambaqui <strong>𑁔</strong>   </h1>
 </header>
 
 <div class="menu-controls">
   <div class="mode-bar">
     <button class="mode-btn" id="open-tutorial-btn">Como Jogar</button>
-        <button class="mode-btn" id="mode-toggle">Treinar</button>
+    <button class="mode-btn" id="mode-toggle">Treinar</button>
     <button class="mode-btn" id="custom-mode-btn">Custom</button>
-    <button class="mode-btn"        id="lang-toggle-btn">EN</button>
+    <button class="mode-btn" id="lang-toggle-btn">EN</button>
   </div>
 </div>
 
-  <div class="board-controls" id="nav-controls">
-    <button id="undo-btn" class="nav-btn" title="Undo" disabled>◀</button>
-    <div class="move-log" id="move-log"></div>
-    <button id="redo-btn" class="nav-btn" title="Redo" disabled>▶</button>
-  </div>
+<div class="board-controls" id="nav-controls">
+  <button id="undo-btn" class="nav-btn" title="Undo" disabled>◀</button>
+  <div class="move-log" id="move-log"></div>
+  <button id="redo-btn" class="nav-btn" title="Redo" disabled>▶</button>
+</div>
 
-  <div class="custom-toolbar hidden" id="custom-toolbar">
-    <div class="custom-phase-label" id="custom-phase-label"></div>
-    <div class="custom-phase-dots" id="custom-phase-dots"></div>
-    <div class="custom-actions">
-      <button class="custom-action-btn danger" id="custom-undo-btn">Undo</button>
-      <button class="custom-action-btn danger" id="custom-clear-btn">Clear</button>
-      <button class="custom-action-btn primary hidden" id="custom-play-btn">▶ Play</button>
-    </div>
+<div class="custom-toolbar hidden" id="custom-toolbar">
+  <div class="custom-phase-label" id="custom-phase-label"></div>
+  <div class="custom-phase-dots" id="custom-phase-dots"></div>
+  <div class="custom-actions">
+    <button class="custom-action-btn primary hidden" id="custom-play-btn">▶ Play</button>
   </div>
+</div>
 
 <div class="stats-bar" id="stats-bar">
   <div><span id="stat-lvl-label">Nível</span> <strong id="stat-streak">0</strong></div>
-    <div class="turn-divider"></div>
+  <div class="turn-divider"></div>
   <div><span id="stat-best-label">Melhor</span> <strong id="stat-high">0</strong></div>
 </div>
-
 
 <div class="board-container-wrapper">
   <div class="board-border">
@@ -510,10 +391,7 @@ body {
   </div>
 </div>
 
-  <div class="status" id="status">Selecione uma peça ativa para mover.</div>
-
-
-
+<div class="status" id="status">Selecione uma peça ativa para mover.</div>
 
 <footer>
   <div class="links">
@@ -524,15 +402,13 @@ body {
   <div id="toast-msg"></div>
 
   <div class="links">
-
-
-<div class="author">
-  Sambaqui • v1.2.9 • © 2026 Eduardo Eller
-</div>
+    <div class="author">
+      Sambaqui • v1.2.10 • © 2026 Eduardo Eller
+    </div>
+  </div>
 </footer>
 
 <script>
-
 'use strict';
 
 // Elements
@@ -543,8 +419,6 @@ const menuControls = document.querySelector('.menu-controls');
 gameTitle.addEventListener('click', () => {
   menuControls.classList.toggle('visible');
 });
-
-
 
 // ═══════════════════════════════════════════════════════════════
 //  SECTION 1 — CONSTANTS, COORDINATE HELPERS & LOCALIZATION
@@ -572,116 +446,63 @@ let currentLang = localStorage.getItem('sambaqui_lang') || 'PT';
 
 const translations = {
   EN: {
-    newGame: "Computer",
-    practice: "Free Play",
-    tutorial: "How to Play",
-    language: "Português",
-    level: "Level⠀",
-    best: "Best⠀",
-    playerYou: "Your Move",
-    computer: "Computer Moves",
-    player1: "Player 1",
-    player2: "Player 2",
-    selectActive: "Select an active piece to move.",
-    calculating: "Computer is calculating moves…",
-    calculatingOpening: "Computer is calculating opening moves…",
-    thinking: "Computer is thinking…",
-    playerWins: "Player {winner} wins!",
-    playerWinsBanner: "Player {winner} wins",
-    humanWinsStreakBanner: "You won {streak} round{plural}",
-    humanLosesStreakBanner: "Final Score: {streak}",
-    gameOver: "Game Over!",
-    moveAgain: "Move again!",
-    repeatForbidden: "That move would repeat a previous position. Choose another move.",
-    chainMoveAgain: "Move again.",
-    noMovesAvailable: "No moves available.",
-    forbiddenByNovelty: "All {blocked} slides forbidden.",
-    legalMoves: "{prefix}Piece on {label}. {free} legal move{plural}{suffix}.",
-    chainMovePrefix: "Chain move. ",
-    forbiddenSuffix: " ({blocked} forbidden)",
-    haltedEnemies: "Halted. {n} enemy piece{plural} spotted.",
-    chainNoEnemies: "Move again.",
-    noLegalMovesPass: "Player {passedFrom} has no legal moves! Turn passes.",
-    victoryOverlayTitle: "Victory!",
-    victoryLevelComplete: "Level {humanStreak} Complete!",
-    nextRound: "Next Round",
-    gamesWon: "Game{plural} Won!",
-    startNewGame: "New Game",
-    bestScore: "Best Score: <strong>{highScore}</strong>",
-    share: "↪\uFE0E Share the Game",
-    supportLink: "♥\uFE0E Support the Game",
-    shareLink: "↪\uFE0E Share",
-    linkCopied: "Link copied to clipboard!",
-    tutorialNext: "Next >",
-    tutorialPrev: "< Prev",
-    tutorialPlay: "Play Game!",
+    newGame: "Computer", practice: "Free Play", tutorial: "How to Play", language: "Português",
+    level: "Level⠀", best: "Best⠀", playerYou: "Your Move", computer: "Computer Moves",
+    player1: "Player 1", player2: "Player 2", selectActive: "Select an active piece to move.",
+    calculating: "Computer is calculating moves…", calculatingOpening: "Computer is calculating opening moves…",
+    thinking: "Computer is thinking…", playerWins: "Player {winner} wins!", playerWinsBanner: "Player {winner} wins",
+    humanWinsStreakBanner: "You won {streak} round{plural}", humanLosesStreakBanner: "Final Score: {streak}",
+    gameOver: "Game Over!", moveAgain: "Move again!", repeatForbidden: "That move would repeat a previous position. Choose another move.",
+    chainMoveAgain: "Move again.", noMovesAvailable: "No moves available.", forbiddenByNovelty: "All {blocked} slides forbidden.",
+    legalMoves: "{prefix}Piece on {label}. {free} legal move{plural}{suffix}.", chainMovePrefix: "Chain move. ",
+    forbiddenSuffix: " ({blocked} forbidden)", haltedEnemies: "Halted. {n} enemy piece{plural} spotted.",
+    chainNoEnemies: "Move again.", noLegalMovesPass: "Player {passedFrom} has no legal moves! Turn passes.",
+    victoryOverlayTitle: "Victory!", victoryLevelComplete: "Level {humanStreak} Complete!",
+    nextRound: "Next Round", gamesWon: "Game{plural} Won!", startNewGame: "New Game",
+    bestScore: "Best Score: <strong>{highScore}</strong>", share: "↪\uFE0E Share the Game",
+    supportLink: "♥\uFE0E Support the Game", shareLink: "↪\uFE0E Share", linkCopied: "Link copied to clipboard!",
+    tutorialNext: "Next >", tutorialPrev: "< Prev", tutorialPlay: "Play Game!",
     tutorialPages: [
       { title: "The Goal", text: "Align <strong>three consecutive pieces</strong> of your color anywhere on the board.<br></br> They can be oriented in horizontal, vertical or diagonal directions." },
       { title: "Movement Rules", text: "Only <strong>active pieces</strong> are allowed to move.<br></br> Pieces move by <strong>sliding in straight lines</strong>. Pieces slide until stopped by the edge of the board or some other piece." },
       { title: "Line of Sight Rule", text: "As soon as your piece <strong>stops</strong>, moveable enemy stones in its <strong>line of sight</strong> wake up and become <strong>active</strong>. <br></br> Your piece goes to sleep and turn passes to your opponent." },
       { title: "The Chain Rule", text: "If a sliding piece halts and <strong>cannot see any enemies</strong> the <strong>chain move</strong> is triggered. The piece remains active and must be moved again immediately." },
-      { title: "The Novelty Rule", text: "Moves that would repeat a previous game state are not allowed. If you have no legal moves left, your turn ends and all enemy pieces activate." },
-   ]
+      { title: "The Novelty Rule", text: "Moves that would repeat a previous game state are not allowed. If you have no legal moves left, your turn ends and all enemy pieces activate." }
+    ]
   },
   PT: {
-    newGame: "Computador",
-    practice: "Jogo Livre",
-    tutorial: "Como Jogar",
-    language: "English",
-    level: "Nível⠀",
-    best: "Melhor⠀",
-    playerYou: "Sua Vez",
-    computer: "Computador Joga",
-    player1: "Jogador 1",
-    player2: "Jogador 2",
-    selectActive: "Selecione uma peça ativa para mover.",
-    calculating: "Computador calculando movimentos…",
-    calculatingOpening: "Computador calculando jogadas de abertura…",
-    thinking: "Computador pensando…",
-    playerWins: "Jogador {winner} venceu.",
-    playerWinsBanner: "Jogador {winner} venceu.",
-    humanWinsStreakBanner: "Pontuação: {streak}",
-    humanLosesStreakBanner: "Pontuação Final: {streak}",
-    gameOver: "Fim de Jogo!",
-    moveAgain: "Mova novamente.",
-    repeatForbidden: "Esse movimento repetiria uma posição anterior.",
-    chainMoveAgain: "Movimento em cadeia. Esta peça deve ser movida novamente.",
-    noMovesAvailable: "Peça em {label}. sem movimentos disponíveis.",
+    newGame: "Computador", practice: "Modo Solo", tutorial: "Como Jogar", language: "English",
+    level: "Nível⠀", best: "Melhor⠀", playerYou: "Sua Vez", computer: "Computador Joga",
+    player1: "Jogador 1", player2: "Jogador 2", selectActive: "Selecione uma peça ativa para mover.",
+    calculating: "Computador calculando movimentos…", calculatingOpening: "Computador calculando jogadas de abertura…",
+    thinking: "Computador pensando…", playerWins: "Jogador {winner} venceu.", playerWinsBanner: "Jogador {winner} venceu.",
+    humanWinsStreakBanner: "Pontuação: {streak}", humanLosesStreakBanner: "Pontuação Final: {streak}",
+    gameOver: "Fim de Jogo!", moveAgain: "Mova novamente.", repeatForbidden: "Esse movimento repetiria uma posição anterior.",
+    chainMoveAgain: "Movimento em cadeia. Esta peça deve ser movida novamente.", noMovesAvailable: "Peça em {label}. sem movimentos disponíveis.",
     forbiddenByNovelty: "Peça em {label}. Todos os {blocked} deslizamentos proibidos pela Regra da Novidade",
-    legalMoves: "{prefix}Peça em {label}. {free} movimento{plural} válido{plural}{suffix}",
-    chainMovePrefix: "Movimento em cadeia. ",
-    forbiddenSuffix: " ({blocked} proibido)",
-    haltedEnemies: "Parado. {n} peça{plural} inimiga{plural} à vista.",
-    chainNoEnemies: "Mova novamente.",
-    noLegalMovesPass: "Jogador {passedFrom} não tem movimentos válidos.",
-    victoryOverlayTitle: "Vitória!",
-    victoryLevelComplete: "Nível {humanStreak} Concluído.",
-    nextRound: "Continue",
-    gamesWon: "Jogo{plural} Vencido{plural}!",
-    startNewGame: "Novo Jogo",
-    bestScore: "Melhor Pontuação: <strong>{highScore}</strong>",
-    share: "↪\uFE0E Compartilhar",
-    supportLink: "♥\uFE0E Apoie o Jogo",
-    shareLink: "↪\uFE0E Compartilhe",
-    linkCopied: "Link copiado!",
-    tutorialNext: "Próximo >",
-    tutorialPrev: "< Anterior",
-    tutorialPlay: "Jogar!",
+    legalMoves: "{prefix}Peça em {label}. {free} movimento{plural} válido{plural}{suffix}", chainMovePrefix: "Movimento em cadeia. ",
+    forbiddenSuffix: " ({blocked} proibido)", haltedEnemies: "Parado. {n} peça{plural} inimiga{plural} à vista.",
+    chainNoEnemies: "Mova novamente.", noLegalMovesPass: "Jogador {passedFrom} não tem movimentos válidos.",
+    victoryOverlayTitle: "Vitória!", victoryLevelComplete: "Nível {humanStreak} Concluído.",
+    nextRound: "Continue", gamesWon: "Jogo{plural} Vencido{plural}!", startNewGame: "Novo Jogo",
+    bestScore: "Melhor Pontuação: <strong>{highScore}</strong>", share: "↪\uFE0E Compartilhar",
+    supportLink: "♥\uFE0E Apoie o Jogo", shareLink: "↪\uFE0E Compartilhe", linkCopied: "Link copiado!",
+    tutorialNext: "Próximo >", tutorialPrev: "< Anterior", tutorialPlay: "Jogar!",
     tutorialPages: [
       { title: "Objetivo", text: "Junte <strong>três peças</strong> da sua cor lado a lado em qualquer lugar do tabuleiro. Elas podem estar orientadas na horizontal, vertical ou diagonal." },
       { title: "Movimento", text: "Apenas <strong>peças ativas</strong> podem se mover. As peças <strong>deslizam em linha reta</strong> até serem bloqueadas pela borda do tabuleiro ou por outra peça." },
       { title: "Linha de Visão", text: "Assim que sua peça <strong>para</strong>, pedras inimigas móveis na sua <strong>linha de visão</strong> acordam e tornam-se <strong>ativas</strong>. Sua peça dorme e a vez passa para o oponente. A <strong>linha de visão</strong> segue as oito direções principais e é obstruída por qualquer peça." },
       { title: "Regra da Cadeia", text: "Se uma peça parar e <strong>não avistar</strong> um inimigo, o <strong>movimento em cadeia</strong> é ativado. A peça continua ativa e deve ser movida novamente." },
-      { title: "Originalidade", text: "Movimentos que <strong>repetiriam</strong> um estado de jogo anterior, incluindo atividade das peças, <strong>não são permitidos</strong>. Se você ficar sem movimentos válidos, sua vez termina e <strong>todas</strong> as peças inimigas são ativadas." },   
+      { title: "Originalidade", text: "Movimentos que <strong>repetiriam</strong> um estado de jogo anterior, incluindo atividade das peças, <strong>não são permitidos</strong>. Se você ficar sem movimentos válidos, sua vez termina e <strong>todas</strong> as peças inimigas são ativadas." }
     ]
   }
 };
 
 function t(key, variables = {}) {
   let text = translations[currentLang][key] || translations['EN'][key] || '';
-  Object.keys(variables).forEach(v => {
-    text = text.replaceAll(`{${v}}`, variables[v]);
-  });
+  for (const [v, val] of Object.entries(variables)) {
+    text = text.replaceAll(`{${v}}`, val);
+  }
   return text;
 }
 
@@ -770,7 +591,6 @@ function checkVictory(pieces) {
       if (!pieces[line[i]] || pieces[line[i]].player !== pId) { match = false; break; }
     }
     if (match) {
-      // Fix 2: if ALL pieces of the winner are part of some winning line, mark them all
       const allWinnerSquares = Object.keys(pieces).filter(sq => pieces[sq].player === pId);
       const squaresInAnyLine = new Set();
       for (const wLine of ALL_LINES) {
@@ -872,7 +692,7 @@ state.history.add(serialiseState(state.pieces, state.currentPlayer));
 
 const timeline = [];
 let timelineIndex = -1;
-const moveLog = []; // { player, from, to } per half-move, length === timelineIndex at end of game
+const moveLog = []; 
 
 function pushTimeline() {
   if (timelineIndex < timeline.length - 1) timeline.splice(timelineIndex + 1);
@@ -924,7 +744,7 @@ function restoreTimeline(idx) {
             document.getElementById('label-p2').textContent = currentLang === 'PT' ? "Jogador Venceu" : "Player Wins";
             tagP2.classList.add('active'); tagP1.classList.remove('active');
           }
-          setStatus(currentLang === 'PT' ? "" : "", true);
+          setStatus("", true);
           document.body.classList.add('clickable-restart');
           window.isWaitingForContinue = true;
         } else {
@@ -989,7 +809,7 @@ function showResultBanner(winner) {
   `;
   resultBannerSlot.appendChild(banner);
   document.getElementById('banner-new-game').addEventListener('click', (e) => {
-    e.stopPropagation(); // Impede o clique fantasma de reiniciar duas vezes
+    e.stopPropagation(); 
     const isDefeat = vsAI && winner !== humanPlayerColor;
     restartGame(isDefeat);
   });
@@ -1029,8 +849,6 @@ const customModeBtn = document.getElementById('custom-mode-btn');
 const customToolbar = document.getElementById('custom-toolbar');
 const customPhaseLabel = document.getElementById('custom-phase-label');
 const customPhaseDots = document.getElementById('custom-phase-dots');
-const customUndoBtn = document.getElementById('custom-undo-btn');
-const customClearBtn = document.getElementById('custom-clear-btn');
 const customPlayBtn = document.getElementById('custom-play-btn');
 
 const cellEls = {};
@@ -1043,7 +861,7 @@ for (let r = 0; r < 5; r++) {
     const cell = document.createElement('div');
     cell.className = 'cell' + (((r + c) % 2 === 1) ? ' dark-sq' : '');
     
-if (!vsAI) {
+    if (!vsAI) {
       const coord = document.createElement('div');
       coord.className = 'cell-label';
       coord.textContent = label;
@@ -1077,18 +895,10 @@ function renderMoveLog() {
   if (moveLog.length === 0) {
     const empty = document.createElement('span');
     empty.className = 'move-log-empty';
-    empty.textContent = '';
     moveLogEl.appendChild(empty);
     return;
   }
 
-  // timelineIndex corresponds to the state *after* moveLog[timelineIndex-1] was played.
-  // Entries 0..timelineIndex-1 are played; timelineIndex..end are the redo tail.
-
-  // For each move, check whether any other active piece of the same player
-  // could also have slid to the same landing square from the pre-move position.
-  // Both the active set and piece positions are captured in the log entry itself,
-  // so this is independent of timeline indexing.
   function needsDisambiguation(i) {
     const entry = moveLog[i];
     const pieces = entry.piecesSnapshot;
@@ -1116,9 +926,7 @@ function renderMoveLog() {
     const el = document.createElement('div');
     const isFuture = i >= timelineIndex;
     const isCurrent = i === timelineIndex - 1;
-    el.className = 'move-log-entry' +
-      (isFuture ? ' future' : '') +
-      (isCurrent ? ' current' : '');
+    el.className = 'move-log-entry' + (isFuture ? ' future' : '') + (isCurrent ? ' current' : '');
 
     const dot = document.createElement('div');
     dot.className = `move-log-dot p${entry.player}`;
@@ -1134,7 +942,6 @@ function renderMoveLog() {
     if (isCurrent) lastActiveEl = el;
   }
 
-  // Scroll the current (last active) entry into view within the bar
   const target = lastActiveEl || (moveLog.length > 0 ? moveLogEl.lastElementChild : null);
   if (target) {
     const containerLeft = moveLogEl.getBoundingClientRect().left;
@@ -1147,7 +954,6 @@ function renderMoveLog() {
 //  SECTION 5 — INTERACTION RULES
 // ═══════════════════════════════════════════════════════════════
 function handleSquareClick(label) {
-  // Custom game setup mode takes over all board clicks
   if (customMode && customMode !== 'ready') {
     handleCustomClick(label);
     return;
@@ -1166,8 +972,13 @@ function handleSquareClick(label) {
     executeMove(src, targetMove);
   } else if (piece && piece.player === state.currentPlayer && piece.active) {
     if (state.sneaking && label !== state.sneakingSquare) return;
-    if (state.selectedSquare === label) { clearSelection(); state.highlightingActive = true; render(); }
-    else selectPiece(label);
+    if (state.selectedSquare === label) { 
+        clearSelection(); 
+        state.highlightingActive = true; 
+        render(); 
+    } else {
+        selectPiece(label);
+    }
   } else {
     if (state.selectedSquare) {
       clearSelection();
@@ -1237,13 +1048,9 @@ function animateSlide(player, fromLabel, path, onDone) {
   const ghost = document.createElement('div');
   ghost.className = `piece-ghost p${player}`;
   ghost.style.cssText = `
-    width: ${pieceSize}px;
-    height: ${pieceSize}px;
-    position: fixed;
-    left: 0; top: 0;
-    z-index: 9999;
-    pointer-events: none;
-    transition: none;
+    width: ${pieceSize}px; height: ${pieceSize}px;
+    position: fixed; left: 0; top: 0;
+    z-index: 9999; pointer-events: none; transition: none;
   `;
 
   const start = cellCenter(fromLabel);
@@ -1292,15 +1099,12 @@ function executeMove(fromLabel, move) {
 }
 
 function finalizeMove(fromLabel, move) {
-  // Record this half-move before any state change so timeline stays aligned.
-  // Capture the full set of active same-player squares and a position snapshot
-  // now, before the deactivation sweep below overwrites state.pieces.
   const movingPlayer = state.currentPlayer;
   const activePeers = Object.keys(state.pieces).filter(
     sq => state.pieces[sq].player === movingPlayer && state.pieces[sq].active
   );
   const piecesSnapshot = JSON.parse(JSON.stringify(state.pieces));
-  moveLog.splice(timelineIndex); // truncate any redo tail
+  moveLog.splice(timelineIndex); 
   moveLog.push({ player: movingPlayer, from: fromLabel, to: move.landing, activePeers, piecesSnapshot });
 
   for (const [sq, p] of Object.entries(state.pieces)) {
@@ -1383,7 +1187,6 @@ function checkTurnPassing() {
     return;
   }
 
-  // No legal moves: turn ends, all enemy pieces activate
   const oppositePlayer = state.currentPlayer === 1 ? 2 : 1;
   const passedFrom = state.currentPlayer;
   for (const [sq, p] of Object.entries(state.pieces)) {
@@ -1410,7 +1213,6 @@ function showVictory(winner) {
   showResultBanner(winner);
 
   if (!vsAI) {
-    if (state.winLine) state.winLine._winner = winner;
     setStatus(t('playerWins', { winner: winner }), true);
     return;
   }
@@ -1424,8 +1226,7 @@ function showVictory(winner) {
       tagP2.classList.add('active'); tagP1.classList.remove('active');
     }
 
-    setStatus(currentLang === 'PT' ? "" : "", true);
-
+    setStatus("", true);
     setTimeout(() => {
       document.body.classList.add('clickable-restart');
       window.isWaitingForContinue = true;
@@ -1433,7 +1234,6 @@ function showVictory(winner) {
 
     updateMetaDisplay();
   } else {
-    // ─── COMPUTADOR VENCEU ───
     if (humanPlayerColor === 1) {
       labelP2.textContent = currentLang === 'PT' ? "Computador Venceu" : "Computer Wins";
       tagP2.classList.add('active'); tagP1.classList.remove('active');
@@ -1667,7 +1467,7 @@ class AdvancedEngineMCTS {
     let depth = 0;
     while (!current.isGameOver && depth < maxDepth) {
       const valid = current.getValidMoves();
-      if (valid.length === 0) break; // makeMove handles pass; if truly stuck, stop simulation
+      if (valid.length === 0) break;
       const action = valid[Math.floor(Math.random() * valid.length)];
       current.makeMove(action.from, action.move);
       depth++;
@@ -1749,7 +1549,6 @@ function launchTutorial(onCloseCallback) {
       <div class="tutorial-header">
         <div class="tutorial-title-area">
           <span class="tutorial-title" id="tut-title"></span>
-          <button class="tutorial-lang-btn" id="tut-lang-toggle"></button>
         </div>
         <span class="tutorial-pages" id="tut-page-indicator"></span>
       </div>
@@ -1762,7 +1561,6 @@ function launchTutorial(onCloseCallback) {
   `;
   document.body.appendChild(overlay);
 
-  // Fix 1b: clicking outside the card closes the tutorial
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) {
       overlay.remove();
@@ -1776,15 +1574,7 @@ function launchTutorial(onCloseCallback) {
   const indicatorEl = overlay.querySelector('#tut-page-indicator');
   const prevBtn = overlay.querySelector('#tut-prev-btn');
   const nextBtn = overlay.querySelector('#tut-next-btn');
-  const innerLangBtn = overlay.querySelector('#tut-lang-toggle');
 
-  innerLangBtn.textContent = currentLang === 'EN' ? 'Português' : 'English';
-  innerLangBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleLanguage();
-    innerLangBtn.textContent = currentLang === 'EN' ? 'Português' : 'English';
-    refreshTutorialPage();
-  });
 
   refreshTutorialPage = () => {
     const pagesData = translations[currentLang].tutorialPages || translations['EN'].tutorialPages;
@@ -1827,14 +1617,11 @@ function launchTutorial(onCloseCallback) {
 // ═══════════════════════════════════════════════════════════════
 //  SECTION 11b — CUSTOM GAME MODE
 // ═══════════════════════════════════════════════════════════════
-
-// customMode: false | 'place-p1' | 'place-p2' | 'select-last' | 'ready'
 let customMode = false;
 
-// custom placement state
 const customSetup = {
-  pieces: {},       // label → { player }  (no active flag yet)
-  lastMoved: null,  // label of "last moved" piece
+  pieces: {}, 
+  lastMoved: null,
 };
 
 const MAX_PIECES_PER_PLAYER = 4;
@@ -1845,13 +1632,11 @@ function enterCustomMode() {
   customSetup.pieces = {};
   customSetup.lastMoved = null;
 
-  // Pause regular game
-  vsAI = false;   // disable AI interference while setting up
+  vsAI = false;
   window.isWaitingForContinue = false;
   document.body.classList.remove('clickable-restart');
   clearResultBanner();
 
-  // UI changes
   customModeBtn.classList.add('active');
   modeToggleBtn.classList.remove('active');
   customToolbar.classList.remove('hidden');
@@ -1875,7 +1660,6 @@ function exitCustomMode() {
   customToolbar.classList.add('hidden');
   customPlayBtn.classList.add('hidden');
 
-  // Return to whatever mode was active, reset the game
   restartGame(true);
 }
 
@@ -1884,18 +1668,11 @@ function countCustomPieces(player) {
 }
 
 function updateCustomPhaseUI() {
-  // Phase label
   const p1Count = countCustomPieces(1);
   const p2Count = countCustomPieces(2);
 
-  let labelHTML = '';
-  if (customMode === 'place-p1') {
-    const need = MAX_PIECES_PER_PLAYER - p1Count;
-    labelHTML = '';
-  }
-  customPhaseLabel.innerHTML = labelHTML;
+  customPhaseLabel.innerHTML = '';
 
-  // Phase dots: 8 slots (4 white, 4 black), then a star for last-moved marker
   customPhaseDots.innerHTML = '';
   for (let i = 0; i < MAX_PIECES_PER_PLAYER; i++) {
     const dot = document.createElement('div');
@@ -1904,10 +1681,11 @@ function updateCustomPhaseUI() {
     if (!filled && customMode === 'place-p1') dot.classList.add('active-step');
     customPhaseDots.appendChild(dot);
   }
-  // small divider
+
   const sep = document.createElement('div');
   sep.style.cssText = 'width:1px;height:10px;background:rgba(122,184,192,0.25);flex-shrink:0;';
   customPhaseDots.appendChild(sep);
+
   for (let i = 0; i < MAX_PIECES_PER_PLAYER; i++) {
     const dot = document.createElement('div');
     const filled = i < p2Count;
@@ -1916,7 +1694,6 @@ function updateCustomPhaseUI() {
     customPhaseDots.appendChild(dot);
   }
 
-  // Show/hide Play button
   if (customMode === 'ready') {
     customPlayBtn.classList.remove('hidden');
     customPlayBtn.textContent = currentLang === 'PT' ? '▶ Jogar' : '▶ Play';
@@ -1930,11 +1707,9 @@ function renderCustomBoard() {
     const cell = cellEls[label];
     const piece = customSetup.pieces[label];
 
-    // reset classes
     cell.className = 'cell' + (((labelToRC(label)[0] + labelToRC(label)[1]) % 2 === 1) ? ' dark-sq' : '');
     cell.innerHTML = '';
 
-    // Always show coordinate labels in custom mode
     const coord = document.createElement('div');
     coord.className = 'cell-label';
     coord.textContent = label;
@@ -1973,7 +1748,6 @@ function renderCustomBoard() {
 function handleCustomClick(label) {
   if (!customMode) return;
 
-  // In 'ready' state, allow re-clicking any piece to change the last-moved selection
   if (customMode === 'ready') {
     const piece = customSetup.pieces[label];
     if (!piece) return;
@@ -1991,25 +1765,19 @@ function handleCustomClick(label) {
 
   if (customMode === 'place-p1') {
     if (piece) {
-      // Remove piece (only own-color pieces)
       if (piece.player === 1) {
         delete customSetup.pieces[label];
         updateCustomPhaseUI();
         renderCustomBoard();
-        setStatus(currentLang === 'PT'
-          ? `Peça removida de ${label}.`
-          : `Piece removed from ${label}.`, 'sneaking');
+        setStatus(currentLang === 'PT' ? `Peça removida de ${label}.` : `Piece removed from ${label}.`, 'sneaking');
       }
       return;
     }
-    // Place white piece
     customSetup.pieces[label] = { player: 1 };
     const count = countCustomPieces(1);
     if (count === MAX_PIECES_PER_PLAYER) {
       customMode = 'place-p2';
-      setStatus(currentLang === 'PT'
-        ? 'Agora coloque 4 peças pretas.'
-        : 'Now place 4 black pieces.', 'sneaking');
+      setStatus(currentLang === 'PT' ? 'Agora coloque 4 peças pretas.' : 'Now place 4 black pieces.', 'sneaking');
     } else {
       const need = MAX_PIECES_PER_PLAYER - count;
       setStatus(currentLang === 'PT'
@@ -2021,27 +1789,20 @@ function handleCustomClick(label) {
 
   } else if (customMode === 'place-p2') {
     if (piece) {
-      // Allow removing placed pieces (either color for flexibility)
       if (piece.player === 2) {
         delete customSetup.pieces[label];
         updateCustomPhaseUI();
         renderCustomBoard();
-        setStatus(currentLang === 'PT'
-          ? `Peça removida de ${label}.`
-          : `Piece removed from ${label}.`, 'sneaking');
+        setStatus(currentLang === 'PT' ? `Peça removida de ${label}.` : `Piece removed from ${label}.`, 'sneaking');
       } else if (piece.player === 1) {
-        // clicking a white piece while placing black — go back to removing it
         delete customSetup.pieces[label];
         customMode = 'place-p1';
         updateCustomPhaseUI();
         renderCustomBoard();
-        setStatus(currentLang === 'PT'
-          ? 'Voltou para colocação de peças brancas.'
-          : 'Back to placing white pieces.', 'sneaking');
+        setStatus(currentLang === 'PT' ? 'Voltou para colocação de peças brancas.' : 'Back to placing white pieces.', 'sneaking');
       }
       return;
     }
-    // Place black piece
     customSetup.pieces[label] = { player: 2 };
     const count = countCustomPieces(2);
     if (count === MAX_PIECES_PER_PLAYER) {
@@ -2074,12 +1835,8 @@ function handleCustomClick(label) {
 function customUndoPlacement() {
   if (!customMode || customMode === 'ready') return;
 
-  // Find last placed piece and remove it
-  const labels = LABELS.split('').filter ? [...LABELS].filter(l => customSetup.pieces[l]) : [];
-  // LABELS is a string of 25 chars, iterate in reverse order of board
   let lastPlaced = null;
   if (customMode === 'place-p1' || customMode === 'place-p2') {
-    // Find last placed piece of current color phase
     const targetPlayer = customMode === 'place-p1' ? 1 : 2;
     for (const lbl of LABELS) {
       if (customSetup.pieces[lbl] && customSetup.pieces[lbl].player === targetPlayer) {
@@ -2089,16 +1846,13 @@ function customUndoPlacement() {
     if (lastPlaced) {
       delete customSetup.pieces[lastPlaced];
     } else if (customMode === 'place-p2') {
-      // Undo back to place-p1 phase
       customMode = 'place-p1';
-      // remove last white piece
       for (const lbl of LABELS) {
         if (customSetup.pieces[lbl] && customSetup.pieces[lbl].player === 1) lastPlaced = lbl;
       }
       if (lastPlaced) delete customSetup.pieces[lastPlaced];
     }
   } else if (customMode === 'select-last') {
-    // Go back to placing black pieces — remove last black piece
     customMode = 'place-p2';
     for (const lbl of LABELS) {
       if (customSetup.pieces[lbl] && customSetup.pieces[lbl].player === 2) lastPlaced = lbl;
@@ -2117,7 +1871,6 @@ function customUndoPlacement() {
 }
 
 function commitCustomPosition() {
-  // Build the pieces object with correct active flags based on LOS from lastMoved piece
   if (!customSetup.lastMoved || !customSetup.pieces[customSetup.lastMoved]) return;
 
   const rawPieces = customSetup.pieces;
@@ -2125,42 +1878,34 @@ function commitCustomPosition() {
   const lastMovedPlayer = rawPieces[lastMovedLabel].player;
   const opponent = lastMovedPlayer === 1 ? 2 : 1;
 
-  // Build pieces dict with all inactive first
   const builtPieces = {};
   for (const [lbl, p] of Object.entries(rawPieces)) {
     builtPieces[lbl] = { player: p.player, active: false };
   }
 
-  // Simulate post-move state: what happens after lastMovedPlayer moved to lastMovedLabel?
-  // Compute visible moveable enemies from that landing square
   const visibleEnemies = computeVisibleMoveableEnemies(lastMovedLabel, builtPieces, lastMovedPlayer);
 
   let nextPlayer;
   if (visibleEnemies.length > 0) {
-    // Normal case: enemies wake up, turn passes
     for (const sq of visibleEnemies) {
       builtPieces[sq] = { ...builtPieces[sq], active: true };
     }
     nextPlayer = opponent;
   } else {
-    // Chain move: the piece that moved stays active, same player moves again
     builtPieces[lastMovedLabel] = { ...builtPieces[lastMovedLabel], active: true };
     nextPlayer = lastMovedPlayer;
   }
 
-  // Exit custom mode, set up game state
   customMode = false;
   customModeBtn.classList.remove('active');
   customToolbar.classList.add('hidden');
   customPlayBtn.classList.add('hidden');
 
-  // Reset the game state with the custom position
   window.isWaitingForContinue = false;
   document.body.classList.remove('clickable-restart');
-  document.querySelector('.victory-overlay')?.remove();
   clearResultBanner();
 
-  vsAI = false;  // custom positions play as 2-player (no AI) by default
+  vsAI = false;  
   modeToggleBtn.textContent = t('newGame');
   humanStreak = 0;
 
@@ -2201,37 +1946,23 @@ customModeBtn.addEventListener('click', () => {
   if (customMode) {
     exitCustomMode();
   } else {
-    // Deactivate other mode buttons visually
     modeToggleBtn.classList.remove('active');
     enterCustomMode();
   }
 });
 
-customUndoBtn.addEventListener('click', () => customUndoPlacement());
-customClearBtn.addEventListener('click', () => {
-  customSetup.pieces = {};
-  customSetup.lastMoved = null;
-  customMode = 'place-p1';
-  updateCustomPhaseUI();
-  renderCustomBoard();
-  setStatus(currentLang === 'PT'
-    ? 'Tabuleiro limpo. Coloque 4 peças brancas.'
-    : 'Board cleared. Place 4 white pieces.', 'sneaking');
-});
+
 customPlayBtn.addEventListener('click', () => commitCustomPosition());
 
 // ═══════════════════════════════════════════════════════════════
 //  SECTION 12 — INITIALIZATION LOOP
 // ═══════════════════════════════════════════════════════════════
 
-let unlockedTutorialTrigger = null;
-
 pushTimeline();
 render();
 updateMetaDisplay();
 
 function render() {
-  // Delegate to custom mode renderer when active
   if (customMode) {
     renderCustomBoard();
     return;
@@ -2325,7 +2056,6 @@ function setStatus(msg, variant = false) {
 function setMode(aiMode) {
   if (state.animating) return;
 
-  // If in custom mode, exit it cleanly first
   if (customMode) {
     customMode = false;
     customModeBtn.classList.remove('active');
@@ -2347,15 +2077,12 @@ function restartGame(forceResetColor) {
   
   window.isWaitingForContinue = false;
   document.body.classList.remove('clickable-restart');
-
-  document.querySelector('.victory-overlay')?.remove();
   clearResultBanner();
 
   if (vsAI) {
     if (forceResetColor) {
       humanPlayerColor = 1;
       humanStreak = 0;
-      window.achievedNewBest = true; // Força render correto dos labels de nível
       window.achievedNewBest = false;
     } else {
       humanPlayerColor = humanPlayerColor === 1 ? 2 : 1;
@@ -2394,7 +2121,7 @@ function restartGame(forceResetColor) {
 }
 
 function updateMetaDisplay() {
-  statStreakEl.textContent = humanStreak+1;
+  statStreakEl.textContent = humanStreak + 1;
   statHighEl.textContent = highScore;
 
   if (vsAI) {
@@ -2430,7 +2157,6 @@ function updateMetaDisplay() {
   footerSupportLink.textContent = t('supportLink');
   footerShareLink.textContent = t('shareLink');
 
-  // Keep Custom button label stable
   customModeBtn.textContent = currentLang === 'PT' ? 'Custom' : 'Custom';
 }
 
@@ -2451,7 +2177,7 @@ function applyLanguageSwitch() {
         } else {
           labelP2.textContent = currentLang === 'PT' ? "Jogador Venceu" : "Player Wins";
         }
-        setStatus(currentLang === 'PT' ? "" : "", true);
+        setStatus("", true);
       } else {
         if (humanPlayerColor === 1) {
           labelP2.textContent = currentLang === 'PT' ? "Computador Venceu" : "Computer Wins";
@@ -2468,7 +2194,6 @@ function applyLanguageSwitch() {
   } else if (vsAI && state.currentPlayer !== humanPlayerColor) {
     setStatus(t('thinking'), 'highlight');
   } else if (state.selectedSquare) {
-    // Retranslate status text only — do NOT call selectPiece (mutates state + renders)
     const raw = state.currentMoves;
     const free = raw.filter(m => !m.blocked).length;
     const blocked = raw.filter(m => m.blocked).length;
@@ -2513,7 +2238,7 @@ function applyLanguageSwitch() {
 }
 
 document.addEventListener('click', (e) => {
-  if (customMode) return;  // custom mode handles its own clicks
+  if (customMode) return;  
   if (window.isWaitingForContinue) {
     if (e.target.closest('.menu-controls') || e.target.closest('.nav-btn') || e.target.closest('#result-banner')) return;
 
@@ -2530,7 +2255,7 @@ document.addEventListener('click', (e) => {
 undoBtn.addEventListener('click', () => { if (!undoBtn.disabled && !vsAI) restoreTimeline(timelineIndex - 1); });
 redoBtn.addEventListener('click', () => { if (!redoBtn.disabled && !vsAI) restoreTimeline(timelineIndex + 1); });
 modeToggleBtn.addEventListener('click', () => setMode(!vsAI));
-openTutorialBtn.addEventListener('click', () => launchTutorial(unlockedTutorialTrigger));
+openTutorialBtn.addEventListener('click', () => launchTutorial());
 langToggleBtn.addEventListener('click', toggleLanguage);
 
 footerShareLink.addEventListener('click', () => {
