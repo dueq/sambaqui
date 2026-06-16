@@ -448,7 +448,7 @@ body {
 
 
 <div class="author">
-  Sambaqui • v1.2.8.2 • © 2026 Eduardo Eller
+  Sambaqui • v1.2.8.3 • © 2026 Eduardo Eller
 </div>
 </footer>
 
@@ -750,17 +750,81 @@ let humanPlayerColor = 1;
 window.isWaitingForContinue = false;
 window.achievedNewBest = false;
 
+const BOARD_OPTIONS = [
+  
+  // Option 1 Quinta
+  {
+    B: { player: 1, active: true }, F: { player: 1, active: true },
+    T: { player: 1, active: true }, X: { player: 1, active: true },
+    D: { player: 2, active: false }, J: { player: 2, active: false },
+    P: { player: 2, active: false }, V: { player: 2, active: false },
+  },
+  // Option 2 Sexta
+  {
+    A: { player: 1, active: true }, G: { player: 1, active: true },
+    T: { player: 1, active: true }, X: { player: 1, active: true },
+    B: { player: 2, active: false }, F: { player: 2, active: false },
+    S: { player: 2, active: false }, Y: { player: 2, active: false },
+  },
+
+
+   // Option 3 Sábado
+  {
+    B: { player: 1, active: true }, G: { player: 1, active: true },
+    S: { player: 1, active: true }, X: { player: 1, active: true },
+    D: { player: 2, active: false }, I: { player: 2, active: false },
+    Q: { player: 2, active: false }, V: { player: 2, active: false },
+  },
+
+     // Option 4 Domingo
+  {
+    B: { player: 1, active: true }, J: { player: 1, active: true },
+    P: { player: 1, active: true }, X: { player: 1, active: true },
+    D: { player: 2, active: false }, F: { player: 2, active: false },
+    T: { player: 2, active: false }, V: { player: 2, active: false },
+  },
+
+     // Option 5 Segunda
+  {
+    C: { player: 1, active: true }, G: { player: 1, active: true },
+    I: { player: 1, active: true }, R: { player: 1, active: true },
+    H: { player: 2, active: false }, Q: { player: 2, active: false },
+    S: { player: 2, active: false }, W: { player: 2, active: false },
+  },
+
+      // Option 6 Terça
+  {
+    C: { player: 1, active: true }, F: { player: 1, active: true },
+    N: { player: 1, active: true }, Q: { player: 1, active: true },
+    I: { player: 2, active: false }, L: { player: 2, active: false },
+    T: { player: 2, active: false }, W: { player: 2, active: false },
+  },
+
+        // Option 7 Quarta
+  {
+    B: { player: 1, active: true }, F: { player: 1, active: true },
+    O: { player: 1, active: true }, W: { player: 1, active: true },
+    C: { player: 2, active: false }, K: { player: 2, active: false },
+    T: { player: 2, active: false }, X: { player: 2, active: false },
+  },
+
+
+];
+
 function makeInitialPieces() {
-  return {
-    B: { player: 1, active: true },
-    F: { player: 1, active: true },
-    T: { player: 1, active: true },
-    X: { player: 1, active: true },
-    D: { player: 2, active: false },
-    J: { player: 2, active: false },
-    P: { player: 2, active: false },
-    V: { player: 2, active: false },
-  };
+  // 1. Get a unique number for the current day (YYYYMMDD format)
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  
+  const dateSeed = parseInt(`${year}${month}${day}`); // e.g., 20260616
+
+  // 2. Use the modulo operator (%) to safely map the seed to your array length
+  const optionIndex = dateSeed % BOARD_OPTIONS.length;
+
+  // 3. Return a *deep copy* so players don't accidentally mutate the master list
+  return JSON.parse(JSON.stringify(BOARD_OPTIONS[optionIndex]));
 }
 
 const state = {
