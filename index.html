@@ -56,22 +56,22 @@ body {
 
   /* ── Stats Bar ── */
   .stats-bar {
-    font-family: 'Lato'; scale:1.15;
-    display: flex; gap: 2.3rem; font-size: 1rem; line-height: 1.2;
+    font-family: 'Lato'; scale:1;
+    display: flex; gap: 2.3rem; font-size: 1.2rem; line-height: 1;
     letter-spacing: 0.1em; background: rgba(72, 49, 2, 0.646);
-    padding: 0.4rem 1.2rem; border-radius: 40px; border: 1px solid rgba(199, 131, 3, 0.3);
+    padding: 0.5rem 2rem; border-radius: 40px; border: 1px solid rgba(199, 131, 3, 0.3);
   }
   .stats-bar strong { color: var(--gold);      font-family: "Molle", cursive; font-weight: 300; font-style: italic;}
   
   /* ── Mode & Help toggles ── */
   .menu-controls { scale:1.1; font-size: 2rem; display: flex; flex-direction: column; align-items: center; gap: 0.6rem;}
   .mode-bar {
-    display: flex; align-items: center; gap: 0.8rem;
-    font-size: clamp(0.65rem, 1.8vw, 0.78rem); letter-spacing: 0.12em; color: var(--sand3);
+    display: flex; align-items: center; gap: 1rem;
+    font-size: clamp(0.65rem, 1.8vw, 0.78rem); letter-spacing: 0.1em; color: var(--sand3);
   }
   .mode-btn {
-    background: transparent; border: 1px solid var(--accent); border-radius: 4px;
-    color: var(--sand3); padding: 0.3rem 0.9rem; cursor: pointer;
+    background: rgba(72, 49, 2, 0.646); border: 1px solid var(--accent); border-radius: 8px;
+    color: var(--sand3); padding: 0.3rem 1rem; cursor: pointer;
     font-family: 'Lato', serif; font-size: inherit; letter-spacing: inherit;
     transition: background 0.2s, border-color 0.2s, color 0.2s;
   }
@@ -93,7 +93,7 @@ body {
   .player-tag .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; }
   .player-tag.p1 .dot { background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90); border: 1.5px solid var(--accent); }
   .player-tag.p2 .dot{ background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05); border: 1.5px solid var(--accent); }
-  .turn-divider { width: 2px; height: 16px; background: var(--accent); opacity: 0.6; }
+  .turn-divider { width: 2px; height: 20px; background: var(--accent); opacity: 0.6; }
 
   /* ── Shared slot: turn-bar and result-banner occupy the same fixed-height area ── */
   .banner-zone {
@@ -112,16 +112,23 @@ body {
   }
   /* Banner slot is invisible when empty; turn-bar shows through */
   .banner-zone #result-banner-slot:empty ~ .turn-bar,
-  .banner-zone .turn-bar { opacity: 1; }
+  .banner-zone .turn-bar { opacity: 1; font-family: 'Lato'; scale:1;
+    display: flex; gap: 2.7rem; font-size: 1.1rem; line-height: 1;
+    letter-spacing: 0.1em; background: rgba(56, 39, 4, 0.715);
+    padding: 0.5rem 2rem; border-radius: 8px; border: 1px solid rgba(136, 91, 9, 0.311);
+ }
   /* When a banner is present, hide the turn-bar behind it */
   .banner-zone #result-banner-slot:not(:empty) ~ .turn-bar { opacity: 0; pointer-events: none; }
   /* result-banner fills the slot width */
   #result-banner-slot .result-banner { width: 100%; max-width: none; }
 
   /* ── Status bar ── */
-  .status {
-    font-size: clamp(1rem, 1.8vw, 0.78rem); letter-spacing: 0.12em;
-    color: var(--sand3); min-height: 1.2em; text-align: center; transition: color 0.2s;
+  .status {font-family: 'Lato'; scale:1;
+    display: flex; gap: 2.3rem; font-size: 1.2rem; line-height: 2;
+    letter-spacing: 0.1em; ;
+ 
+    font-size: clamp(1.1rem, 1.2vw, 0.78rem); letter-spacing: 0.1em;
+    color: var(--sand3); min-height: 1em; text-align: center; transition: color 0.2s;
   }
   .status.highlight { color: var(--gold); }
   .status.warn      { color: #c0704a; }
@@ -131,7 +138,7 @@ body {
   .board-container-wrapper { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
   .board-border {
     padding: clamp(10px, 2vw, 18px); border: 2px solid var(--accent); border-radius: 8px;
-    box-shadow: 0 0 0 1px rgba(196,154,68,0.15), 0 0 60px rgba(60,30,10,0.8), inset 0 0 30px rgba(0,0,0,0.3);
+    box-shadow: 0 0 0 1px rgba(196,154,68,0.15), 0 0 60px rgba(60,30,10,0.8), inset 0 0 20px rgba(35, 23, 3, 0.426);
     background: rgba(202, 172, 121, 0.572);
   }
   .board-wrapper { display: flex; flex-direction: column; align-items: center; gap: var(--gap); }
@@ -198,10 +205,11 @@ body {
   }
 
   /* ── Result banner ── */
-  .result-banner {
+  .result-banner {background: rgba(56, 39, 4, 0.715);
+    padding: 0.5rem 2rem; border: 1px solid rgba(136, 91, 9, 0.311);
     display: flex; align-items: center; justify-content: center; gap: 1.2rem;
-    border: 1px solid var(--accent); border-radius: 6px;
-    background: rgba(28,21,16,0.85); padding: 0.55rem 1.2rem;
+    border: 1px solid var(--accent); border-radius: 8px;
+  ; padding: 0.55rem 1.2rem;
     font-size: clamp(1rem, 1.8vw, 0.85rem); letter-spacing: 0.15em;
     color: var(--gold); animation: fade-in 0.4s ease;
     width: 100%;
@@ -215,6 +223,18 @@ body {
     transition: background 0.2s, border-color 0.2s; flex-shrink: 0;
   }
   .result-banner .new-game-btn:hover { background: rgba(196,154,68,0.12); border-color: var(--gold); }
+
+  /* ── Share-result button (below board, after game ends) ── */
+  #share-result-btn {
+    display: none;
+    background: rgba(196,154,68,0.08); border: 1px solid rgba(196,154,68,0.45);
+    border-radius: 6px; color: var(--gold);
+    padding: 0.45rem 1.3rem; cursor: pointer; white-space: nowrap;
+    font-family: 'Lato', serif; font-size: clamp(0.72rem, 2vw, 1rem);
+    letter-spacing: 0.12em; transition: background 0.2s, border-color 0.2s;
+    margin-top: 0.2rem;
+  }
+  #share-result-btn:hover { background: rgba(196,154,68,0.18); border-color: var(--gold); }
 
   /* ── Cells ── */
   .cell {
@@ -347,18 +367,11 @@ body {
   .tutorial-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(122,79,46,0.3); padding-bottom: 0.6rem; gap: 0.5rem; }
   .tutorial-title-area { display: flex; align-items: center; gap: 0.6rem; }
   .tutorial-title { color: var(--gold); font-size: 1.4rem; font-weight: bold; letter-spacing: 0.05em; }
-  .tutorial-lang-btn {
-    background: transparent; border: 1px solid rgba(196,154,68,0.3); border-radius: 4px;
-    color: var(--sand3); padding: 0.15rem 0.4rem; cursor: pointer;
-    font-family: 'Lato', serif; font-size: 0.65rem; letter-spacing: 0.05em;
-    transition: all 0.2s;
-  }
-  .tutorial-lang-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(196,154,68,0.08); }
   .tutorial-pages { font-size: 0.8rem; color: var(--sand3); letter-spacing: 0.1em; white-space: nowrap; }
-  .tutorial-body { font-family:"Lato"; font-size: 0.95rem; line-height: 1.5; color: var(--sand); min-height: 120px; }
+  .tutorial-body { font-family:"Lato"; font-size: 1.1rem; letter-spacing: 0.05rem; line-height: 1.3; color: var(--sand); min-height: 120px; }
   .tutorial-body strong { color: var(--gold); }
   .tutorial-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; }
-  .tut-nav { background: transparent; border: 1px solid rgba(184,169,138,0.2); color: var(--sand2); font-family: 'Lato', serif; padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer; transition: all 0.2s; font-size: 0.8rem; }
+  .tut-nav { background: transparent; border: 1px solid rgba(184,169,138,0.2); color: var(--sand2); font-family: 'Lato', serif; padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer; transition: all 0.2s; font-size: 1rem; }
   .tut-nav:hover:not(:disabled) { border-color: var(--sand3); color: #fff; }
   .tut-nav:disabled { opacity: 0.2; cursor: not-allowed; }
 
@@ -376,14 +389,14 @@ body {
     text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
     margin-top: 1rem; text-align: center;
   }
-  footer .author { opacity: 0.5; font-size: 0.7rem; letter-spacing: 0.2em; line-height: 0.01rem}
+  footer .author { opacity: 0.5; font-size: 0.7rem; letter-spacing: 0.1em; line-height: 0.01rem}
   footer .links { display: flex; align-items: center; gap: 1rem; line-height: 0.01rem }
   footer .links a, footer .links span {
     color: var(--gold); text-decoration: none; cursor: pointer;
     transition: color 0.2s, opacity 0.2s; font-weight: bold;
   }
   footer .links a:hover, footer .links span:hover { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.2); }
-  footer .footer-divider { width: 1px; height: 12px; background: var(--accent); opacity: 0.4; }
+  footer .footer-divider { width: 2px; height: 20px; background: var(--gold); opacity: 0; }
   #toast-msg {
     font-size: 0.65rem; color: var(--teal); letter-spacing: 0.1em;
     min-height: 1.2em; opacity: 0; transition: opacity 0.2s;
@@ -431,7 +444,10 @@ body {
   </div>
 </div>
 
+  <button id="share-result-btn">↪\uFE0E; Compartilhar Resultado</button>
+
   <div class="status" id="status">Selecione uma peça ativa para mover</div>
+
 
 
 
@@ -448,7 +464,7 @@ body {
 
 
 <div class="author">
-  Sambaqui • v1.2.8.3 • © 2026 Eduardo Eller
+  Sambaqui • v1.2.8.5 • © 2026 Eduardo Eller
 </div>
 </footer>
 
@@ -520,6 +536,8 @@ const translations = {
     share: "↪\uFE0E Share the Game",
     supportLink: "♥\uFE0E Support the Game",
     shareLink: "↪\uFE0E Share",
+    shareResultBtn: "↪\uFE0E Share Result",
+    shareResultMsg: "Today's Sambaqui:\n{board}\nI scored {score} so far!\n{url}",
     linkCopied: "Link copied to clipboard!",
     tutorialNext: "Next >",
     tutorialPrev: "< Prev",
@@ -572,6 +590,8 @@ const translations = {
     share: "↪\uFE0E Compartilhar",
     supportLink: "♥\uFE0E Apoie o Jogo",
     shareLink: "↪\uFE0E Compartilhe",
+    shareResultBtn: "↪\uFE0E Compartilhar Resultado",
+    shareResultMsg: "Sambaqui de hoje:\n{board}\nFiz {score} pontos até agora!\n{url}",
     linkCopied: "Link copiado!",
     tutorialNext: "Próximo >",
     tutorialPrev: "< Anterior",
@@ -744,31 +764,38 @@ function currentPlayerHasLegalMoves(pieces, currentPlayer, sneaking, sneakingSqu
 // ═══════════════════════════════════════════════════════════════
 let vsAI = true;
 let humanStreak = 0;
-let highScore = parseInt(localStorage.getItem('sambaqui_high_score') || '0', 10);
+const _today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+const _savedScoreDate = localStorage.getItem('sambaqui_high_score_date');
+let highScore = (_savedScoreDate === _today)
+  ? parseInt(localStorage.getItem('sambaqui_high_score') || '0', 10)
+  : 0;
+if (_savedScoreDate !== _today) {
+  localStorage.setItem('sambaqui_high_score', '0');
+  localStorage.setItem('sambaqui_high_score_date', _today);
+}
 let humanPlayerColor = 1;
 
 window.isWaitingForContinue = false;
 window.achievedNewBest = false;
 
-const BOARD_OPTIONS = [
+const BOARD_PATTERNS = [
   
-  // Option 1 Quinta
+  // Pattern 0 Quinta
   {
     B: { player: 1, active: true }, F: { player: 1, active: true },
     T: { player: 1, active: true }, X: { player: 1, active: true },
     D: { player: 2, active: false }, J: { player: 2, active: false },
     P: { player: 2, active: false }, V: { player: 2, active: false },
   },
-  // Option 2 Sexta
+  // Pattern 1 Sexta
   {
-    A: { player: 1, active: true }, G: { player: 1, active: true },
-    T: { player: 1, active: true }, X: { player: 1, active: true },
-    B: { player: 2, active: false }, F: { player: 2, active: false },
-    S: { player: 2, active: false }, Y: { player: 2, active: false },
+    A: { player: 1, active: true }, D: { player: 1, active: true },
+    P: { player: 1, active: true }, S: { player: 1, active: true },
+    G: { player: 2, active: false }, J: { player: 2, active: false },
+    V: { player: 2, active: false }, Y: { player: 2, active: false },
   },
 
-
-   // Option 3 Sábado
+   // Pattern 2 Sábado
   {
     B: { player: 1, active: true }, G: { player: 1, active: true },
     S: { player: 1, active: true }, X: { player: 1, active: true },
@@ -776,7 +803,7 @@ const BOARD_OPTIONS = [
     Q: { player: 2, active: false }, V: { player: 2, active: false },
   },
 
-     // Option 4 Domingo
+     // Pattern 3 Domingo
   {
     B: { player: 1, active: true }, J: { player: 1, active: true },
     P: { player: 1, active: true }, X: { player: 1, active: true },
@@ -784,7 +811,7 @@ const BOARD_OPTIONS = [
     T: { player: 2, active: false }, V: { player: 2, active: false },
   },
 
-     // Option 5 Segunda
+     // Pattern 4 Segunda
   {
     C: { player: 1, active: true }, G: { player: 1, active: true },
     I: { player: 1, active: true }, R: { player: 1, active: true },
@@ -792,7 +819,7 @@ const BOARD_OPTIONS = [
     S: { player: 2, active: false }, W: { player: 2, active: false },
   },
 
-      // Option 6 Terça
+      // Pattern 5 Terça
   {
     C: { player: 1, active: true }, F: { player: 1, active: true },
     N: { player: 1, active: true }, Q: { player: 1, active: true },
@@ -800,7 +827,7 @@ const BOARD_OPTIONS = [
     T: { player: 2, active: false }, W: { player: 2, active: false },
   },
 
-        // Option 7 Quarta
+        // Pattern 6 Quarta
   {
     B: { player: 1, active: true }, F: { player: 1, active: true },
     O: { player: 1, active: true }, W: { player: 1, active: true },
@@ -821,10 +848,12 @@ function makeInitialPieces() {
   const dateSeed = parseInt(`${year}${month}${day}`); // e.g., 20260616
 
   // 2. Use the modulo operator (%) to safely map the seed to your array length
-  const optionIndex = dateSeed % BOARD_OPTIONS.length;
+  const patternIndex = dateSeed % BOARD_PATTERNS.length;
+
+  // const patternIndex = 0
 
   // 3. Return a *deep copy* so players don't accidentally mutate the master list
-  return JSON.parse(JSON.stringify(BOARD_OPTIONS[optionIndex]));
+  return JSON.parse(JSON.stringify(BOARD_PATTERNS[patternIndex]));
 }
 
 const state = {
@@ -970,6 +999,44 @@ function showResultBanner(winner) {
 
 function clearResultBanner() {
   resultBannerSlot.innerHTML = '';
+}
+
+// ── Build the emoji board from today's initial pattern ──────────────────────
+function buildEmojiBoard() {
+  const pattern = makeInitialPieces(); // always returns today's pattern (deep copy)
+  let rows = [];
+  for (let r = 0; r < 5; r++) {
+    let row = '';
+    for (let c = 0; c < 5; c++) {
+      const label = rcToLabel(r, c);
+      const piece = pattern[label];
+      if (!piece)           row += '⬜️';
+      else if (piece.player === 1) row += '🌕';
+      else                  row += '🌑';
+    }
+    rows.push(row);
+  }
+  return rows.join('\n');
+}
+
+function buildShareText() {
+  const board = buildEmojiBoard();
+  const score = highScore;
+  const url   = window.location.href;
+  return t('shareResultMsg', { board, score, url });
+}
+
+function showShareResultBtn() {
+  const btn = document.getElementById('share-result-btn');
+  if (btn) {
+    btn.textContent = t('shareResultBtn');
+    btn.style.display = 'inline-block';
+  }
+}
+
+function hideShareResultBtn() {
+  const btn = document.getElementById('share-result-btn');
+  if (btn) btn.style.display = 'none';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1284,6 +1351,7 @@ function finalizeMove(fromLabel, move) {
       if (humanStreak > highScore) {
         highScore = humanStreak;
         localStorage.setItem('sambaqui_high_score', highScore);
+        localStorage.setItem('sambaqui_high_score_date', new Date().toISOString().slice(0, 10));
         window.achievedNewBest = true;
       }
     }
@@ -1390,6 +1458,7 @@ function showVictory(winner) {
     }, 100);
 
     updateMetaDisplay();
+    showShareResultBtn();
   } else {
     // ─── COMPUTADOR VENCEU ───
     if (humanPlayerColor === 1) {
@@ -1405,6 +1474,7 @@ function showVictory(winner) {
     humanStreak = 0;
     window.achievedNewBest = false;
     updateMetaDisplay();
+    showShareResultBtn();
   }
 }
 
@@ -2099,6 +2169,7 @@ function restartGame(forceResetColor) {
 
   document.querySelector('.victory-overlay')?.remove();
   clearResultBanner();
+  hideShareResultBtn();
 
   if (vsAI) {
     if (forceResetColor) {
@@ -2178,6 +2249,10 @@ function updateMetaDisplay() {
   langToggleBtn.textContent = t('language');
   footerSupportLink.textContent = t('supportLink');
   footerShareLink.textContent = t('shareLink');
+  const _shareBtn = document.getElementById('share-result-btn');
+  if (_shareBtn && _shareBtn.style.display !== 'none') {
+    _shareBtn.textContent = t('shareResultBtn');
+  }
 }
 
 function toggleLanguage() {
@@ -2260,7 +2335,7 @@ function applyLanguageSwitch() {
 
 document.addEventListener('click', (e) => {
   if (window.isWaitingForContinue) {
-    if (e.target.closest('.menu-controls') || e.target.closest('.nav-btn') || e.target.closest('#result-banner')) return;
+    if (e.target.closest('.menu-controls') || e.target.closest('.nav-btn') || e.target.closest('#result-banner') || e.target.closest('#share-result-btn')) return;
 
     e.preventDefault();
     e.stopPropagation();
@@ -2288,6 +2363,24 @@ footerShareLink.addEventListener('click', () => {
     toastMsgEl.style.opacity = '1';
     setTimeout(() => { toastMsgEl.style.opacity = '0'; }, 4000);
   });
+});
+
+const shareResultBtn = document.getElementById('share-result-btn');
+shareResultBtn.addEventListener('click', () => {
+  const text = buildShareText();
+  if (navigator.share) {
+    navigator.share({ text }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(text).then(() => {
+      toastMsgEl.textContent = t('linkCopied');
+      toastMsgEl.style.opacity = '1';
+      setTimeout(() => { toastMsgEl.style.opacity = '0'; }, 2000);
+    }).catch(() => {
+      toastMsgEl.textContent = text;
+      toastMsgEl.style.opacity = '1';
+      setTimeout(() => { toastMsgEl.style.opacity = '0'; }, 4000);
+    });
+  }
 });
 
 applyLanguageSwitch();
