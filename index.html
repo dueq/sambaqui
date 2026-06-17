@@ -112,10 +112,10 @@ body {
   }
   /* Banner slot is invisible when empty; turn-bar shows through */
   .banner-zone #result-banner-slot:empty ~ .turn-bar,
-  .banner-zone .turn-bar { opacity: 1; font-family: 'Lato'; scale:1;
-    display: flex; gap: 2.7rem; font-size: 1.1rem; line-height: 1;
+  .banner-zone .turn-bar { opacity: 1; font-family: 'Lato';
+     gap: 2.3rem; font-size: 0.95rem; line-height: 1;
     letter-spacing: 0.1em; background: rgba(56, 39, 4, 0.715);
-    padding: 0.5rem 2rem; border-radius: 8px; border: 1px solid rgba(136, 91, 9, 0.311);
+    padding: 0.5rem 2rem; border-radius: 8px; border: 1px solid rgba(218, 148, 19, 0.311);
  }
   /* When a banner is present, hide the turn-bar behind it */
   .banner-zone #result-banner-slot:not(:empty) ~ .turn-bar { opacity: 0; pointer-events: none; }
@@ -124,8 +124,9 @@ body {
 
   /* ── Status bar ── */
   .status {font-family: 'Lato'; scale:1;
-    display: flex; gap: 2.3rem; font-size: 1.2rem; line-height: 2;
-    letter-spacing: 0.1em; ;
+    display: flex; gap: 2.3rem; font-size: 1.2rem; line-height: 1;
+    letter-spacing: 0.1em; background: rgba(72, 49, 2, 0.646);
+    padding: 0.5rem 2rem; border-radius: 10px; border: 1px solid rgba(199, 131, 3, 0.3);
  
     font-size: clamp(1.1rem, 1.2vw, 0.78rem); letter-spacing: 0.1em;
     color: var(--sand3); min-height: 1em; text-align: center; transition: color 0.2s;
@@ -205,11 +206,10 @@ body {
   }
 
   /* ── Result banner ── */
-  .result-banner {background: rgba(56, 39, 4, 0.715);
-    padding: 0.5rem 2rem; border: 1px solid rgba(136, 91, 9, 0.311);
+  .result-banner {
     display: flex; align-items: center; justify-content: center; gap: 1.2rem;
-    border: 1px solid var(--accent); border-radius: 8px;
-  ; padding: 0.55rem 1.2rem;
+    border: 1px solid var(--accent); border-radius: 6px;
+    background:  rgba(56, 39, 4, 0.715); padding: 0.55rem 1.2rem;
     font-size: clamp(1rem, 1.8vw, 0.85rem); letter-spacing: 0.15em;
     color: var(--gold); animation: fade-in 0.4s ease;
     width: 100%;
