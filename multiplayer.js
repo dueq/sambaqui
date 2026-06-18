@@ -160,21 +160,21 @@ function buildPanelHTML() {
       </p>
       <div id="mp-code-display" style="
         font-size:2.4rem; letter-spacing:.35em; color:var(--gold);
-        font-family:'Lato',cursive; text-align:center;
+        font-family:'Molle',cursive; text-align:center;
         background:rgba(196,154,68,.07); border:1px solid rgba(196,154,68,.3);
         border-radius:8px; padding:.5rem 1.4rem; cursor:pointer; user-select:all;
-      " title="Clique para copiar · Click to copy"></div>
+      " title="Clique para copiar"></div>
       <p style="font-size:.68rem; color:var(--sand3); letter-spacing:.1em;
                 text-align:center; margin:0;">clique para copiar</p>
       <!-- Separate status line for waiting screen — different ID to avoid clash -->
       <p id="mp-wait-status-line"
         style="font-size:.78rem; letter-spacing:.1em; color:var(--sand3);
                min-height:1.2em; text-align:center; margin:0;">
-        Aguardando oponente… / Waiting for opponent…
+        Aguardando oponente…
       </p>
       <button id="mp-cancel-btn" class="generic-btn danger"
         style="font-size:.78rem; padding:.4rem 1.1rem;">
-        Cancelar
+        Cancelar · Cancel
       </button>
     </div>
 
@@ -294,7 +294,7 @@ function onCancelWait() {
 }
 
 async function onCreateRoom() {
-  setAnyStatus('Criando sala…');
+  setAnyStatus('Criando sala… / Creating room…');
   try { await initSupabase(); }
   catch (err) { setAnyError(err.message); return; }
 
@@ -313,7 +313,7 @@ async function onJoinRoom() {
     .trim().toUpperCase();
 
   if (code.length < 4) {
-    setAnyError('Digite um código válido');
+    setAnyError('Digite um código válido · Enter a valid code');
     return;
   }
 
@@ -343,18 +343,24 @@ function subscribeChannel(code, onSubscribed) {
 
   ch.on('broadcast', { event: 'player_joined' }, ({ payload }) => {
     log('player_joined', payload);
-    // Only the host handles this — it sends back game_start so both sides proceed
+    // Only the host handles this — it sends back game_start with color assignments
     if (!mp.isHost) return;
     mp.opponentPresent = true;
-    // Acknowledge to Player 2 that we're ready
-    ch.send({ type: 'broadcast', event: 'game_start', payload: {} });
+    // Tell Player 2 their assigned color and that we're ready
+    ch.send({
+      type: 'broadcast', event: 'game_start',
+      payload: { hostColor: 1, joinerColor: 2 },
+    });
+    // Host starts immediately
     onBothPlayersReady();
   });
 
-  ch.on('broadcast', { event: 'game_start' }, () => {
-    log('game_start received');
-    // Only Player 2 (joiner) waits for this signal
+  ch.on('broadcast', { event: 'game_start' }, ({ payload }) => {
+    log('game_start received', payload);
+    // Host sent this — should not receive it back (self:false), but guard anyway
     if (mp.isHost) return;
+    // Use the server-assigned color rather than what we set locally
+    mp.myColor = payload.joinerColor ?? 2;
     mp.opponentPresent = true;
     onBothPlayersReady();
   });
