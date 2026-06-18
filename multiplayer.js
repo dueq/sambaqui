@@ -43,6 +43,8 @@ const mp = {
   client:          null,
   opponentPresent: false,
   myColor:         null,   // 1 = light, 2 = dark
+  gameCount:       0,      // increments each rematch; determines who goes first
+  rematchReady:    false,  // this player has pressed "Novo Jogo"
 };
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
@@ -128,11 +130,11 @@ function buildPanelHTML() {
     <div id="mp-lobby" style="display:flex; flex-direction:column; gap:.9rem;">
       <button id="mp-create-btn" class="generic-btn"
         style="width:100%; font-size:1rem; padding:.7rem 1rem;">
-        Criar Sala &nbsp;·&nbsp; Create Room
+        Criar Sala
       </button>
       <div style="display:flex; gap:.5rem; align-items:stretch;">
         <input id="mp-code-input" maxlength="6"
-          placeholder="CÓDIGO · CODE"
+          placeholder="CÓDIGO"
           style="
             flex:1; background:rgba(72,49,2,.5); border:1px solid var(--accent);
             border-radius:6px; color:var(--sand); padding:.55rem .75rem;
@@ -142,7 +144,7 @@ function buildPanelHTML() {
         />
         <button id="mp-join-btn" class="generic-btn"
           style="white-space:nowrap; padding:.55rem 1rem; flex-shrink:0;">
-          Entrar · Join
+          Entrar
         </button>
       </div>
       <!-- Single status line for lobby screen -->
@@ -160,12 +162,12 @@ function buildPanelHTML() {
       </p>
       <div id="mp-code-display" style="
         font-size:2.4rem; letter-spacing:.35em; color:var(--gold);
-        font-family:'Molle',cursive; text-align:center;
+        font-family:'Lato',cursive; text-align:center;
         background:rgba(196,154,68,.07); border:1px solid rgba(196,154,68,.3);
         border-radius:8px; padding:.5rem 1.4rem; cursor:pointer; user-select:all;
-      " title="Clique para copiar · Click to copy"></div>
+      " title="Clique para copiar"></div>
       <p style="font-size:.68rem; color:var(--sand3); letter-spacing:.1em;
-                text-align:center; margin:0;">clique para copiar · click to copy</p>
+                text-align:center; margin:0;">clique para copiar</p>
       <!-- Separate status line for waiting screen — different ID to avoid clash -->
       <p id="mp-wait-status-line"
         style="font-size:.78rem; letter-spacing:.1em; color:var(--sand3);
@@ -174,7 +176,7 @@ function buildPanelHTML() {
       </p>
       <button id="mp-cancel-btn" class="generic-btn danger"
         style="font-size:.78rem; padding:.4rem 1.1rem;">
-        Cancelar · Cancel
+        Cancelar
       </button>
     </div>
 
@@ -313,7 +315,7 @@ async function onJoinRoom() {
     .trim().toUpperCase();
 
   if (code.length < 4) {
-    setAnyError('Digite um código válido · Enter a valid code');
+    setAnyError('Digite um código válido');
     return;
   }
 
@@ -379,6 +381,23 @@ function subscribeChannel(code, onSubscribed) {
     }
   });
 
+  ch.on('broadcast', { event: 'rematch_ready' }, ({ payload }) => {
+    log('rematch_ready from opponent', payload);
+    if (mp.rematchReady) {
+      // We already pressed — both ready, host decides and fires rematch_start
+      if (mp.isHost) startRematch();
+    } else {
+      // Show a visual cue that opponent is waiting
+      showOpponentWaiting();
+    }
+  });
+
+  ch.on('broadcast', { event: 'rematch_start' }, ({ payload }) => {
+    log('rematch_start received', payload);
+    if (mp.isHost) return; // host triggered this, doesn't need to receive it
+    executeRematch(payload.firstPlayer);
+  });
+
   ch.subscribe((status, err) => {
     log('Channel status:', status, err || '');
 
@@ -392,10 +411,10 @@ function subscribeChannel(code, onSubscribed) {
       log('Channel error detail:', err);
 
     } else if (status === 'TIMED_OUT') {
-      setAnyError('Tempo esgotado. Verifique sua conexão · Timed out');
+      setAnyError('Tempo esgotado. Verifique sua conexão');
 
     } else if (status === 'CLOSED') {
-      if (mp.active) setAnyError('Conexão encerrada · Connection closed');
+      if (mp.active) setAnyError('Conexão encerrada');
     }
   });
 }
@@ -417,6 +436,94 @@ function onBothPlayersReady() {
   log(`Game started as player ${mp.myColor}`);
 }
 
+// ─── Rematch logic ────────────────────────────────────────────────────────────
+
+/**
+ * Called when this player clicks "Novo Jogo" in online mode.
+ * Replaces the button with a waiting indicator and notifies the opponent.
+ */
+function onNewGameClick(e) {
+  e.stopPropagation();
+  if (mp.rematchReady) return; // already clicked
+  mp.rematchReady = true;
+  broadcastRematchReady();
+
+  // Replace the button with a waiting message
+  const btn = document.getElementById('banner-new-game');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = window.currentLang === 'PT'
+      ? 'Aguardando oponente…'
+      : 'Waiting for opponent…';
+    btn.style.opacity = '0.6';
+    btn.style.cursor = 'default';
+  }
+}
+
+/** Show a cue that the opponent already pressed "Novo Jogo" */
+function showOpponentWaiting() {
+  const btn = document.getElementById('banner-new-game');
+  if (btn && !mp.rematchReady) {
+    btn.textContent = window.currentLang === 'PT'
+      ? '▶ Novo Jogo (oponente pronto)'
+      : '▶ New Game (opponent ready)';
+  }
+}
+
+/**
+ * Host calls this once both players are ready.
+ * Increments gameCount, determines firstPlayer (alternates), broadcasts, and executes locally.
+ */
+function startRematch() {
+  mp.gameCount++;
+  // Alternate who goes first: even games → player 1 first, odd → player 2 first
+  const firstPlayer = (mp.gameCount % 2 === 0) ? 1 : 2;
+  broadcastRematchStart(firstPlayer);
+  executeRematch(firstPlayer);
+}
+
+/**
+ * Both players call this to actually start the new game.
+ * firstPlayer is whose turn it is on move 1 (1 or 2).
+ * myColor doesn't change — only who moves first does.
+ */
+function executeRematch(firstPlayer) {
+  mp.rematchReady = false;
+
+  // In online mode, humanPlayerColor controls which side the local player
+  // is allowed to interact with. We keep myColor fixed (1=host, 2=guest)
+  // but we need state.currentPlayer to start as firstPlayer.
+  // mpActivate sets humanPlayerColor=myColor and calls restartGame which
+  // always sets currentPlayer=1. So we patch currentPlayer after restart.
+  _suppressBroadcast = true;
+  try {
+    window.mpActivate(mp.myColor);
+    // Override starting player after restartGame resets it to 1
+    if (firstPlayer !== 1) {
+      window.state.currentPlayer = firstPlayer;
+      // Activate only the firstPlayer's pieces
+      for (const [sq, p] of Object.entries(window.state.pieces)) {
+        window.state.pieces[sq] = { ...p, active: p.player === firstPlayer };
+      }
+      window.render();
+    }
+  } finally {
+    _suppressBroadcast = false;
+  }
+}
+
+/**
+ * Intercepts the "Novo Jogo" button click at the document level (capture phase)
+ * so it fires before the game's own handler, which we suppress in online mode.
+ */
+function interceptNewGameButton(e) {
+  if (!mp.active) return; // solo mode — let game handle it normally
+  const btn = e.target.closest('#banner-new-game');
+  if (!btn) return;
+  e.stopImmediatePropagation(); // block the game's own listener
+  onNewGameClick(e);
+}
+
 // ─── Broadcast outgoing move ──────────────────────────────────────────────────
 
 function broadcastMove(fromLabel, landingLabel) {
@@ -431,6 +538,24 @@ function broadcastMove(fromLabel, landingLabel) {
 function broadcastRestart() {
   if (!mp.active || !mp.channel) return;
   mp.channel.send({ type: 'broadcast', event: 'restart', payload: {} });
+}
+
+// ─── Rematch ──────────────────────────────────────────────────────────────────
+
+function broadcastRematchReady() {
+  if (!mp.active || !mp.channel) return;
+  mp.channel.send({
+    type: 'broadcast', event: 'rematch_ready',
+    payload: { color: mp.myColor },
+  });
+}
+
+function broadcastRematchStart(firstPlayer) {
+  if (!mp.active || !mp.channel) return;
+  mp.channel.send({
+    type: 'broadcast', event: 'rematch_start',
+    payload: { firstPlayer },
+  });
 }
 
 // ─── Apply remote move ────────────────────────────────────────────────────────
@@ -467,6 +592,8 @@ function fullDisconnect() {
 
   window.mpOnline  = false;
   window.mpMyColor = null;
+  mp.gameCount   = 0;
+  mp.rematchReady = false;
   resetOnlineBtn();
 
   window.vsAI             = true;
@@ -511,6 +638,8 @@ function patchGameFunctions() {
 function boot() {
   injectOnlineButton();
   patchGameFunctions();
+  // Capture phase so we intercept before the game's own listener on banner-new-game
+  document.addEventListener('click', interceptNewGameButton, true);
   log('Multiplayer module ready — open console for [MP] logs');
 }
 
