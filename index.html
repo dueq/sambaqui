@@ -404,7 +404,7 @@ body {
 <div class="menu-controls">
   <div class="mode-bar">
     <button class="mode-btn" id="open-tutorial-btn">Como Jogar</button>
-    <button class="mode-btn"        id="lang-toggle-btn">EN</button>
+    <button class="mode-btn" id="lang-toggle-btn">EN</button>
   </div>
 </div>
 
@@ -1172,6 +1172,8 @@ function renderMoveLog() {
 function handleSquareClick(label) {
   if (state.gameOver || state.animating) return;
   if (vsAI && state.currentPlayer !== humanPlayerColor) return;
+  // Online multiplayer: block interaction when it is the opponent's turn
+  if (window.mpOnline && state.currentPlayer !== window.mpMyColor) return;
   if (window.isWaitingForContinue) return;
 
   const piece = state.pieces[label];
@@ -1385,7 +1387,10 @@ function finalizeMove(fromLabel, move) {
     pushTimeline();
 
     setStatus(t('chainNoEnemies'), 'sneaking');
-    if (!vsAI || state.currentPlayer === humanPlayerColor) selectPiece(move.landing);
+    const isMyChainTurn = window.mpOnline
+      ? state.currentPlayer === window.mpMyColor
+      : (!vsAI || state.currentPlayer === humanPlayerColor);
+    if (isMyChainTurn) selectPiece(move.landing);
     checkTurnPassing();
   }
 }
@@ -2057,7 +2062,10 @@ render();
 updateMetaDisplay();
 
 function render() {
-  const humanTurn = state.currentPlayer === humanPlayerColor || !vsAI;
+  // In online mode, only show selectable pieces on our own turn
+  const humanTurn = window.mpOnline
+    ? state.currentPlayer === window.mpMyColor
+    : (state.currentPlayer === humanPlayerColor || !vsAI);
   if (state.currentPlayer === 1) {
     tagP1.classList.add('active');
     tagP2.classList.remove('active');
@@ -2376,6 +2384,50 @@ shareResultBtn.addEventListener('click', () => {
 });
 
 applyLanguageSwitch();
+
+// ═══════════════════════════════════════════════════════════════
+//  MULTIPLAYER BRIDGE — expose internals to window for multiplayer.js
+//  Uses closure-based getters/setters so writes from multiplayer.js
+//  propagate into the closed-over let variables used by game functions.
+// ═══════════════════════════════════════════════════════════════
+window.state            = state;
+window.executeMove      = executeMove;
+window.computeAllSlides = computeAllSlides;
+window.selectPiece      = selectPiece;
+window.setStatus        = setStatus;
+window.render           = render;
+window.restartGame      = restartGame;
+
+// vsAI and humanPlayerColor are closed-over lets — wire via property descriptors
+// so multiplayer.js can read/write them and the game logic sees the change immediately.
+Object.defineProperty(window, 'vsAI', {
+  get()  { return vsAI; },
+  set(v) { vsAI = v; },
+  configurable: true,
+  enumerable: true,
+});
+Object.defineProperty(window, 'humanPlayerColor', {
+  get()  { return humanPlayerColor; },
+  set(v) { humanPlayerColor = v; },
+  configurable: true,
+  enumerable: true,
+});
+
+/**
+ * mpActivate(myColor) — called by multiplayer.js to switch into online mode.
+ * Sets vsAI=false, assigns myColor, triggers a clean game restart.
+ */
+window.mpActivate = function(myColor) {
+  vsAI = false;
+  humanPlayerColor = myColor;
+  humanStreak = 0;
+  restartGame(true);
+};
 </script>
+
+<!-- Supabase client (UMD build — exposes window.supabase) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<!-- Online multiplayer module -->
+<script src="./multiplayer.js"></script>
 </body>
 </html>
