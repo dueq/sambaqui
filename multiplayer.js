@@ -27,23 +27,22 @@
 'use strict';
 
 // ─── Supabase config ─────────────────────────────────────────────────────────
+// IMPORTANT: Replace SUPABASE_ANON_KEY with your project's real anon/public key.
+// Find it at: Supabase Dashboard → Project Settings → API → Project API keys → anon public
 
 const SUPABASE_URL      = 'https://qasopfvcdyikqxbniyqn.supabase.co';
-const SUPABASE_ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
-  'eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhc29wZnZjZHlpa3F4Ym5peXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyMDEwNjgsImV4cCI6MjA2NTc3NzA2OH0.' +
-  'RrJXJCpj1r-blOsOJ2n-P0IYS0p3Z0cWAnl2Y-jC29o';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhc29wZnZjZHlpa3F4Ym5peXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzUwMDAsImV4cCI6MjA5NzMxMTAwMH0.MIiyCiRC09kC2hFA-h5-HoNJZGBAhHxoHUPchUB2VKE';
 
 // ─── Module state ─────────────────────────────────────────────────────────────
 
 const mp = {
-  active:          false,  // online mode is on
-  isHost:          false,  // true = player 1 (created room)
+  active:          false,
+  isHost:          false,
   roomCode:        null,
-  channel:         null,   // Supabase RealtimeChannel
+  channel:         null,
   client:          null,
   opponentPresent: false,
-  myColor:         null,   // 1 or 2
+  myColor:         null,   // 1 = light, 2 = dark
 };
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
@@ -58,34 +57,48 @@ function channelName(code) {
 
 function log(...args) { console.log('[MP]', ...args); }
 
+// ─── Status helpers ───────────────────────────────────────────────────────────
+
+/** Update whichever #mp-status-line is currently in the DOM */
+function setMpStatus(msg, color) {
+  const el = document.getElementById('mp-status-line');
+  if (!el) return;
+  el.textContent = msg;
+  if (color) el.style.color = color;
+}
+
+function setMpError(msg) {
+  setMpStatus(msg, '#c0704a');
+  log('ERROR:', msg);
+}
+
 // ─── Supabase init ────────────────────────────────────────────────────────────
 
 async function initSupabase() {
   if (mp.client) return mp.client;
+
   if (!window.supabase) {
-    throw new Error('Supabase JS not loaded. Check network / CDN.');
+    throw new Error(
+      'Supabase JS not loaded. Check that the CDN <script> tag in sambaqui.html is reachable.'
+    );
   }
-  mp.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  if (SUPABASE_ANON_KEY === 'REPLACE_WITH_YOUR_ANON_KEY') {
+    throw new Error(
+      'Anon key not set. Open multiplayer.js and replace SUPABASE_ANON_KEY ' +
+      'with the value from your Supabase dashboard → Project Settings → API.'
+    );
+  }
+
+  mp.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    realtime: {
+      params: { eventsPerSecond: 20 },
+    },
+  });
   return mp.client;
 }
 
-// ─── UI helpers ───────────────────────────────────────────────────────────────
-
-function setMpStatus(msg, color) {
-  // Update the panel status line if open, otherwise use the game status bar
-  const el = document.getElementById('mp-status-line');
-  if (el) { el.textContent = msg; if (color) el.style.color = color; }
-}
-
-function showPanel() {
-  if (document.getElementById('mp-panel')) return;
-  document.body.insertAdjacentHTML('beforeend', buildPanelHTML());
-  bindPanelEvents();
-}
-
-function hidePanel() {
-  document.getElementById('mp-panel')?.remove();
-}
+// ─── Panel HTML ───────────────────────────────────────────────────────────────
 
 function buildPanelHTML() {
   return `
@@ -105,21 +118,21 @@ function buildPanelHTML() {
     <!-- Header -->
     <div style="display:flex; justify-content:space-between; align-items:center;
                 border-bottom:1px solid rgba(122,79,46,.35); padding-bottom:.6rem;">
-      <span style="color:var(--gold); font-size:1.3rem; font-weight:700; letter-spacing:.06em;">Online</span>
+      <span style="color:var(--gold); font-size:1.3rem; font-weight:700; letter-spacing:.06em;">Jogar Online</span>
       <button id="mp-close-btn" style="background:none; border:none; color:var(--sand3);
         font-size:1.3rem; cursor:pointer; line-height:1; padding:.2rem .4rem;"
         title="Fechar / Close">✕</button>
     </div>
 
-    <!-- Lobby screen -->
+    <!-- Lobby screen (shown first) -->
     <div id="mp-lobby" style="display:flex; flex-direction:column; gap:.9rem;">
       <button id="mp-create-btn" class="generic-btn"
         style="width:100%; font-size:1rem; padding:.7rem 1rem;">
-        Criar Sala &nbsp;·&nbsp; Create Room
+        Criar Sala
       </button>
       <div style="display:flex; gap:.5rem; align-items:stretch;">
         <input id="mp-code-input" maxlength="6"
-          placeholder="CÓDIGO · CODE"
+          placeholder="CÓDIGO"
           style="
             flex:1; background:rgba(72,49,2,.5); border:1px solid var(--accent);
             border-radius:6px; color:var(--sand); padding:.55rem .75rem;
@@ -129,42 +142,81 @@ function buildPanelHTML() {
         />
         <button id="mp-join-btn" class="generic-btn"
           style="white-space:nowrap; padding:.55rem 1rem; flex-shrink:0;">
-          Entrar · Join
+          Entrar
         </button>
       </div>
+      <!-- Single status line for lobby screen -->
       <p id="mp-status-line"
         style="font-size:.75rem; letter-spacing:.1em; color:var(--sand3);
                min-height:1.1em; text-align:center; margin:0;"></p>
     </div>
 
-    <!-- Waiting screen (hidden initially) -->
+    <!-- Waiting screen (hidden until room created) -->
     <div id="mp-waiting" style="display:none; flex-direction:column; gap:1rem; align-items:center;">
       <p style="color:var(--sand); font-size:.9rem; letter-spacing:.06em;
                 text-align:center; margin:0; line-height:1.5;">
         Compartilhe com seu oponente<br>
-        <span style="font-size:.75rem; color:var(--sand3);">Share with your opponent</span>
+        <span style="font-size:.75rem; color:var(--sand3);"></span>
       </p>
       <div id="mp-code-display" style="
         font-size:2.4rem; letter-spacing:.35em; color:var(--gold);
-        font-family:'Molle',cursive; text-align:center;
+        font-family:'Lato'; text-align:center;
         background:rgba(196,154,68,.07); border:1px solid rgba(196,154,68,.3);
         border-radius:8px; padding:.5rem 1.4rem; cursor:pointer; user-select:all;
-      " title="Clique para copiar · Click to copy"></div>
-      <p style="font-size:.68rem; color:var(--sand3); letter-spacing:.1em;
-                text-align:center; margin:0;">clique para copiar · click to copy</p>
-      <p id="mp-status-line"
+      " title="Clique para copiar"></div>
+      <p style="font-size:.8rem; color:var(--sand3); letter-spacing:.1em;
+                text-align:center; margin:0;">Clique para copiar</p>
+      <!-- Separate status line for waiting screen — different ID to avoid clash -->
+      <p id="mp-wait-status-line"
         style="font-size:.78rem; letter-spacing:.1em; color:var(--sand3);
                min-height:1.2em; text-align:center; margin:0;">
         Aguardando oponente… / Waiting for opponent…
       </p>
       <button id="mp-cancel-btn" class="generic-btn danger"
         style="font-size:.78rem; padding:.4rem 1.1rem;">
-        Cancelar · Cancel
+        Cancelar
       </button>
     </div>
 
   </div>
 </div>`;
+}
+
+// ─── Status helpers (screen-aware) ───────────────────────────────────────────
+
+/** Update the visible status line regardless of which screen is showing */
+function setAnyStatus(msg, color) {
+  // Try both status line IDs — only one will be visible at a time
+  ['mp-status-line', 'mp-wait-status-line'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = msg; if (color) el.style.color = color; }
+  });
+}
+
+function setAnyError(msg) {
+  setAnyStatus(msg, '#c0704a');
+  log('ERROR:', msg);
+}
+
+// ─── Panel lifecycle ──────────────────────────────────────────────────────────
+
+function showPanel() {
+  if (document.getElementById('mp-panel')) return;
+  document.body.insertAdjacentHTML('beforeend', buildPanelHTML());
+  bindPanelEvents();
+}
+
+function hidePanel() {
+  document.getElementById('mp-panel')?.remove();
+}
+
+function switchToWaitingScreen(code) {
+  const lobby   = document.getElementById('mp-lobby');
+  const waiting = document.getElementById('mp-waiting');
+  if (lobby)   lobby.style.display   = 'none';
+  if (waiting) waiting.style.display = 'flex';
+  const display = document.getElementById('mp-code-display');
+  if (display) display.textContent   = code;
 }
 
 function bindPanelEvents() {
@@ -180,33 +232,23 @@ function bindPanelEvents() {
     ?.addEventListener('keydown', e => {
       if (e.key === 'Enter') document.getElementById('mp-join-btn')?.click();
     });
-
-  // Click the code display to copy it
   document.getElementById('mp-code-display')
     ?.addEventListener('click', () => {
-      const code = document.getElementById('mp-code-display')?.textContent;
-      if (code) navigator.clipboard.writeText(code).catch(() => {});
+      const txt = document.getElementById('mp-code-display')?.textContent;
+      if (txt) navigator.clipboard.writeText(txt).catch(() => {});
     });
 }
 
-function switchToWaitingScreen(code) {
-  document.getElementById('mp-lobby').style.display  = 'none';
-  const waiting = document.getElementById('mp-waiting');
-  waiting.style.display = 'flex';
-  const display = document.getElementById('mp-code-display');
-  if (display) display.textContent = code;
-}
-
-// ─── Online button injection ──────────────────────────────────────────────────
+// ─── Online button ────────────────────────────────────────────────────────────
 
 function injectOnlineButton() {
   if (document.getElementById('mp-online-btn')) return;
   const modeBar = document.querySelector('.mode-bar');
-  if (!modeBar) return;
+  if (!modeBar) { log('WARNING: .mode-bar not found'); return; }
 
-  const btn = document.createElement('button');
-  btn.id        = 'mp-online-btn';
-  btn.className = 'mode-btn';
+  const btn       = document.createElement('button');
+  btn.id          = 'mp-online-btn';
+  btn.className   = 'mode-btn';
   btn.textContent = 'Online';
   btn.addEventListener('click', onOnlineBtnClick);
   modeBar.appendChild(btn);
@@ -214,10 +256,7 @@ function injectOnlineButton() {
 
 function onOnlineBtnClick() {
   if (mp.active) {
-    const leave = confirm(
-      'Sair do jogo online?\nLeave the online game?'
-    );
-    if (leave) fullDisconnect();
+    if (confirm('Sair do jogo online?\nLeave the online game?')) fullDisconnect();
   } else {
     showPanel();
   }
@@ -225,27 +264,22 @@ function onOnlineBtnClick() {
 
 function setOnlineBtnActive(code) {
   const btn = document.getElementById('mp-online-btn');
-  if (!btn) return;
-  btn.classList.add('active');
-  btn.textContent = `Online · ${code}`;
+  if (btn) { btn.classList.add('active'); btn.textContent = `Online · ${code}`; }
 }
 
 function resetOnlineBtn() {
   const btn = document.getElementById('mp-online-btn');
-  if (!btn) return;
-  btn.classList.remove('active');
-  btn.textContent = 'Online';
+  if (btn) { btn.classList.remove('active'); btn.textContent = 'Online'; }
 }
 
 // ─── Panel button handlers ────────────────────────────────────────────────────
 
 function onClosePanelBtn() {
   hidePanel();
-  // If we were waiting for an opponent, clean up the channel
   if (mp.channel && !mp.opponentPresent) {
     mp.channel.unsubscribe();
-    mp.channel = null;
-    mp.active  = false;
+    mp.channel  = null;
+    mp.active   = false;
     mp.roomCode = null;
     resetOnlineBtn();
   }
@@ -253,23 +287,16 @@ function onClosePanelBtn() {
 
 function onCancelWait() {
   hidePanel();
-  if (mp.channel) {
-    mp.channel.unsubscribe();
-    mp.channel = null;
-  }
+  if (mp.channel) { mp.channel.unsubscribe(); mp.channel = null; }
   mp.active   = false;
   mp.roomCode = null;
   resetOnlineBtn();
 }
 
 async function onCreateRoom() {
-  setMpStatus('Criando sala… / Creating room…');
-  try {
-    await initSupabase();
-  } catch (err) {
-    setMpStatus('Erro ao carregar Supabase · ' + err.message, '#c0704a');
-    return;
-  }
+  setAnyStatus('Criando sala…');
+  try { await initSupabase(); }
+  catch (err) { setAnyError(err.message); return; }
 
   const code   = randomCode();
   mp.isHost    = true;
@@ -278,27 +305,21 @@ async function onCreateRoom() {
   mp.active    = true;
 
   switchToWaitingScreen(code);
-  subscribeChannel(code, () => {
-    log(`Room ${code} created, waiting for opponent`);
-  });
+  subscribeChannel(code, () => log(`Room ${code} ready, waiting for opponent`));
 }
 
 async function onJoinRoom() {
-  const raw  = document.getElementById('mp-code-input')?.value || '';
-  const code = raw.trim().toUpperCase();
+  const code = (document.getElementById('mp-code-input')?.value || '')
+    .trim().toUpperCase();
 
   if (code.length < 4) {
-    setMpStatus('Digite um código válido · Enter a valid code', '#c0704a');
+    setAnyError('Digite um código válido · Enter a valid code');
     return;
   }
 
-  setMpStatus('Conectando… / Connecting…');
-  try {
-    await initSupabase();
-  } catch (err) {
-    setMpStatus('Erro ao carregar Supabase · ' + err.message, '#c0704a');
-    return;
-  }
+  setAnyStatus('Conectando… / Connecting…');
+  try { await initSupabase(); }
+  catch (err) { setAnyError(err.message); return; }
 
   mp.isHost   = false;
   mp.roomCode = code;
@@ -308,45 +329,50 @@ async function onJoinRoom() {
   subscribeChannel(code, () => {
     log(`Joined room ${code}, announcing presence`);
     mp.channel.send({
-      type:    'broadcast',
-      event:   'player_joined',
-      payload: { color: 2 },
+      type: 'broadcast', event: 'player_joined', payload: { color: 2 },
     });
   });
 }
 
-// ─── Supabase channel ─────────────────────────────────────────────────────────
+// ─── Supabase Realtime channel ────────────────────────────────────────────────
 
 function subscribeChannel(code, onSubscribed) {
   const ch = mp.client.channel(channelName(code), {
-    config: { broadcast: { self: false } },
+    config: { broadcast: { self: false, ack: false } },
   });
 
-  // Opponent arrived
   ch.on('broadcast', { event: 'player_joined' }, ({ payload }) => {
-    log('player_joined received', payload);
+    log('player_joined', payload);
     mp.opponentPresent = true;
     onBothPlayersReady();
   });
 
-  // Incoming move
   ch.on('broadcast', { event: 'move' }, ({ payload }) => {
     applyRemoteMove(payload);
   });
 
-  // Opponent restarted (new game)
   ch.on('broadcast', { event: 'restart' }, () => {
-    log('Remote restart received');
+    log('Remote restart');
     window.restartGame(true);
   });
 
-  ch.subscribe(status => {
-    log('Channel status:', status);
+  ch.subscribe((status, err) => {
+    log('Channel status:', status, err || '');
+
     if (status === 'SUBSCRIBED') {
       mp.channel = ch;
       if (onSubscribed) onSubscribed();
-    } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-      setMpStatus('Erro de conexão · Connection error', '#c0704a');
+
+    } else if (status === 'CHANNEL_ERROR') {
+      const detail = err?.message || 'unknown error';
+      setAnyError(`Erro de canal: ${detail}`);
+      log('Channel error detail:', err);
+
+    } else if (status === 'TIMED_OUT') {
+      setAnyError('Tempo esgotado. Verifique sua conexão · Timed out');
+
+    } else if (status === 'CLOSED') {
+      if (mp.active) setAnyError('Conexão encerrada · Connection closed');
     }
   });
 }
@@ -356,100 +382,86 @@ function subscribeChannel(code, onSubscribed) {
 function onBothPlayersReady() {
   hidePanel();
   setOnlineBtnActive(mp.roomCode);
-  // Set global flags used by the game turn guard
-  window.mpOnline = true;
+  window.mpOnline  = true;
   window.mpMyColor = mp.myColor;
-  // Activate online mode inside the game (closes over the let variables)
   window.mpActivate(mp.myColor);
   log(`Game started as player ${mp.myColor}`);
 }
 
-// ─── Move broadcasting ────────────────────────────────────────────────────────
+// ─── Broadcast outgoing move ──────────────────────────────────────────────────
 
 function broadcastMove(fromLabel, landingLabel) {
   if (!mp.active || !mp.channel) return;
-  log(`Broadcasting move ${fromLabel}→${landingLabel}`);
+  log(`→ move ${fromLabel}→${landingLabel}`);
   mp.channel.send({
-    type:    'broadcast',
-    event:   'move',
+    type: 'broadcast', event: 'move',
     payload: { from: fromLabel, to: landingLabel, color: mp.myColor },
   });
 }
 
 function broadcastRestart() {
   if (!mp.active || !mp.channel) return;
-  mp.channel.send({
-    type:    'broadcast',
-    event:   'restart',
-    payload: { by: mp.myColor },
-  });
+  mp.channel.send({ type: 'broadcast', event: 'restart', payload: {} });
 }
 
 // ─── Apply remote move ────────────────────────────────────────────────────────
 
 function applyRemoteMove({ from, to, color }) {
-  if (color === mp.myColor) return; // shouldn't happen (self:false), but guard
-  log(`Received move ${from}→${to} from player ${color}`);
+  if (color === mp.myColor) return;
+  log(`← move ${from}→${to} from player ${color}`);
 
   const slides = window.computeAllSlides(from, window.state.pieces);
   const match  = slides.find(s => s.landing === to);
 
   if (!match) {
-    log('WARNING: received move has no matching slide — possible desync');
+    log('WARNING: no matching slide for received move — possible desync');
     return;
   }
 
   window.executeMove(from, match);
 }
 
-// ─── Full disconnect ──────────────────────────────────────────────────────────
+// ─── Disconnect ───────────────────────────────────────────────────────────────
 
 function fullDisconnect() {
-  if (mp.channel) {
-    mp.channel.unsubscribe();
-    mp.channel = null;
-  }
+  if (mp.channel) { mp.channel.unsubscribe(); mp.channel = null; }
   mp.active          = false;
   mp.opponentPresent = false;
   mp.roomCode        = null;
   mp.myColor         = null;
 
-  resetOnlineBtn();
-  // Clear online flags
   window.mpOnline  = false;
   window.mpMyColor = null;
-  // Return to vs-AI mode
+  resetOnlineBtn();
+
   window.vsAI             = true;
   window.humanPlayerColor = 1;
   window.restartGame(true);
   log('Disconnected');
 }
 
-// ─── Patch executeMove to capture outgoing moves ──────────────────────────────
-// We wrap the game's executeMove. When it's our turn in multiplayer mode,
-// we capture the (from, landing) pair and broadcast it.
+// ─── Patch game functions ─────────────────────────────────────────────────────
 
 function patchGameFunctions() {
-  // executeMove
+  // 1. Wrap executeMove to broadcast our moves
   const origExecuteMove = window.executeMove;
   if (!origExecuteMove) {
-    console.error('[MP] window.executeMove not found — cannot patch');
+    console.error('[MP] window.executeMove not found on window — bridge missing?');
     return;
   }
   window.executeMove = function(fromLabel, move) {
-    const isMyTurn =
-      mp.active &&
-      window.state.currentPlayer === mp.myColor;
-    // Broadcast first (before animation starts) so opponent gets it ASAP
-    if (isMyTurn) broadcastMove(fromLabel, move.landing);
+    const myTurn = mp.active && window.state.currentPlayer === mp.myColor;
+    if (myTurn) broadcastMove(fromLabel, move.landing);
     origExecuteMove.call(this, fromLabel, move);
   };
 
-  // restartGame — broadcast when host deliberately restarts
+  // 2. Wrap restartGame to broadcast restarts in online mode
   const origRestart = window.restartGame;
   window.restartGame = function(forceResetColor) {
     origRestart.call(this, forceResetColor);
-    if (mp.active && forceResetColor) broadcastRestart();
+    // Only broadcast deliberate restarts (forceResetColor=true) and not the
+    // internal restart triggered by mpActivate itself
+    if (mp.active && forceResetColor && mp.opponentPresent) broadcastRestart();
   };
 
   log('Game functions patched');
@@ -460,7 +472,7 @@ function patchGameFunctions() {
 function boot() {
   injectOnlineButton();
   patchGameFunctions();
-  log('Multiplayer module ready');
+  log('Multiplayer module ready — open console for [MP] logs');
 }
 
 if (document.readyState === 'loading') {
