@@ -128,11 +128,11 @@ function buildPanelHTML() {
     <div id="mp-lobby" style="display:flex; flex-direction:column; gap:.9rem;">
       <button id="mp-create-btn" class="generic-btn"
         style="width:100%; font-size:1rem; padding:.7rem 1rem;">
-        Criar Sala
+        Criar Sala &nbsp;·&nbsp; Create Room
       </button>
       <div style="display:flex; gap:.5rem; align-items:stretch;">
         <input id="mp-code-input" maxlength="6"
-          placeholder="CÓDIGO"
+          placeholder="CÓDIGO · CODE"
           style="
             flex:1; background:rgba(72,49,2,.5); border:1px solid var(--accent);
             border-radius:6px; color:var(--sand); padding:.55rem .75rem;
@@ -142,7 +142,7 @@ function buildPanelHTML() {
         />
         <button id="mp-join-btn" class="generic-btn"
           style="white-space:nowrap; padding:.55rem 1rem; flex-shrink:0;">
-          Entrar
+          Entrar · Join
         </button>
       </div>
       <!-- Single status line for lobby screen -->
@@ -156,21 +156,21 @@ function buildPanelHTML() {
       <p style="color:var(--sand); font-size:.9rem; letter-spacing:.06em;
                 text-align:center; margin:0; line-height:1.5;">
         Compartilhe com seu oponente<br>
-        <span style="font-size:.75rem; color:var(--sand3);"></span>
+        <span style="font-size:.75rem; color:var(--sand3);">Share with your opponent</span>
       </p>
       <div id="mp-code-display" style="
         font-size:2.4rem; letter-spacing:.35em; color:var(--gold);
         font-family:'Molle',cursive; text-align:center;
         background:rgba(196,154,68,.07); border:1px solid rgba(196,154,68,.3);
         border-radius:8px; padding:.5rem 1.4rem; cursor:pointer; user-select:all;
-      " title="Clique para copiar"></div>
+      " title="Clique para copiar · Click to copy"></div>
       <p style="font-size:.68rem; color:var(--sand3); letter-spacing:.1em;
-                text-align:center; margin:0;">clique para copiar</p>
+                text-align:center; margin:0;">clique para copiar · click to copy</p>
       <!-- Separate status line for waiting screen — different ID to avoid clash -->
       <p id="mp-wait-status-line"
         style="font-size:.78rem; letter-spacing:.1em; color:var(--sand3);
                min-height:1.2em; text-align:center; margin:0;">
-        Aguardando oponente…
+        Aguardando oponente… / Waiting for opponent…
       </p>
       <button id="mp-cancel-btn" class="generic-btn danger"
         style="font-size:.78rem; padding:.4rem 1.1rem;">
@@ -371,7 +371,12 @@ function subscribeChannel(code, onSubscribed) {
 
   ch.on('broadcast', { event: 'restart' }, () => {
     log('Remote restart');
-    window.restartGame(true);
+    _suppressBroadcast = true;
+    try {
+      window.restartGame(true);
+    } finally {
+      _suppressBroadcast = false;
+    }
   });
 
   ch.subscribe((status, err) => {
@@ -402,7 +407,13 @@ function onBothPlayersReady() {
   setOnlineBtnActive(mp.roomCode);
   window.mpOnline  = true;
   window.mpMyColor = mp.myColor;
-  window.mpActivate(mp.myColor);
+  // Suppress broadcast during the initial game-start reset
+  _suppressBroadcast = true;
+  try {
+    window.mpActivate(mp.myColor);
+  } finally {
+    _suppressBroadcast = false;
+  }
   log(`Game started as player ${mp.myColor}`);
 }
 
@@ -436,7 +447,13 @@ function applyRemoteMove({ from, to, color }) {
     return;
   }
 
-  window.executeMove(from, match);
+  // Suppress broadcast while applying a remote move so we don't echo it back
+  _suppressBroadcast = true;
+  try {
+    window.executeMove(from, match);
+  } finally {
+    _suppressBroadcast = false;
+  }
 }
 
 // ─── Disconnect ───────────────────────────────────────────────────────────────
@@ -460,6 +477,9 @@ function fullDisconnect() {
 
 // ─── Patch game functions ─────────────────────────────────────────────────────
 
+// Set to true while applying a remote event so we don't echo it back
+let _suppressBroadcast = false;
+
 function patchGameFunctions() {
   // 1. Wrap executeMove to broadcast our moves
   const origExecuteMove = window.executeMove;
@@ -468,18 +488,19 @@ function patchGameFunctions() {
     return;
   }
   window.executeMove = function(fromLabel, move) {
-    const myTurn = mp.active && window.state.currentPlayer === mp.myColor;
+    const myTurn = mp.active && !_suppressBroadcast && window.state.currentPlayer === mp.myColor;
     if (myTurn) broadcastMove(fromLabel, move.landing);
     origExecuteMove.call(this, fromLabel, move);
   };
 
-  // 2. Wrap restartGame to broadcast restarts in online mode
+  // 2. Wrap restartGame — only broadcast user-initiated restarts, never
+  //    the initial game-start reset or restarts triggered by remote events
   const origRestart = window.restartGame;
   window.restartGame = function(forceResetColor) {
     origRestart.call(this, forceResetColor);
-    // Only broadcast deliberate restarts (forceResetColor=true) and not the
-    // internal restart triggered by mpActivate itself
-    if (mp.active && forceResetColor && mp.opponentPresent) broadcastRestart();
+    if (mp.active && forceResetColor && mp.opponentPresent && !_suppressBroadcast) {
+      broadcastRestart();
+    }
   };
 
   log('Game functions patched');
