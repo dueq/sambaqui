@@ -31,7 +31,7 @@
 // Find it at: Supabase Dashboard → Project Settings → API → Project API keys → anon public
 
 const SUPABASE_URL      = 'https://qasopfvcdyikqxbniyqn.supabase.co';
-const SUPABASE_ANON_KEY = 'REPLACE_WITH_YOUR_ANON_KEY';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhc29wZnZjZHlpa3F4Ym5peXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzUwMDAsImV4cCI6MjA5NzMxMTAwMH0.MIiyCiRC09kC2hFA-h5-HoNJZGBAhHxoHUPchUB2VKE';
 
 // ─── Module state ─────────────────────────────────────────────────────────────
 
@@ -128,11 +128,11 @@ function buildPanelHTML() {
     <div id="mp-lobby" style="display:flex; flex-direction:column; gap:.9rem;">
       <button id="mp-create-btn" class="generic-btn"
         style="width:100%; font-size:1rem; padding:.7rem 1rem;">
-        Criar Sala &nbsp;·&nbsp; Create Room
+        Criar Sala
       </button>
       <div style="display:flex; gap:.5rem; align-items:stretch;">
         <input id="mp-code-input" maxlength="6"
-          placeholder="CÓDIGO · CODE"
+          placeholder="CÓDIGO"
           style="
             flex:1; background:rgba(72,49,2,.5); border:1px solid var(--accent);
             border-radius:6px; color:var(--sand); padding:.55rem .75rem;
@@ -142,7 +142,7 @@ function buildPanelHTML() {
         />
         <button id="mp-join-btn" class="generic-btn"
           style="white-space:nowrap; padding:.55rem 1rem; flex-shrink:0;">
-          Entrar · Join
+          Entrar
         </button>
       </div>
       <!-- Single status line for lobby screen -->
@@ -156,16 +156,16 @@ function buildPanelHTML() {
       <p style="color:var(--sand); font-size:.9rem; letter-spacing:.06em;
                 text-align:center; margin:0; line-height:1.5;">
         Compartilhe com seu oponente<br>
-        <span style="font-size:.75rem; color:var(--sand3);">Share with your opponent</span>
+        <span style="font-size:.75rem; color:var(--sand3);"></span>
       </p>
       <div id="mp-code-display" style="
         font-size:2.4rem; letter-spacing:.35em; color:var(--gold);
-        font-family:'Molle',cursive; text-align:center;
+        font-family:'Lato',cursive; text-align:center;
         background:rgba(196,154,68,.07); border:1px solid rgba(196,154,68,.3);
         border-radius:8px; padding:.5rem 1.4rem; cursor:pointer; user-select:all;
       " title="Clique para copiar · Click to copy"></div>
       <p style="font-size:.68rem; color:var(--sand3); letter-spacing:.1em;
-                text-align:center; margin:0;">clique para copiar · click to copy</p>
+                text-align:center; margin:0;">clique para copiar</p>
       <!-- Separate status line for waiting screen — different ID to avoid clash -->
       <p id="mp-wait-status-line"
         style="font-size:.78rem; letter-spacing:.1em; color:var(--sand3);
@@ -174,7 +174,7 @@ function buildPanelHTML() {
       </p>
       <button id="mp-cancel-btn" class="generic-btn danger"
         style="font-size:.78rem; padding:.4rem 1.1rem;">
-        Cancelar · Cancel
+        Cancelar
       </button>
     </div>
 
@@ -294,7 +294,7 @@ function onCancelWait() {
 }
 
 async function onCreateRoom() {
-  setAnyStatus('Criando sala… / Creating room…');
+  setAnyStatus('Criando sala…');
   try { await initSupabase(); }
   catch (err) { setAnyError(err.message); return; }
 
@@ -313,7 +313,7 @@ async function onJoinRoom() {
     .trim().toUpperCase();
 
   if (code.length < 4) {
-    setAnyError('Digite um código válido · Enter a valid code');
+    setAnyError('Digite um código válido');
     return;
   }
 
