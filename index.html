@@ -466,7 +466,7 @@ body {
 
 
 <div class="author">
-  Sambaqui • v1.3.2 • © 2026 Eduardo Eller
+  Sambaqui • v1.3.1 • © 2026 Eduardo Eller
 </div>
 </footer>
 
@@ -887,7 +887,6 @@ const BOARD_PATTERNS = [
 
 
 ];
-
 
 function makeInitialPieces() {
   // 1. Get a unique number for the current day (YYYYMMDD format)
@@ -2520,16 +2519,16 @@ applyLanguageSwitch();
     pieceSize = srcRect.width * 0.68;
     dragGhost = document.createElement('div');
     dragGhost.className = `piece-ghost p${player}`;
-    // left:0;top:0 is required so translate3d values map 1:1 to viewport coords
     Object.assign(dragGhost.style, {
-      position:  'fixed',
-      left:      '0',
-      top:       '0',
-      width:     pieceSize + 'px',
-      height:    pieceSize + 'px',
-      transform: `translate3d(${x - pieceSize / 2}px,${y - pieceSize / 2}px,0)`,
+      position:   'fixed',
+      left:       '0',
+      top:        '0',
+      width:      pieceSize + 'px',
+      height:     pieceSize + 'px',
+      transform:  `translate3d(${x - pieceSize / 2}px,${y - pieceSize / 2}px,0)`,
       transition: 'none',
-      zIndex:    '9999',
+      willChange: 'transform',
+      zIndex:     '9999',
     });
     document.body.appendChild(dragGhost);
   }
