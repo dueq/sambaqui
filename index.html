@@ -8,8 +8,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Molle:ital@1&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols+2:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lily+Script+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" href="./favicon.png">
 
 <style>
@@ -35,8 +38,8 @@ body {
   background-image:
       radial-gradient(ellipse 60% 30% at 50% 0%, #5d3d073d 0%, transparent 100%);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  font-family: 'Lato', serif; color: var(--sand);
-  padding: 2rem 1rem; gap: 1.1rem;
+  font-family: 'Quicksand', serif; color: var(--sand);
+  padding: 4rem 1rem; gap: 1.1rem;
 }
 
   body.clickable-restart {
@@ -50,18 +53,18 @@ body {
   header { text-align: center; }
   h1 {
     font-size: clamp(2.2rem, 12vw, 4.5rem);
-    letter-spacing: 0.02em; color: var(--sand3); line-height: 0.8;
-     font-family: "Molle", cursive; font-weight: 300; font-style: italic;
+    letter-spacing: 0em; color: var(--sand3); line-height: 0.8;
+     font-family: "Lily Script One", cursive; font-weight: 300; font-style: italic;
   }
 
   /* ── Stats Bar ── */
   .stats-bar {
-    font-family: 'Lato'; scale:1;
+    font-family: 'Quicksand'; scale:1 ;
     display: flex; gap: 2.3rem; font-size: 1.2rem; line-height: 1;
-    letter-spacing: 0.1em; background: rgba(72, 49, 2, 0.646);
-    padding: 0.5rem 2rem; border-radius: 40px; border: 1px solid rgba(199, 131, 3, 0.3);
+    letter-spacing: 0.08em; background: rgba(72, 49, 2, 0.646);
+    padding: 0.6rem 2rem; border-radius: 40px; border: 1px solid rgba(199, 131, 3, 0.3);
   }
-  .stats-bar strong { color: var(--gold);      font-family: "Molle", cursive; font-weight: 300; font-style: italic;}
+  .stats-bar strong { color: var(--gold);      font-family: "Lily Script One"; font-weight: 100; }
   
   /* ── Mode & Help toggles ── */
   .menu-controls { scale:1.1; font-size: 2rem; display: flex; flex-direction: column; align-items: center; gap: 0.6rem;}
@@ -70,9 +73,9 @@ body {
     font-size: clamp(0.65rem, 1.8vw, 0.78rem); letter-spacing: 0.12em; color: var(--sand3);
   }
   .mode-btn {
-    background: rgba(72, 49, 2, 0.646); border: 1px solid var(--accent); border-radius: 8px;
-    color: var(--sand3); padding: 0.3rem 1rem; cursor: pointer;
-    font-family: 'Lato', serif; font-size: inherit; letter-spacing: inherit;
+    background: #26180c 100%; border: 1px solid #644021 ; border-radius: 8px;
+    color: var(--sand3); padding: 0.25rem 1.6rem; cursor: pointer;
+    font-family: 'Quicksand', serif; font-size: inherit; letter-spacing: inherit;
     transition: background 0.2s, border-color 0.2s, color 0.2s;
   }
   .mode-btn.active { background: rgba(196,154,68,0.12); border-color: var(--gold); color: var(--gold); }
@@ -81,7 +84,7 @@ body {
   .help-btn {
     background: rgba(196,154,68,0.06); border: 1px dashed rgba(196,154,68,0.4);
     border-radius: 4px; color: var(--sand2); padding: 0.25rem 0.8rem; cursor: pointer;
-    font-family: 'Lato', serif; font-size: clamp(0.65rem, 1.8vw, 0.75rem); letter-spacing: 0.1em;
+    font-family: 'Quicksand', serif; font-size: clamp(0.65rem, 1.8vw, 0.75rem); letter-spacing: 0.1em;
     transition: all 0.2s;
   }
   .help-btn:hover { background: rgba(196,154,68,0.15); border-color: var(--gold); color: var(--gold); }
@@ -211,7 +214,7 @@ body {
   .result-banner .new-game-btn {
     background: transparent; border: 1px solid rgba(196,154,68,0.45); border-radius: 4px;
     color: var(--gold); padding: 0.25rem 0.75rem; cursor: pointer; white-space: nowrap;
-    font-family: 'Lato', serif; font-size: inherit; letter-spacing: inherit;
+    font-family: 'Quicksand', serif; font-size: inherit; letter-spacing: inherit;
     transition: background 0.2s, border-color 0.2s; flex-shrink: 0;
   }
   .result-banner .new-game-btn:hover { background: rgba(196,154,68,0.12); border-color: var(--gold); }
@@ -222,7 +225,7 @@ body {
     background: rgba(196,154,68,0.08); border: 1px solid rgba(196,154,68,0.45);
     border-radius: 6px; color: var(--gold);
     padding: 0.45rem 1.3rem; cursor: pointer; white-space: nowrap;
-    font-family: 'Lato', serif; font-size: clamp(0.72rem, 2vw, 1rem);
+    font-family: 'Quicksand', serif; font-size: clamp(0.72rem, 2vw, 1rem);
     letter-spacing: 0.12em; transition: background 0.2s, border-color 0.2s;
     margin-top: 0.2rem;
   }
@@ -344,7 +347,7 @@ body {
   .victory-title { font-size: clamp(2rem, 8vw, 3.5rem); font-weight: 700; color: var(--gold); letter-spacing: 0.1em; text-shadow: 0 0 60px rgba(196,154,68,0.6); text-align: center; }
   .victory-sub   { font-size: clamp(0.8rem, 2.5vw, 1.1rem); letter-spacing: 0.15em; color: var(--sand3); text-align: center; padding: 0 1rem; }
   
-  .generic-btn   { font-family: 'Lato', serif; font-size: clamp(0.75rem,2vw,0.85rem); letter-spacing: 0.15em; color: var(--gold); background: transparent; border: 1px solid rgba(196,154,68,0.5); border-radius: 4px; padding: 0.6rem 1.8rem; cursor: pointer; transition: all 0.2s; }
+  .generic-btn   { font-family: 'Quicksand', serif; font-size: clamp(0.75rem,2vw,0.85rem); letter-spacing: 0.15em; color: var(--gold); background: transparent; border: 1px solid rgba(196,154,68,0.5); border-radius: 4px; padding: 0.6rem 1.8rem; cursor: pointer; transition: all 0.2s; }
   .generic-btn:hover { background: rgba(196,154,68,0.12); border-color: var(--gold); }
   .generic-btn.danger { color: #c0704a; border-color: rgba(192,112,74,0.5); }
   .generic-btn.danger:hover { background: rgba(192,112,74,0.1); border-color: #c0704a; }
@@ -360,10 +363,10 @@ body {
   .tutorial-title-area { display: flex; align-items: center; gap: 0.6rem; }
   .tutorial-title { color: var(--gold); font-size: 1.4rem; font-weight: bold; letter-spacing: 0.05em; }
   .tutorial-pages { font-size: 0.8rem; color: var(--sand3); letter-spacing: 0.1em; white-space: nowrap; }
-  .tutorial-body { font-family:"Lato"; font-size: 1.1rem; letter-spacing: 0.05rem; line-height: 1.3; color: var(--sand); min-height: 120px; }
+  .tutorial-body { font-family:"Quicksand"; font-size: 1.1rem; letter-spacing: 0.05rem; line-height: 1.3; color: var(--sand); min-height: 120px; }
   .tutorial-body strong { color: var(--gold); }
   .tutorial-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; }
-  .tut-nav { background: transparent; border: 1px solid rgba(184,169,138,0.2); color: var(--sand2); font-family: 'Lato', serif; padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer; transition: all 0.2s; font-size: 1rem; }
+  .tut-nav { background: transparent; border: 1px solid rgba(184,169,138,0.2); color: var(--sand2); font-family: 'Quicksand', serif; padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer; transition: all 0.2s; font-size: 1rem; }
   .tut-nav:hover:not(:disabled) { border-color: var(--sand3); color: #fff; }
   .tut-nav:disabled { opacity: 0.2; cursor: not-allowed; }
 
@@ -404,12 +407,12 @@ body {
 <div class="menu-controls">
   <div class="mode-bar">
     <button class="mode-btn" id="open-tutorial-btn">Como Jogar</button>
-    <button class="mode-btn" id="lang-toggle-btn">EN</button>
+    <button class="mode-btn"        id="lang-toggle-btn">EN</button>
   </div>
 </div>
 
-  <div class="board-controls" id="nav-controls">
-    <button id="undo-btn" class="nav-btn" title="Undo" disabled>◀</button>
+  <div class="board-controls" id="nav-controls" style="display:none">
+  <button id="undo-btn" class="nav-btn" title="Undo" disabled>◀</button>
     <div class="move-log" id="move-log"></div>
     <button id="redo-btn" class="nav-btn" title="Redo" disabled>▶</button>
   </div>
@@ -456,7 +459,7 @@ body {
 
 
 <div class="author">
-  Sambaqui • v1.2.8.5 • © 2026 Eduardo Eller
+  Sambaqui • v1.3.1 • © 2026 Eduardo Eller
 </div>
 </footer>
 
@@ -2221,7 +2224,7 @@ function updateMetaDisplay() {
     statsBarEl.classList.remove('hidden');
     
     if (window.achievedNewBest) {
-      statLvlLabel.textContent = currentLang === 'PT' ? "★\uFE0E Nível " : "★\uFE0E Level ";
+      statLvlLabel.textContent = currentLang === 'PT' ? " Nível " : " Level ";
     } else {
       statLvlLabel.textContent = t('level');
     }
@@ -2239,8 +2242,20 @@ function updateMetaDisplay() {
   } else {
     statsBarEl.classList.add('hidden');
     if (!state.gameOver) {
-      labelP1.textContent = t('player1');
-      labelP2.textContent = t('player2');
+      if (window.mpOnline) {
+        // Online mode: label the local player "Sua Vez" and the opponent "Oponente Joga"
+        const myColor = window.mpMyColor; // 1 or 2
+        if (myColor === 1) {
+          labelP1.textContent = currentLang === 'PT' ? 'Sua Vez' : 'Your Turn';
+          labelP2.textContent = currentLang === 'PT' ? 'Oponente Joga' : 'Opponent\'s Turn';
+        } else {
+          labelP1.textContent = currentLang === 'PT' ? 'Oponente Joga' : 'Opponent\'s Turn';
+          labelP2.textContent = currentLang === 'PT' ? 'Sua Vez' : 'Your Turn';
+        }
+      } else {
+        labelP1.textContent = t('player1');
+        labelP2.textContent = t('player2');
+      }
     }
   }
 
@@ -2392,6 +2407,10 @@ applyLanguageSwitch();
 // ═══════════════════════════════════════════════════════════════
 window.state            = state;
 window.executeMove      = executeMove;
+Object.defineProperty(window, 'currentLang', {
+  get()  { return currentLang; },
+  configurable: true, enumerable: true,
+});
 window.computeAllSlides = computeAllSlides;
 window.selectPiece      = selectPiece;
 window.setStatus        = setStatus;
