@@ -33,7 +33,6 @@
   }
 
 body {
-  min-height: 10vh;
   background-color: #241a0e;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   font-family: 'Quicksand', serif; color: var(--sand);
@@ -88,7 +87,7 @@ body {
   .help-btn:hover { background: rgba(196,154,68,0.15); border-color: var(--gold); color: var(--gold); }
 
   /* ── Turn bar ── */
-  .turn-bar { display: flex; align-items: center; gap: 1.4rem; font-size: clamp(0.7rem, 2vw, 1rem); letter-spacing: 0.15em; }
+  .turn-bar { display: flex; align-items: center; gap: 1.4rem; font-size: clamp(0.8rem, 2vw, 1.2rem); letter-spacing: 0.1em; }
   .player-tag { display: flex; align-items: center; gap: 0.5rem; opacity: 0.2; transition: opacity 0s; }
   .player-tag.active { opacity: 1; }
   .player-tag .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; }
@@ -380,7 +379,7 @@ body {
   footer {
     font-size: 0.8rem; letter-spacing: 0.15em; color: var(--sand3);
     text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
-    margin-top: 1rem; text-align: center;
+    margin-top: 0.5rem; text-align: center;
   }
   footer .author { opacity: 0.5; font-size: 0.7rem; letter-spacing: 0.1em; line-height: 0.01rem}
   footer .links { display: flex; align-items: center; gap: 1rem; line-height: 0.01rem }
