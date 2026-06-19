@@ -120,7 +120,7 @@ function buildPanelHTML() {
     <!-- Header -->
     <div style="display:flex; justify-content:space-between; align-items:center;
                 border-bottom:1px solid rgba(122,79,46,.35); padding-bottom:.6rem;">
-      <span style="color:var(--gold); font-size:1.3rem; font-weight:700; letter-spacing:.06em;">Online</span>
+      <span style="color:var(--gold); font-size:1.3rem; font-weight:700; letter-spacing:.06em;">🌐\uFE0E Jogar Online</span>
       <button id="mp-close-btn" style="background:none; border:none; color:var(--sand3);
         font-size:1.3rem; cursor:pointer; line-height:1; padding:.2rem .4rem;"
         title="Fechar / Close">✕</button>
@@ -158,7 +158,6 @@ function buildPanelHTML() {
       <p style="color:var(--sand); font-size:.9rem; letter-spacing:.06em;
                 text-align:center; margin:0; line-height:1.5;">
         Compartilhe com seu oponente<br>
-        <span style="font-size:.75rem; color:var(--sand3);">Share with your opponent</span>
       </p>
       <div id="mp-code-display" style="
         font-size:2.4rem; letter-spacing:.35em; color:var(--gold);
@@ -166,13 +165,13 @@ function buildPanelHTML() {
         background:rgba(196,154,68,.07); border:1px solid rgba(196,154,68,.3);
         border-radius:8px; padding:.5rem 1.4rem; cursor:pointer; user-select:all;
       " title="Clique para copiar"></div>
-      <p style="font-size:.68rem; color:var(--sand3); letter-spacing:.1em;
-                text-align:center; margin:0;">clique para copiar</p>
+      <p style="font-size:.8rem; color:var(--sand3); letter-spacing:.1em;
+                text-align:center; margin:0;">Clique para copiar</p>
       <!-- Separate status line for waiting screen — different ID to avoid clash -->
       <p id="mp-wait-status-line"
-        style="font-size:.78rem; letter-spacing:.1em; color:var(--sand3);
+        style="font-size:.8rem; letter-spacing:.1em; color:var(--sand3);
                min-height:1.2em; text-align:center; margin:0;">
-        Aguardando oponente… / Waiting for opponent…
+        Aguardando oponente…
       </p>
       <button id="mp-cancel-btn" class="generic-btn danger"
         style="font-size:.78rem; padding:.4rem 1.1rem;">
@@ -296,7 +295,7 @@ function onCancelWait() {
 }
 
 async function onCreateRoom() {
-  setAnyStatus('Criando sala… / Creating room…');
+  setAnyStatus('Criando sala…');
   try { await initSupabase(); }
   catch (err) { setAnyError(err.message); return; }
 
