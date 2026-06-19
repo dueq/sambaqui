@@ -200,8 +200,8 @@ body {
   /* ── Result banner ── */
   .result-banner {
     display: flex; align-items: center; justify-content: center; gap: 1.2rem;
-    border: 1px solid var(--accent); border-radius: 6px;
-    background: rgba(28,21,16,0.85); padding: 0.55rem 1.2rem;
+    background: #26180c 100%; border: 1px solid #644021 ; border-radius: 8px;
+    color: var(--sand3);   padding: 0.55rem 1.2rem;
     font-size: clamp(1rem, 1.8vw, 0.85rem); letter-spacing: 0.15em;
     color: var(--gold); animation: fade-in 0.4s ease;
     width: 100%;
@@ -342,7 +342,6 @@ body {
   /* ── Drag-and-drop states ── */
   .cell.drag-over-valid   { border-color: var(--gold) !important; background-color: rgba(196,154,68,0.22) !important; }
   .cell.drag-over-invalid { border-color: rgba(192,112,74,0.7) !important; }
-  .piece.dragging         { opacity: 0; }
 
   /* ── Modals & Overlays ── */
   .victory-overlay, .tutorial-overlay {
@@ -467,7 +466,7 @@ body {
 
 
 <div class="author">
-  Sambaqui • <v1 class="3 2"></v1> • © 2026 Eduardo Eller
+  Sambaqui • v1.3.2 • © 2026 Eduardo Eller
 </div>
 </footer>
 
@@ -783,14 +782,14 @@ window.achievedNewBest = false;
 
 const BOARD_PATTERNS = [
   
-  // Pattern 0 Quinta
+  // Pattern 0       BFTX - DJPV
   {
     B: { player: 1, active: true }, F: { player: 1, active: true },
     T: { player: 1, active: true }, X: { player: 1, active: true },
     D: { player: 2, active: false }, J: { player: 2, active: false },
     P: { player: 2, active: false }, V: { player: 2, active: false },
   },
-  // Pattern 1 Sexta
+  // Pattern 1        ADSP - GJVY
   {
     A: { player: 1, active: true }, D: { player: 1, active: true },
     P: { player: 1, active: true }, S: { player: 1, active: true },
@@ -798,7 +797,7 @@ const BOARD_PATTERNS = [
     V: { player: 2, active: false }, Y: { player: 2, active: false },
   },
 
-   // Pattern 2 Sábado
+   // Pattern 2       BGSX - DIQV
   {
     B: { player: 1, active: true }, G: { player: 1, active: true },
     S: { player: 1, active: true }, X: { player: 1, active: true },
@@ -806,7 +805,7 @@ const BOARD_PATTERNS = [
     Q: { player: 2, active: false }, V: { player: 2, active: false },
   },
 
-     // Pattern 3 Domingo
+     // Pattern 3     BJPX - DFTV
   {
     B: { player: 1, active: true }, J: { player: 1, active: true },
     P: { player: 1, active: true }, X: { player: 1, active: true },
@@ -814,7 +813,7 @@ const BOARD_PATTERNS = [
     T: { player: 2, active: false }, V: { player: 2, active: false },
   },
 
-     // Pattern 4 Segunda
+     // Pattern 4
   {
     B: { player: 1, active: true }, D: { player: 1, active: true },
     U: { player: 1, active: true }, Y: { player: 1, active: true },
@@ -822,7 +821,7 @@ const BOARD_PATTERNS = [
     V: { player: 2, active: false }, X: { player: 2, active: false },
   },
 
-      // Pattern 5 Terça
+      // Pattern 5
   {
     C: { player: 1, active: true }, F: { player: 1, active: true },
     N: { player: 1, active: true }, Q: { player: 1, active: true },
@@ -838,8 +837,57 @@ const BOARD_PATTERNS = [
     T: { player: 2, active: false }, X: { player: 2, active: false },
   },
 
+        // Pattern 7 
+  {
+    A: { player: 1, active: true }, D: { player: 1, active: true },
+    V: { player: 1, active: true }, Y: { player: 1, active: true },
+    B: { player: 2, active: false }, E: { player: 2, active: false },
+    U: { player: 2, active: false }, X: { player: 2, active: false },
+  },
+
+        // Pattern 8
+  {
+    A: { player: 1, active: true }, I: { player: 1, active: true },
+    Q: { player: 1, active: true }, Y: { player: 1, active: true },
+    E: { player: 2, active: false }, G: { player: 2, active: false },
+    S: { player: 2, active: false }, U: { player: 2, active: false },
+  },
+
+          // Pattern 9 
+  {
+    A: { player: 1, active: true }, H: { player: 1, active: true },
+    L: { player: 1, active: true }, S: { player: 1, active: true },
+    G: { player: 2, active: false }, N: { player: 2, active: false },
+    R: { player: 2, active: false }, Y: { player: 2, active: false },
+  },
+
+            // Pattern 10
+  {
+    G: { player: 1, active: true }, K: { player: 1, active: true },
+    N: { player: 1, active: true }, Q: { player: 1, active: true },
+    I: { player: 2, active: false }, L: { player: 2, active: false },
+    O: { player: 2, active: false }, S: { player: 2, active: false },
+  },
+
+             // Pattern 11
+  {
+    B: { player: 1, active: true }, L: { player: 1, active: true },
+    O: { player: 1, active: true }, X: { player: 1, active: true },
+    D: { player: 2, active: false }, K: { player: 2, active: false },
+    N: { player: 2, active: false }, V: { player: 2, active: false },
+  },
+
+               // Pattern 12
+  {
+    D: { player: 1, active: true }, L: { player: 1, active: true },
+    N: { player: 1, active: true }, V: { player: 1, active: true },
+    F: { player: 2, active: false }, H: { player: 2, active: false },
+    R: { player: 2, active: false }, T: { player: 2, active: false },
+  },
+
 
 ];
+
 
 function makeInitialPieces() {
   // 1. Get a unique number for the current day (YYYYMMDD format)
@@ -1076,6 +1124,7 @@ for (let r = 0; r < 5; r++) {
     const label = rcToLabel(r, c);
     const cell = document.createElement('div');
     cell.className = 'cell' + (((r + c) % 2 === 1) ? ' dark-sq' : '');
+    cell.dataset.label = label;
     
 if (!vsAI) {
       const coord = document.createElement('div');
@@ -1303,6 +1352,7 @@ function animateSlide(player, fromLabel, path, onDone) {
       requestAnimationFrame(frame);
     } else {
       ghost.remove();
+      if (internalPiece) internalPiece.style.opacity = '';
       state.animating = false;
       updateNavButtons();
       onDone();
@@ -2505,8 +2555,24 @@ applyLanguageSwitch();
     lastHover = label;
   }
 
+  // A <style> tag we inject/remove to hide the dragged piece's cell contents
+  // across render() rebuilds (which nuke and recreate innerHTML entirely).
+  let dragHideStyle = null;
+
+  function hideDragSource(label) {
+    removeDragHideStyle();
+    dragHideStyle = document.createElement('style');
+    // The data-label attribute is set on each cell by the render loop
+    dragHideStyle.textContent = `.cell[data-label="${label}"] .piece { opacity: 0 !important; }`;
+    document.head.appendChild(dragHideStyle);
+  }
+
+  function removeDragHideStyle() {
+    if (dragHideStyle) { dragHideStyle.remove(); dragHideStyle = null; }
+  }
+
   function beginDrag(label, clientX, clientY) {
-    // Select the piece (shows landing dots etc.)
+    // Select the piece (shows landing dots etc.) — triggers render() internally
     if (state.selectedSquare !== label) {
       handleSquareClick(label);
     }
@@ -2518,9 +2584,8 @@ applyLanguageSwitch();
     const piece = state.pieces[label];
     createGhost(piece.player, clientX, clientY);
 
-    // Hide the real piece element
-    const pieceEl = cellEls[label].querySelector('.piece');
-    if (pieceEl) pieceEl.classList.add('dragging');
+    // Hide via injected CSS rule — survives render() rebuilding the cell's innerHTML
+    hideDragSource(label);
   }
 
   function endDrag(clientX, clientY) {
@@ -2528,10 +2593,7 @@ applyLanguageSwitch();
 
     clearHoverHighlights();
     if (dragGhost) { dragGhost.remove(); dragGhost = null; }
-
-    // Restore piece visibility
-    const pieceEl = cellEls[dragLabel]?.querySelector('.piece');
-    if (pieceEl) pieceEl.classList.remove('dragging');
+    removeDragHideStyle();
 
     const landLabel = labelAtPoint(clientX, clientY);
     const move = landLabel
@@ -2546,7 +2608,6 @@ applyLanguageSwitch();
       executeMove(src, move);
       window._dragDropActive = false;
     } else {
-      // Not a valid drop: keep piece selected (click-select already ran at drag start)
       dragLabel = null;
     }
   }
@@ -2555,8 +2616,7 @@ applyLanguageSwitch();
     if (!dragLabel) return;
     clearHoverHighlights();
     if (dragGhost) { dragGhost.remove(); dragGhost = null; }
-    const pieceEl = cellEls[dragLabel]?.querySelector('.piece');
-    if (pieceEl) pieceEl.classList.remove('dragging');
+    removeDragHideStyle();
     dragLabel = null;
   }
 
