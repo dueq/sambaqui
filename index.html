@@ -200,8 +200,8 @@ body {
   /* ── Result banner ── */
   .result-banner {
     display: flex; align-items: center; justify-content: center; gap: 1.2rem;
-    border: 1px solid var(--accent); border-radius: 6px;
-    background: rgba(28,21,16,0.85); padding: 0.55rem 1.2rem;
+     background: #26180c 100%; border: 1px solid #644021 ; border-radius: 8px;
+    color: var(--sand3);  padding: 0.55rem 1.2rem;
     font-size: clamp(1rem, 1.8vw, 0.85rem); letter-spacing: 0.15em;
     color: var(--gold); animation: fade-in 0.4s ease;
     width: 100%;
@@ -318,7 +318,7 @@ body {
     50%     { box-shadow: 0 3px 8px rgba(0,0,0,0.5), 0 0 0 5px rgba(122,184,192,0.25), 0 0 22px rgba(122,184,192,0.4); }
   }
 
-  /* ── Piece ghost ── */
+  /* ── Piece ghost (used by animation engine AND drag-and-drop) ── */
   .piece-ghost { position: fixed; border-radius: 50%; pointer-events: none; z-index: 50; }
   .piece-ghost.p1 {
     background: radial-gradient(circle at 38% 32%, #f5f0e8b1, #c8bfad 55%, #a89f90);
@@ -332,6 +332,11 @@ body {
     box-shadow: 0 4px 12px rgba(0,0,0,0.65), inset 0 1px 3px rgba(255,255,255,0.15),
       0 0 0 3px rgba(232,220,200,0.35), 0 0 18px rgba(232,220,200,0.2);
   }
+
+  /* ── Drag-and-drop states ── */
+  .cell.drag-over-valid   { border-color: var(--gold) !important; background-color: rgba(196,154,68,0.22) !important; }
+  .cell.drag-over-invalid { border-color: rgba(192,112,74,0.7) !important; }
+  .piece.dragging         { opacity: 0; }
 
   /* ── Modals & Overlays ── */
   .victory-overlay, .tutorial-overlay {
@@ -456,7 +461,7 @@ body {
 
 
 <div class="author">
-  Sambaqui • v1.3.1 • © 2026 Eduardo Eller
+  Sambaqui • v1.3.2 • © 2026 Eduardo Eller
 </div>
 </footer>
 
@@ -772,14 +777,14 @@ window.achievedNewBest = false;
 
 const BOARD_PATTERNS = [
   
-  // Pattern 0 Quinta
+  // Pattern 0       BFTX - DJPV
   {
     B: { player: 1, active: true }, F: { player: 1, active: true },
     T: { player: 1, active: true }, X: { player: 1, active: true },
     D: { player: 2, active: false }, J: { player: 2, active: false },
     P: { player: 2, active: false }, V: { player: 2, active: false },
   },
-  // Pattern 1 Sexta
+  // Pattern 1        ADSP - GJVY
   {
     A: { player: 1, active: true }, D: { player: 1, active: true },
     P: { player: 1, active: true }, S: { player: 1, active: true },
@@ -787,7 +792,7 @@ const BOARD_PATTERNS = [
     V: { player: 2, active: false }, Y: { player: 2, active: false },
   },
 
-   // Pattern 2 Sábado
+   // Pattern 2       BGSX - DIQV
   {
     B: { player: 1, active: true }, G: { player: 1, active: true },
     S: { player: 1, active: true }, X: { player: 1, active: true },
@@ -795,7 +800,7 @@ const BOARD_PATTERNS = [
     Q: { player: 2, active: false }, V: { player: 2, active: false },
   },
 
-     // Pattern 3 Domingo
+     // Pattern 3     BJPX - DFTV
   {
     B: { player: 1, active: true }, J: { player: 1, active: true },
     P: { player: 1, active: true }, X: { player: 1, active: true },
@@ -803,15 +808,15 @@ const BOARD_PATTERNS = [
     T: { player: 2, active: false }, V: { player: 2, active: false },
   },
 
-     // Pattern 4 Segunda
+     // Pattern 4
   {
-    C: { player: 1, active: true }, G: { player: 1, active: true },
-    I: { player: 1, active: true }, R: { player: 1, active: true },
-    H: { player: 2, active: false }, Q: { player: 2, active: false },
-    S: { player: 2, active: false }, W: { player: 2, active: false },
+    B: { player: 1, active: true }, D: { player: 1, active: true },
+    U: { player: 1, active: true }, Y: { player: 1, active: true },
+    A: { player: 2, active: false }, E: { player: 2, active: false },
+    V: { player: 2, active: false }, X: { player: 2, active: false },
   },
 
-      // Pattern 5 Terça
+      // Pattern 5
   {
     C: { player: 1, active: true }, F: { player: 1, active: true },
     N: { player: 1, active: true }, Q: { player: 1, active: true },
@@ -827,8 +832,57 @@ const BOARD_PATTERNS = [
     T: { player: 2, active: false }, X: { player: 2, active: false },
   },
 
+        // Pattern 7 
+  {
+    A: { player: 1, active: true }, D: { player: 1, active: true },
+    V: { player: 1, active: true }, Y: { player: 1, active: true },
+    B: { player: 2, active: false }, E: { player: 2, active: false },
+    U: { player: 2, active: false }, X: { player: 2, active: false },
+  },
+
+        // Pattern 8
+  {
+    A: { player: 1, active: true }, I: { player: 1, active: true },
+    Q: { player: 1, active: true }, Y: { player: 1, active: true },
+    E: { player: 2, active: false }, G: { player: 2, active: false },
+    S: { player: 2, active: false }, U: { player: 2, active: false },
+  },
+
+          // Pattern 9 
+  {
+    A: { player: 1, active: true }, H: { player: 1, active: true },
+    L: { player: 1, active: true }, S: { player: 1, active: true },
+    G: { player: 2, active: false }, N: { player: 2, active: false },
+    R: { player: 2, active: false }, Y: { player: 2, active: false },
+  },
+
+            // Pattern 10
+  {
+    G: { player: 1, active: true }, K: { player: 1, active: true },
+    N: { player: 1, active: true }, Q: { player: 1, active: true },
+    I: { player: 2, active: false }, L: { player: 2, active: false },
+    O: { player: 2, active: false }, S: { player: 2, active: false },
+  },
+
+             // Pattern 11
+  {
+    B: { player: 1, active: true }, L: { player: 1, active: true },
+    O: { player: 1, active: true }, X: { player: 1, active: true },
+    D: { player: 2, active: false }, K: { player: 2, active: false },
+    N: { player: 2, active: false }, V: { player: 2, active: false },
+  },
+
+               // Pattern 12
+  {
+    D: { player: 1, active: true }, L: { player: 1, active: true },
+    N: { player: 1, active: true }, V: { player: 1, active: true },
+    F: { player: 2, active: false }, H: { player: 2, active: false },
+    R: { player: 2, active: false }, T: { player: 2, active: false },
+  }
+
 
 ];
+
 
 function makeInitialPieces() {
   // 1. Get a unique number for the current day (YYYYMMDD format)
@@ -842,7 +896,7 @@ function makeInitialPieces() {
   // 2. Use the modulo operator (%) to safely map the seed to your array length
   const patternIndex = dateSeed % BOARD_PATTERNS.length;
 
-  // const patternIndex = 0
+  // const patternIndex = 6
 
   // 3. Return a *deep copy* so players don't accidentally mutate the master list
   return JSON.parse(JSON.stringify(BOARD_PATTERNS[patternIndex]));
@@ -1305,9 +1359,14 @@ function animateSlide(player, fromLabel, path, onDone) {
 // ═══════════════════════════════════════════════════════════════
 function executeMove(fromLabel, move) {
   const player = state.currentPlayer;
-  animateSlide(player, fromLabel, move.path, () => {
+  if (window._dragDropActive) {
+    // Piece was already dragged by the user — skip the slide animation
     finalizeMove(fromLabel, move);
-  });
+  } else {
+    animateSlide(player, fromLabel, move.path, () => {
+      finalizeMove(fromLabel, move);
+    });
+  }
 }
 
 function finalizeMove(fromLabel, move) {
@@ -2221,7 +2280,7 @@ function updateMetaDisplay() {
     statsBarEl.classList.remove('hidden');
     
     if (window.achievedNewBest) {
-      statLvlLabel.textContent = currentLang === 'PT' ? " Nível " : " Level ";
+      statLvlLabel.textContent = currentLang === 'PT' ? " Nível⠀" : " Level⠀";
     } else {
       statLvlLabel.textContent = t('level');
     }
@@ -2396,6 +2455,276 @@ shareResultBtn.addEventListener('click', () => {
 });
 
 applyLanguageSwitch();
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 13 — DRAG-AND-DROP (mouse + touch, desktop + mobile)
+// ═══════════════════════════════════════════════════════════════
+//
+//  Design: dragging a piece behaves exactly like click-select + click-land.
+//  • Drag starts on a selectable cell (active own piece).
+//  • A floating ghost tracks the pointer; the source piece hides.
+//  • Valid landing cells highlight in gold; invalid ones in red.
+//  • Drop on a valid landing → executeMove(). Drop elsewhere → cancel.
+//  • Short taps (< 200 ms, < 8 px travel) fall through to handleSquareClick
+//    so the original click-to-select flow still works on touch devices.
+// ═══════════════════════════════════════════════════════════════
+
+(function initDragDrop() {
+  let dragLabel    = null;   // label of cell being dragged from
+  let dragGhost    = null;   // floating ghost element
+  let pieceSize    = 0;      // ghost diameter in px
+  let lastHover    = null;   // label of cell currently under pointer
+  let dragStartTime = 0;
+  let dragStartX   = 0;
+  let dragStartY   = 0;
+  const DRAG_THRESHOLD = 8; // px movement before we commit to a drag
+
+  // Exposed so executeMove can skip the slide animation on drag-drops
+  window._dragDropActive = false;
+
+  // ── helpers ─────────────────────────────────────────────────
+
+  function canDragFrom(label) {
+    if (state.gameOver || state.animating || window.isWaitingForContinue) return false;
+    if (vsAI && state.currentPlayer !== humanPlayerColor) return false;
+    if (window.mpOnline && state.currentPlayer !== window.mpMyColor) return false;
+    const piece = state.pieces[label];
+    if (!piece || piece.player !== state.currentPlayer || !piece.active) return false;
+    if (state.sneaking && label !== state.sneakingSquare) return false;
+    return true;
+  }
+
+  function labelAtPoint(x, y) {
+    // Temporarily hide ghost so elementFromPoint sees what's under it
+    if (dragGhost) dragGhost.style.display = 'none';
+    const el = document.elementFromPoint(x, y);
+    if (dragGhost) dragGhost.style.display = '';
+    if (!el) return null;
+    const cell = el.closest('.cell');
+    if (!cell) return null;
+    for (const [lbl, cellEl] of Object.entries(cellEls)) {
+      if (cellEl === cell) return lbl;
+    }
+    return null;
+  }
+
+  function createGhost(player, x, y) {
+    const srcRect = cellEls[dragLabel].getBoundingClientRect();
+    pieceSize = srcRect.width * 0.68;
+    dragGhost = document.createElement('div');
+    dragGhost.className = `piece-ghost p${player}`;
+    // left:0;top:0 is required so translate3d values map 1:1 to viewport coords
+    Object.assign(dragGhost.style, {
+      position:  'fixed',
+      left:      '0',
+      top:       '0',
+      width:     pieceSize + 'px',
+      height:    pieceSize + 'px',
+      transform: `translate3d(${x - pieceSize / 2}px,${y - pieceSize / 2}px,0)`,
+      transition: 'none',
+      zIndex:    '9999',
+    });
+    document.body.appendChild(dragGhost);
+  }
+
+  function moveGhost(x, y) {
+    if (!dragGhost) return;
+    dragGhost.style.transform = `translate3d(${x - pieceSize / 2}px,${y - pieceSize / 2}px,0)`;
+  }
+
+  function clearHoverHighlights() {
+    for (const lbl of Object.keys(cellEls)) {
+      cellEls[lbl].classList.remove('drag-over-valid', 'drag-over-invalid');
+    }
+    lastHover = null;
+  }
+
+  function applyHover(label) {
+    if (label === lastHover) return;
+    clearHoverHighlights();
+    if (!label || label === dragLabel) { lastHover = label; return; }
+    const move = state.currentMoves.find(m => m.landing === label && !m.blocked);
+    cellEls[label].classList.add(move ? 'drag-over-valid' : 'drag-over-invalid');
+    lastHover = label;
+  }
+
+  function beginDrag(label, clientX, clientY) {
+    // Select the piece (shows landing dots etc.)
+    if (state.selectedSquare !== label) {
+      handleSquareClick(label);
+    }
+    dragLabel     = label;
+    dragStartTime = performance.now();
+    dragStartX    = clientX;
+    dragStartY    = clientY;
+
+    const piece = state.pieces[label];
+    createGhost(piece.player, clientX, clientY);
+
+    // Hide the real piece element
+    const pieceEl = cellEls[label].querySelector('.piece');
+    if (pieceEl) pieceEl.classList.add('dragging');
+  }
+
+  function endDrag(clientX, clientY) {
+    if (!dragLabel) return;
+
+    clearHoverHighlights();
+    if (dragGhost) { dragGhost.remove(); dragGhost = null; }
+
+    // Restore piece visibility
+    const pieceEl = cellEls[dragLabel]?.querySelector('.piece');
+    if (pieceEl) pieceEl.classList.remove('dragging');
+
+    const landLabel = labelAtPoint(clientX, clientY);
+    const move = landLabel
+      ? state.currentMoves.find(m => m.landing === landLabel && !m.blocked)
+      : null;
+
+    if (move) {
+      const src = dragLabel;
+      dragLabel = null;
+      clearSelection();
+      window._dragDropActive = true;
+      executeMove(src, move);
+      window._dragDropActive = false;
+    } else {
+      // Not a valid drop: keep piece selected (click-select already ran at drag start)
+      dragLabel = null;
+    }
+  }
+
+  function cancelDrag() {
+    if (!dragLabel) return;
+    clearHoverHighlights();
+    if (dragGhost) { dragGhost.remove(); dragGhost = null; }
+    const pieceEl = cellEls[dragLabel]?.querySelector('.piece');
+    if (pieceEl) pieceEl.classList.remove('dragging');
+    dragLabel = null;
+  }
+
+  // ── MOUSE EVENTS ────────────────────────────────────────────
+
+  // We track mousedown on each cell (not document) so we know the source label immediately
+  function onCellMouseDown(label, e) {
+    if (e.button !== 0) return;
+    if (!canDragFrom(label)) return;
+    // Don't begin drag yet — wait for mousemove threshold
+    dragLabel     = null;     // will be set in beginDrag
+    dragStartTime = performance.now();
+    dragStartX    = e.clientX;
+    dragStartY    = e.clientY;
+    // Store the candidate label temporarily
+    e.currentTarget._dragCandidate = label;
+  }
+
+  document.addEventListener('mousemove', (e) => {
+    // Check if we have a candidate but haven't started dragging yet
+    const candidate = (() => {
+      for (const lbl of Object.keys(cellEls)) {
+        const c = cellEls[lbl]._dragCandidate;
+        if (c) return { lbl: c, el: cellEls[lbl] };
+      }
+      return null;
+    })();
+
+    if (candidate && !dragLabel) {
+      const dx = e.clientX - dragStartX;
+      const dy = e.clientY - dragStartY;
+      if (Math.sqrt(dx * dx + dy * dy) > DRAG_THRESHOLD) {
+        delete cellEls[candidate.lbl]._dragCandidate;
+        beginDrag(candidate.lbl, e.clientX, e.clientY);
+      }
+      return;
+    }
+
+    if (!dragLabel) return;
+    moveGhost(e.clientX, e.clientY);
+    applyHover(labelAtPoint(e.clientX, e.clientY));
+  });
+
+  document.addEventListener('mouseup', (e) => {
+    // Clear any pending candidate (short click — let normal click handler fire)
+    for (const lbl of Object.keys(cellEls)) delete cellEls[lbl]._dragCandidate;
+
+    if (!dragLabel) return;
+    e.preventDefault();
+    endDrag(e.clientX, e.clientY);
+  });
+
+  document.addEventListener('mouseleave', () => {
+    for (const lbl of Object.keys(cellEls)) delete cellEls[lbl]._dragCandidate;
+    cancelDrag();
+  });
+
+  // ── TOUCH EVENTS ────────────────────────────────────────────
+
+  // touch-action must allow drag; we suppress scroll only after threshold
+  let touchId      = null;
+  let touchCandidate = null;   // { label, startX, startY }
+  let touchDragging = false;
+
+  function onCellTouchStart(label, e) {
+    if (!canDragFrom(label)) return;
+    if (e.touches.length !== 1) return;
+    const t0 = e.touches[0];
+    touchId        = t0.identifier;
+    touchCandidate = { label, startX: t0.clientX, startY: t0.clientY };
+    touchDragging  = false;
+    dragStartTime  = performance.now();
+  }
+
+  document.addEventListener('touchmove', (e) => {
+    if (!touchCandidate) return;
+    const touch = [...e.changedTouches].find(t => t.identifier === touchId);
+    if (!touch) return;
+
+    const dx = touch.clientX - touchCandidate.startX;
+    const dy = touch.clientY - touchCandidate.startY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (!touchDragging) {
+      if (dist > DRAG_THRESHOLD) {
+        touchDragging = true;
+        beginDrag(touchCandidate.label, touch.clientX, touch.clientY);
+        e.preventDefault(); // prevent scroll only after we commit
+      }
+      return;
+    }
+
+    e.preventDefault();
+    moveGhost(touch.clientX, touch.clientY);
+    applyHover(labelAtPoint(touch.clientX, touch.clientY));
+  }, { passive: false });
+
+  document.addEventListener('touchend', (e) => {
+    if (!touchCandidate) return;
+    const touch = [...e.changedTouches].find(t => t.identifier === touchId);
+    if (!touch) { touchCandidate = null; touchId = null; return; }
+
+    if (touchDragging) {
+      endDrag(touch.clientX, touch.clientY);
+    }
+    // If NOT dragging, let the normal click/touchend → handleSquareClick fire naturally.
+    touchCandidate = null;
+    touchId = null;
+    touchDragging = false;
+  });
+
+  document.addEventListener('touchcancel', () => {
+    cancelDrag();
+    touchCandidate = null;
+    touchId = null;
+    touchDragging = false;
+  });
+
+  // ── Attach mousedown listeners to every cell ─────────────────
+  for (const [label, cellEl] of Object.entries(cellEls)) {
+    cellEl.addEventListener('mousedown', (e) => onCellMouseDown(label, e));
+    cellEl.addEventListener('touchstart', (e) => onCellTouchStart(label, e), { passive: true });
+  }
+
+})(); // end initDragDrop IIFE
 
 // ═══════════════════════════════════════════════════════════════
 //  MULTIPLAYER BRIDGE — expose internals to window for multiplayer.js
