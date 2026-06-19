@@ -200,8 +200,8 @@ body {
   /* ── Result banner ── */
   .result-banner {
     display: flex; align-items: center; justify-content: center; gap: 1.2rem;
-     background: #26180c 100%; border: 1px solid #644021 ; border-radius: 8px;
-    color: var(--sand3);  padding: 0.55rem 1.2rem;
+    border: 1px solid var(--accent); border-radius: 6px;
+    background: rgba(28,21,16,0.85); padding: 0.55rem 1.2rem;
     font-size: clamp(1rem, 1.8vw, 0.85rem); letter-spacing: 0.15em;
     color: var(--gold); animation: fade-in 0.4s ease;
     width: 100%;
@@ -279,6 +279,12 @@ body {
     width: 68%; height: 68%; border-radius: 50%; flex-shrink: 0;
     transition: transform 0.15s, opacity 0.15s;
     position: relative; z-index: 1; pointer-events: none; /* Evita que cliques caiam no elemento interno da peça */
+    user-select: none; -webkit-user-select: none;
+    -webkit-user-drag: none; -khtml-user-drag: none; -moz-user-drag: none;
+  }
+  .cell {
+    user-select: none; -webkit-user-select: none;
+    -webkit-user-drag: none;
   }
   .piece.p1 {
     background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90);
@@ -461,7 +467,7 @@ body {
 
 
 <div class="author">
-  Sambaqui • v1.3.2 • © 2026 Eduardo Eller
+  Sambaqui • <v1 class="3 2"></v1> • © 2026 Eduardo Eller
 </div>
 </footer>
 
@@ -777,14 +783,14 @@ window.achievedNewBest = false;
 
 const BOARD_PATTERNS = [
   
-  // Pattern 0       BFTX - DJPV
+  // Pattern 0 Quinta
   {
     B: { player: 1, active: true }, F: { player: 1, active: true },
     T: { player: 1, active: true }, X: { player: 1, active: true },
     D: { player: 2, active: false }, J: { player: 2, active: false },
     P: { player: 2, active: false }, V: { player: 2, active: false },
   },
-  // Pattern 1        ADSP - GJVY
+  // Pattern 1 Sexta
   {
     A: { player: 1, active: true }, D: { player: 1, active: true },
     P: { player: 1, active: true }, S: { player: 1, active: true },
@@ -792,7 +798,7 @@ const BOARD_PATTERNS = [
     V: { player: 2, active: false }, Y: { player: 2, active: false },
   },
 
-   // Pattern 2       BGSX - DIQV
+   // Pattern 2 Sábado
   {
     B: { player: 1, active: true }, G: { player: 1, active: true },
     S: { player: 1, active: true }, X: { player: 1, active: true },
@@ -800,7 +806,7 @@ const BOARD_PATTERNS = [
     Q: { player: 2, active: false }, V: { player: 2, active: false },
   },
 
-     // Pattern 3     BJPX - DFTV
+     // Pattern 3 Domingo
   {
     B: { player: 1, active: true }, J: { player: 1, active: true },
     P: { player: 1, active: true }, X: { player: 1, active: true },
@@ -808,7 +814,7 @@ const BOARD_PATTERNS = [
     T: { player: 2, active: false }, V: { player: 2, active: false },
   },
 
-     // Pattern 4
+     // Pattern 4 Segunda
   {
     B: { player: 1, active: true }, D: { player: 1, active: true },
     U: { player: 1, active: true }, Y: { player: 1, active: true },
@@ -816,7 +822,7 @@ const BOARD_PATTERNS = [
     V: { player: 2, active: false }, X: { player: 2, active: false },
   },
 
-      // Pattern 5
+      // Pattern 5 Terça
   {
     C: { player: 1, active: true }, F: { player: 1, active: true },
     N: { player: 1, active: true }, Q: { player: 1, active: true },
@@ -832,57 +838,8 @@ const BOARD_PATTERNS = [
     T: { player: 2, active: false }, X: { player: 2, active: false },
   },
 
-        // Pattern 7 
-  {
-    A: { player: 1, active: true }, D: { player: 1, active: true },
-    V: { player: 1, active: true }, Y: { player: 1, active: true },
-    B: { player: 2, active: false }, E: { player: 2, active: false },
-    U: { player: 2, active: false }, X: { player: 2, active: false },
-  },
-
-        // Pattern 8
-  {
-    A: { player: 1, active: true }, I: { player: 1, active: true },
-    Q: { player: 1, active: true }, Y: { player: 1, active: true },
-    E: { player: 2, active: false }, G: { player: 2, active: false },
-    S: { player: 2, active: false }, U: { player: 2, active: false },
-  },
-
-          // Pattern 9 
-  {
-    A: { player: 1, active: true }, H: { player: 1, active: true },
-    L: { player: 1, active: true }, S: { player: 1, active: true },
-    G: { player: 2, active: false }, N: { player: 2, active: false },
-    R: { player: 2, active: false }, Y: { player: 2, active: false },
-  },
-
-            // Pattern 10
-  {
-    G: { player: 1, active: true }, K: { player: 1, active: true },
-    N: { player: 1, active: true }, Q: { player: 1, active: true },
-    I: { player: 2, active: false }, L: { player: 2, active: false },
-    O: { player: 2, active: false }, S: { player: 2, active: false },
-  },
-
-             // Pattern 11
-  {
-    B: { player: 1, active: true }, L: { player: 1, active: true },
-    O: { player: 1, active: true }, X: { player: 1, active: true },
-    D: { player: 2, active: false }, K: { player: 2, active: false },
-    N: { player: 2, active: false }, V: { player: 2, active: false },
-  },
-
-               // Pattern 12
-  {
-    D: { player: 1, active: true }, L: { player: 1, active: true },
-    N: { player: 1, active: true }, V: { player: 1, active: true },
-    F: { player: 2, active: false }, H: { player: 2, active: false },
-    R: { player: 2, active: false }, T: { player: 2, active: false },
-  }
-
 
 ];
-
 
 function makeInitialPieces() {
   // 1. Get a unique number for the current day (YYYYMMDD format)
@@ -2722,7 +2679,11 @@ applyLanguageSwitch();
   for (const [label, cellEl] of Object.entries(cellEls)) {
     cellEl.addEventListener('mousedown', (e) => onCellMouseDown(label, e));
     cellEl.addEventListener('touchstart', (e) => onCellTouchStart(label, e), { passive: true });
+    // Kill the browser's native drag-and-drop on every cell and its children
+    cellEl.addEventListener('dragstart', (e) => e.preventDefault());
   }
+  // Also suppress at the board level to catch any element the browser decides to drag
+  document.addEventListener('dragstart', (e) => e.preventDefault());
 
 })(); // end initDragDrop IIFE
 
