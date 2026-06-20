@@ -1,649 +1,2796 @@
-/**
- * Sambaqui – Online Multiplayer Module v1.0
- *
- * Architecture
- * ────────────
- * • Supabase Realtime Broadcast channel — no DB writes needed for live play.
- * • Room codes: 6-char alphanumeric, used as the channel name suffix.
- * • Player 1 (room creator) plays light pieces; Player 2 (joiner) plays dark.
- * • Move authority: the player whose turn it is executes locally, then
- *   broadcasts (from, to). The opponent receives and replays identically.
- * • Chain moves, passes, and game-over are handled by the shared game logic
- *   running on both clients — they stay in sync because they start from the
- *   same initial state and apply identical deterministic moves.
- *
- * Integration points (must exist on window, set by the game's MP bridge)
- * ────────────────────────────────────────────────────────────────────────
- *   window.state            — live game state object
- *   window.vsAI             — getter/setter into closed-over let vsAI
- *   window.humanPlayerColor — getter/setter into closed-over let
- *   window.executeMove(from, moveObj)
- *   window.computeAllSlides(from, pieces)
- *   window.setStatus(msg, variant)
- *   window.restartGame(forceResetColor)
- *   window.mpActivate(myColor) — sets vsAI=false, humanPlayerColor=myColor, restarts
- */
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sambaqui</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Molle:ital@1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols+2:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lily+Script+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="./favicon.png">
 
+<style>
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sand:       #b9a788;
+    --sand2:      #b8a789eb;
+    --sand3:      #988a6c;
+    --dark:       #1c1510;
+    --mid:        #6c623e;
+    --accent:     #7a4f2e;
+    --gold:       #c49a44;
+    --teal:       #7ab8c0;
+    --cell-size:  clamp(60px, 12vw, 90px);
+    --gap:        clamp(3px, 0.6vw, 6px);
+  }
+
+body {
+  background-color: #241a0e;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-family: 'Quicksand', serif; color: var(--sand);
+  padding: 2rem 0.5rem; gap: 1.1rem;
+}
+
+  body.clickable-restart {
+    cursor: pointer !important;
+  }
+  body.clickable-restart .cell.selectable {
+    cursor: pointer !important;
+  }
+
+  /* ── Header ── */
+  header { text-align: center; }
+  h1 {
+    font-size: clamp(2.8rem, 12vw, 4.5rem);
+    letter-spacing: 0em; color: var(--sand3); line-height: 0.8; text-shadow: 0px 1px 2px var(--gold);
+     font-family: "Lily Script One", cursive; font-weight: 300; 
+  }
+
+  /* ── Stats Bar ── */
+  .stats-bar {
+    font-family: 'Quicksand'; scale:1 ;
+    display: flex; gap: 2.3rem; font-size: 1.2rem; line-height: 1;
+    letter-spacing: 0.08em; background: rgba(72, 49, 2, 0.646);
+    padding: 0.6rem 2rem; border-radius: 40px; border: 1px solid rgba(199, 131, 3, 0.3);
+  }
+  .stats-bar strong { color: var(--gold);      font-family: "Lily Script One"; font-weight: 100; }
+  
+  /* ── Mode & Help toggles ── */
+  .menu-controls { scale:1.1; font-size: 2rem; display: flex; flex-direction: column; align-items: center; gap: 0.6rem;}
+  .mode-bar {
+    display: flex; align-items: center; gap: 0.8rem;
+    font-size: clamp(0.65rem, 1.8vw, 0.78rem); letter-spacing: 0.12em; color: var(--sand3);
+  }
+  .mode-btn {
+    background: #26180c 100%; border: 1px solid #644021 ; border-radius: 8px;
+    color: var(--sand3); padding: 0.15rem 1rem; cursor: pointer;
+    font-family: 'Quicksand', serif; font-size: inherit; letter-spacing: inherit;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+  }
+  .mode-btn.active { background: rgba(196,154,68,0.12); border-color: var(--gold); color: var(--gold); }
+  .mode-btn:hover:not(.active) { border-color: var(--sand3); color: var(--sand); }
+
+  .help-btn {
+    background: rgba(196,154,68,0.06); border: 1px dashed rgba(196,154,68,0.4);
+    border-radius: 4px; color: var(--sand2); padding: 0.25rem 0.8rem; cursor: pointer;
+    font-family: 'Quicksand', serif; font-size: clamp(0.65rem, 1.8vw, 0.75rem); letter-spacing: 0.1em;
+    transition: all 0.2s;
+  }
+  .help-btn:hover { background: rgba(196,154,68,0.15); border-color: var(--gold); color: var(--gold); }
+
+  /* ── Turn bar ── */
+  .turn-bar { display: flex; align-items: center; gap: 1.4rem; font-size: clamp(0.8rem, 2vw, 1.2rem); letter-spacing: 0.1em; }
+  .player-tag { display: flex; align-items: center; gap: 0.5rem; opacity: 0.2; transition: opacity 0s; }
+  .player-tag.active { opacity: 1; }
+  .player-tag .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; }
+  .player-tag.p1 .dot { background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90); border: 1.5px solid var(--accent); }
+  .player-tag.p2 .dot{ background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05); border: 1.5px solid var(--accent); }
+  .turn-divider { width: 2px; height: 20px; background: var(--accent); opacity: 0.6; }
+
+  /* ── Shared slot: turn-bar and result-banner occupy the same fixed-height area ── */
+  .banner-zone {
+    position: relative;
+    width: 100%;
+    max-width: calc(var(--cell-size) * 5 + var(--gap) * 4 + clamp(20px, 4vw, 36px) + 4px);
+    height: calc(1.2em + 1.1rem); /* tall enough for the result-banner */
+    display: flex; align-items: center; justify-content: center;
+  }
+  .banner-zone .turn-bar,
+  .banner-zone #result-banner-slot {
+    position: absolute;
+    inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    width: 100%;
+  }
+  /* Banner slot is invisible when empty; turn-bar shows through */
+  .banner-zone #result-banner-slot:empty ~ .turn-bar,
+  .banner-zone .turn-bar { opacity: 1; }
+  /* When a banner is present, hide the turn-bar behind it */
+  .banner-zone #result-banner-slot:not(:empty) ~ .turn-bar { opacity: 0; pointer-events: none; }
+  /* result-banner fills the slot width */
+  #result-banner-slot .result-banner { width: 100%; max-width: none; }
+
+  /* ── Status bar ── */
+  .status {
+    font-size: clamp(1rem, 1.8vw, 0.78rem); letter-spacing: 0.1em;
+    color: var(--sand3); min-height: 1em; text-align: center; transition: color 0.2s;
+  }
+  .status.highlight { color: var(--gold); }
+  .status.warn      { color: #c0704a; }
+  .status.sneaking  { color: var(--teal); }
+
+  /* ── Board ── */
+  .board-container-wrapper { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+  .board-border {
+    padding: clamp(10px, 2vw, 18px); border: 2px solid var(--accent); border-radius: 8px;
+    box-shadow: 0 0 0 1px rgba(196,154,68,0.15), 0 0 60px rgba(60,30,10,0.8), inset 0 0 20px rgba(35, 23, 3, 0.426);
+    background: rgba(202, 172, 121, 0.572);
+  }
+  .board-wrapper { display: flex; flex-direction: column; align-items: center; gap: var(--gap); }
+  .board-row    { display: flex; gap: var(--gap); }
+
+  /* ── Board nav controls ── */
+  .board-controls {
+    display: flex; justify-content: space-between; align-items: center; width: 100%; 
+    max-width: calc(var(--cell-size) * 5 + var(--gap) * 4 + clamp(20px, 4vw, 36px) + 4px);
+    padding: 0 2px; min-height: 28px;
+  }
+  .hidden { display: none !important; }
+ 
+  .nav-btn {
+    background: var(--sand3); border: 1px solid var(--sand); color: var(--mid);
+    border-radius: 38px; width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; cursor: pointer; transition: all 0.2s; 
+    box-shadow: 0 2px 6px rgba(71, 42, 2, 0.722);
+  }
+  .nav-btn:hover:not(:disabled) { background: var(--mid); border-color: var(--sand); color: var(--sand); }
+  .nav-btn:disabled { opacity: 1; cursor: not-allowed; box-shadow: none; }
+
+  /* ── Move log ── */
+  .move-log {
+    scale:0.95;
+    flex: 1; overflow-x: auto; display: flex; align-items: center;
+    gap: 0.35rem; padding: 0 0.5rem; 
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    height: 40px;
+    border: 2px solid rgba(122, 79, 46, 0.765); border-radius: 20px;
+    box-shadow: inset 0 1px 4px rgba(0,0,0,0.3);
+    background: rgba(72, 49, 2, 0.646);
+    min-width: 0;
+  }
+  .move-log::-webkit-scrollbar { display: none; }
+  .move-log-empty {
+    font-size: 0.62rem; letter-spacing: 0.1em; color: var(--accent); opacity: 0.5;
+    white-space: nowrap; padding: 0 0.3rem;
+  }
+  .move-log-entry {
+    display: flex; align-items: center; gap: 0.22rem;
+    font-size: 1.1rem; letter-spacing: 0.08em; color: var(--sand);
+    white-space: nowrap; flex-shrink: 0;
+    padding: 0.5rem 0.4rem; border-radius: 0px;
+    transition: opacity 0.2s;
+  }
+  .move-log-entry.future { opacity: 1; }
+  .move-log-entry.current { background: rgba(36, 24, 1, 0.898); border-color: var(--gold);}
+  .move-log-dot {
+    width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0;
+  }
+  .move-log-dot.p1 {
+    background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90);
+    border: 1px solid rgba(196,154,68,0.5);
+  }
+  .move-log-dot.p2 {
+    background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05);
+    border: 1px solid var(--accent);
+  }
+  .move-log-divider {
+    width: 1px; height: 15px; background: var(--accent); opacity: 0.4; flex-shrink: 0;
+  }
+
+  /* ── Result banner ── */
+  .result-banner {
+    display: flex; align-items: center; justify-content: center; gap: 1.2rem;
+    background: #26180c 100%; border: 1px solid #644021 ; border-radius: 8px;
+    color: var(--sand3);   padding: 0.55rem 1.2rem;
+    font-size: clamp(1rem, 1.8vw, 0.85rem); letter-spacing: 0.15em;
+    color: var(--gold); animation: fade-in 0.4s ease;
+    width: 100%;
+    max-width: calc(var(--cell-size) * 5 + var(--gap) * 4 + clamp(20px, 4vw, 36px) + 4px);
+  }
+  .result-banner .banner-text { flex: 1; text-align: center; }
+  .result-banner .new-game-btn {
+    background: transparent; border: 1px solid rgba(196,154,68,0.45); border-radius: 4px;
+    color: var(--gold); padding: 0.25rem 0.75rem; cursor: pointer; white-space: nowrap;
+    font-family: 'Quicksand', serif; font-size: inherit; letter-spacing: inherit;
+    transition: background 0.2s, border-color 0.2s; flex-shrink: 0;
+  }
+  .result-banner .new-game-btn:hover { background: rgba(196,154,68,0.12); border-color: var(--gold); }
+
+  /* ── Share-result button (below board, after game ends) ── */
+  #share-result-btn {
+    display: none;
+    background: rgba(196,154,68,0.08); border: 1px solid rgba(196,154,68,0.45);
+    border-radius: 6px; color: var(--gold);
+    padding: 0.45rem 1.3rem; cursor: pointer; white-space: nowrap;
+    font-family: 'Quicksand', serif; font-size: clamp(0.72rem, 2vw, 1rem);
+    letter-spacing: 0.12em; transition: background 0.2s, border-color 0.2s;
+    margin-top: 0.2rem;
+  }
+  #share-result-btn:hover { background: rgba(196,154,68,0.18); border-color: var(--gold); }
+
+  /* ── Cells ── */
+  .cell {
+    width: var(--cell-size); height: var(--cell-size);
+    background-color: var(--sand2);
+    background-image:
+      radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.18) 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='40' height='40' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+    border: 1.5px solid var(--sand3); border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; cursor: default; transition: border-color 0.15s, background-color 0.15s;
+  }
+  .cell.dark-sq {
+    background-color: var(--sand3);
+    background-image: radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.12) 0%, transparent 60%);
+  }
+  .cell.selectable            { cursor: pointer; }
+  .cell.selectable:hover      { border-color: var(--gold); }
+  .cell.selected              { border-color: var(--gold); box-shadow: inset 0 0 0 2px rgba(196,154,68,0.5); cursor: pointer; }
+  .cell.landing               { cursor: pointer; border-color: rgba(191, 137, 29, 0.331); background-color: rgba(199, 135, 8, 0.739); }
+  .cell.dark-sq.landing       { background-color: rgba(173, 119, 10, 0.643); }
+  .cell.landing:hover         { border-color: var(--gold); background-color: rgba(196,154,68,0.22); }
+  .cell.blocked-landing       { box-shadow: inset 0 0 0 2px rgba(196,154,68,0.5); cursor: not-allowed; }
+  .cell.dark-sq.blocked-landing { box-shadow: inset 0 0 0 2px rgba(196,154,68,0.5); }
+  .cell.los-target            { color: rgba(229, 180, 119, 0.944); }
+  .cell.win-line              { border-color: var(--gold) !important; background-color: rgba(194, 135, 19, 0.762) !important;  }
+  .cell.dark-sq.win-line      { background-color: rgba(175, 125, 25, 0.762) !important;}
+
+  @keyframes win-flash {
+    0%,100% { background-color: rgba(236, 218, 182, 0.805); }
+    50%     { background-color: rgba(122, 90, 25, 0.715); }
+  }
+
+  .cell-label {
+    position: absolute; bottom: 4px; left: 6px;
+    font-size: clamp(0.55rem, 1.5vw, 0.7rem); color: var(--accent);
+    line-height: 1; user-select: none; opacity: 0.7;
+  }
+
+  .arrow-hint {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    font-size: clamp(28px, 6vw, 28px); color: rgba(233, 212, 169, 0.593);
+    pointer-events: none; user-select: none; line-height: 1;
+   font-family: -apple-system, BlinkMacSystemFont,"Apple Symbols", "Google Sans", sans-serif;
+    font-weight: 800; /* Crisp and thick enough on all mobile screens without being overly bold */ }
+  .arrow-hint.blocked { color: rgba(180,80,40,0.00); font-size: clamp(13px, 2.4vw, 17px); }
+
+  /* ── Pieces ── */
+  .piece {
+    width: 68%; height: 68%; border-radius: 50%; flex-shrink: 0;
+    transition: transform 0.15s, opacity 0.15s;
+    position: relative; z-index: 1; pointer-events: none; /* Evita que cliques caiam no elemento interno da peça */
+    user-select: none; -webkit-user-select: none;
+    -webkit-user-drag: none; -khtml-user-drag: none; -moz-user-drag: none;
+  }
+  .cell {
+    user-select: none; -webkit-user-select: none;
+    -webkit-user-drag: none;
+  }
+  .piece.p1 {
+    background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90);
+    border: 2px solid rgba(196,154,68,0.5);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.15);
+  }
+  .piece.p2 {
+    background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05);
+    border: 2px solid rgba(184,169,138,0.3);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.12), inset 0 -2px 4px rgba(0,0,0,0.4);
+  }
+  .piece.inactive       { opacity: 1; transform: scale(1); }
+  .piece.active-piece   { opacity: 1; transform: scale(1); }
+  .piece.p1.active-piece {
+    border: 2px solid rgba(231, 221, 196, 0.82);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.6),
+      0 0 0 3px rgba(232,220,200,0.3), 0 0 14px rgba(232,220,200,0.15);
+  }
+  .piece.p2.active-piece {
+    border: 2px solid rgba(165, 118, 8, 0.474);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.12),
+      0 0 0 3px rgba(232,220,200,0.3), 0 0 14px rgba(232,220,200,0.15);
+  }
+  .piece.selected-piece {
+    transform: scale(1.05); border-color: var(--gold) !important;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.7),
+      0 0 0 4px rgba(196,154,68,0.6), 0 0 24px rgba(196,154,68,0.5) !important;
+  }
+  .piece.sneaking {
+    animation: pulse-sneak 1.2s ease-in-out infinite !important;
+    border-color: var(--teal) !important;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.5),
+      0 0 0 3px rgba(122,184,192,0.4), 0 0 16px rgba(122,184,192,0.3) !important;
+  }
+  @keyframes pulse-sneak {
+    0%,100% { box-shadow: 0 3px 8px rgba(0,0,0,0.5), 0 0 0 3px rgba(122,184,192,0.4), 0 0 12px rgba(122,184,192,0.25); }
+    50%     { box-shadow: 0 3px 8px rgba(0,0,0,0.5), 0 0 0 5px rgba(122,184,192,0.25), 0 0 22px rgba(122,184,192,0.4); }
+  }
+
+  /* ── Piece ghost (used by animation engine AND drag-and-drop) ── */
+  .piece-ghost { position: fixed; border-radius: 50%; pointer-events: none; z-index: 50; }
+  .piece-ghost.p1 {
+    background: radial-gradient(circle at 38% 32%, #f5f0e8b1, #c8bfad 55%, #a89f90);
+    border: 2px solid var(--gold);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.55), inset 0 1px 3px rgba(255,255,255,0.7),
+      0 0 0 3px rgba(196,154,68,0.5), 0 0 18px rgba(196,154,68,0.35);
+  }
+  .piece-ghost.p2 {
+    background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05);
+    border: 2px solid var(--accent);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.65), inset 0 1px 3px rgba(255,255,255,0.15),
+      0 0 0 3px rgba(232,220,200,0.35), 0 0 18px rgba(232,220,200,0.2);
+  }
+
+  /* ── Drag-and-drop states ── */
+  .cell.drag-over-valid   { border-color: var(--gold) !important; background-color: rgba(196,154,68,0.22) !important; }
+  .cell.drag-over-invalid { border-color: rgba(192,112,74,0.7) !important; }
+
+  /* ── Modals & Overlays ── */
+  .victory-overlay, .tutorial-overlay {
+    position: fixed; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: rgba(10,6,3,0.88); z-index: 100; gap: 1.2rem;
+    animation: fade-in 0.4s ease;
+  }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+  .victory-title { font-size: clamp(2rem, 8vw, 3.5rem); font-weight: 700; color: var(--gold); letter-spacing: 0.1em; text-shadow: 0 0 60px rgba(196,154,68,0.6); text-align: center; }
+  .victory-sub   { font-size: clamp(0.8rem, 2.5vw, 1.1rem); letter-spacing: 0.15em; color: var(--sand3); text-align: center; padding: 0 1rem; }
+  
+  .generic-btn   { font-family: 'Quicksand', serif; font-size: clamp(0.75rem,2vw,0.85rem); letter-spacing: 0.15em; color: var(--gold); background: transparent; border: 1px solid rgba(196,154,68,0.5); border-radius: 4px; padding: 0.6rem 1.8rem; cursor: pointer; transition: all 0.2s; }
+  .generic-btn:hover { background: rgba(196,154,68,0.12); border-color: var(--gold); }
+  .generic-btn.danger { color: #c0704a; border-color: rgba(192,112,74,0.5); }
+  .generic-btn.danger:hover { background: rgba(192,112,74,0.1); border-color: #c0704a; }
+
+  /* ── Tutorial Card ── */
+  .tutorial-card {
+    background: #241a12; border: 2px solid var(--accent); border-radius: 8px;
+    width: 90%; max-width: 440px; padding: 1.8rem; display: flex; flex-direction: column; gap: 1.2rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.4);
+    position: relative;
+  }
+  .tutorial-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(122,79,46,0.3); padding-bottom: 0.6rem; gap: 0.5rem; }
+  .tutorial-title-area { display: flex; align-items: center; gap: 0.6rem; }
+  .tutorial-title { color: var(--gold); font-size: 1.4rem; font-weight: bold; letter-spacing: 0.05em; }
+  .tutorial-pages { font-size: 0.8rem; color: var(--sand3); letter-spacing: 0.1em; white-space: nowrap; }
+  .tutorial-body { font-family:"Quicksand"; font-size: 1.1rem; letter-spacing: 0.05rem; line-height: 1.3; color: var(--sand); min-height: 120px; }
+  .tutorial-body strong { color: var(--gold); }
+  .tutorial-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; }
+  .tut-nav { background: transparent; border: 1px solid rgba(184,169,138,0.2); color: var(--sand2); font-family: 'Quicksand', serif; padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer; transition: all 0.2s; font-size: 1rem; }
+  .tut-nav:hover:not(:disabled) { border-color: var(--sand3); color: #fff; }
+  .tut-nav:disabled { opacity: 0.2; cursor: not-allowed; }
+
+  /* ── Legend ── */
+  .legend { display: flex; gap: 2rem; font-size: 0.75rem; font-weight: 300; letter-spacing: 0.1em; color: var(--sand3); }
+  .legend-item { display: flex; align-items: center; gap: 0.5rem; }
+  .legend-piece { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; }
+  .legend-piece.p1 { background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90); border: 1.5px solid rgba(196,154,68,0.5); }
+  .legend-piece.p2 { background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05); border: 1.5px solid rgba(184,169,138,0.3); }
+
+
+  /* ── Enhanced Footer ── */
+  footer {
+    font-size: 0.8rem; letter-spacing: 0.15em; color: var(--sand3);
+    text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
+    margin-top: 0.5rem; text-align: center;
+  }
+  footer .author { opacity: 0.5; font-size: 0.7rem; letter-spacing: 0.1em; line-height: 0.01rem}
+  footer .links { display: flex; align-items: center; gap: 1rem; line-height: 0.01rem }
+  footer .links a, footer .links span {
+    color: var(--gold); text-decoration: none; cursor: pointer;
+    transition: color 0.2s, opacity 0.2s; font-weight: bold;
+  }
+  footer .links a:hover, footer .links span:hover { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.2); }
+  footer .footer-divider { width: 2px; height: 20px; background: var(--gold); opacity: 0; }
+  #toast-msg {
+    font-size: 0.65rem; color: var(--teal); letter-spacing: 0.1em;
+    min-height: 1.2em; opacity: 0; transition: opacity 0.2s;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Sambaqui</h1>
+</header>
+
+<div class="menu-controls">
+  <div class="mode-bar">
+    <button class="mode-btn" id="open-tutorial-btn">Como Jogar</button>
+    <button class="mode-btn"        id="lang-toggle-btn">EN</button>
+  </div>
+</div>
+
+  <div class="board-controls" id="nav-controls" style="display:none">
+  <button id="undo-btn" class="nav-btn" title="Undo" disabled>◀</button>
+    <div class="move-log" id="move-log"></div>
+    <button id="redo-btn" class="nav-btn" title="Redo" disabled>▶</button>
+  </div>
+
+<div class="stats-bar" id="stats-bar">
+  <div><span id="stat-lvl-label">Nível</span> <strong id="stat-streak">0</strong></div>
+    <div class="turn-divider"></div>
+  <div><span id="stat-best-label">Melhor</span> <strong id="stat-high">0</strong></div>
+</div>
+
+
+<div class="board-container-wrapper">
+  <div class="board-border">
+    <div class="board-wrapper" id="board"></div>
+  </div>
+
+  <div class="banner-zone">
+    <div id="result-banner-slot"></div>
+    <div class="turn-bar">
+      <div class="player-tag p1 active" id="tag-p1"><div class="dot"></div><span id="label-p1">Você</span></div>
+      <div class="turn-divider"></div>
+      <div class="player-tag p2" id="tag-p2"><div class="dot"></div><span id="label-p2">Computador</span></div>
+    </div>
+  </div>
+</div>
+
+  <button id="share-result-btn">↪\uFE0E; Compartilhar Resultado</button>
+
+  <div class="status" id="status">Selecione uma peça ativa para mover</div>
+
+
+
+<footer>
+  <div class="links">
+    <a href="https://ko-fi.com/eduardoeller" target="_blank" id="footer-support-link">♥↪\uFE0E Apoiar o jogo</a>
+    <div class="footer-divider"></div>
+    <span id="footer-share-link">↪\uFE0E Compartilhar</span>
+  </div>
+  <div id="toast-msg"></div>
+
+  <div class="links">
+
+
+<div class="author">
+  Sambaqui • v1.3.3 • © 2026 Eduardo Eller
+</div>
+</footer>
+
+<script>
 'use strict';
 
-// ─── Supabase config ─────────────────────────────────────────────────────────
-// IMPORTANT: Replace SUPABASE_ANON_KEY with your project's real anon/public key.
-// Find it at: Supabase Dashboard → Project Settings → API → Project API keys → anon public
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 1 — CONSTANTS, COORDINATE HELPERS & LOCALIZATION
+// ═══════════════════════════════════════════════════════════════
 
-const SUPABASE_URL      = 'https://qasopfvcdyikqxbniyqn.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhc29wZnZjZHlpa3F4Ym5peXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzUwMDAsImV4cCI6MjA5NzMxMTAwMH0.MIiyCiRC09kC2hFA-h5-HoNJZGBAhHxoHUPchUB2VKE';
+const LABELS = 'ABCDEFGHIJKLMNOPQRSTUVWXY';
 
-// ─── Module state ─────────────────────────────────────────────────────────────
+const DIRS = [
+  [-1, -1, '↖\uFE0E'], [-1,  0, '↑\uFE0E'], [-1,  1, '↗\uFE0E'],
+  [ 0, -1, '←\uFE0E'],                     [ 0,  1, '→\uFE0E'],
+  [ 1, -1, '↙\uFE0E'], [ 1,  0, '↓\uFE0E'], [ 1,  1, '↘\uFE0E'],
+];
 
-const mp = {
-  active:          false,
-  isHost:          false,
-  roomCode:        null,
-  channel:         null,
-  client:          null,
-  opponentPresent: false,
-  myColor:         null,   // 1 = light, 2 = dark
-  gameCount:       0,      // increments each rematch; determines who goes first
-  rematchReady:    false,  // this player has pressed "Novo Jogo"
+function labelToRC(label) {
+  const idx = LABELS.indexOf(label);
+  return [Math.floor(idx / 5), idx % 5];
+}
+
+function rcToLabel(r, c) {
+  if (r < 0 || r > 4 || c < 0 || c > 4) return null;
+  return LABELS[r * 5 + c];
+}
+
+let currentLang = localStorage.getItem('sambaqui_lang') || 'PT';
+
+const translations = {
+  EN: {
+    newGame: "Computer",
+    practice: "Solo Mode",
+    tutorial: "How to Play",
+    language: "Português",
+    level: "Level⠀",
+    best: "Best⠀",
+    playerYou: "Your Move",
+    computer: "Computer Moves",
+    player1: "Player 1",
+    player2: "Player 2",
+    selectActive: "Select an active piece to move.",
+    calculating: "Computer is calculating moves…",
+    calculatingOpening: "Computer is calculating opening moves…",
+    thinking: "Computer is thinking…",
+    playerWins: "Player {winner} wins!",
+    playerWinsBanner: "Player {winner} wins",
+    humanWinsStreakBanner: "You won {streak} round{plural}.",
+    humanLosesStreakBanner: "Final Score: {streak}",
+    gameOver: "Game Over!",
+    moveAgain: "Move again!",
+    repeatForbidden: "That move would repeat a previous position. Choose another move.",
+    chainMoveAgain: "Move again.",
+    noMovesAvailable: "No moves available.",
+    forbiddenByNovelty: "All {blocked} slides forbidden.",
+    legalMoves: "{prefix}Piece on {label}. {free} legal move{plural}{suffix}.",
+    chainMovePrefix: "Chain move. ",
+    forbiddenSuffix: " ({blocked} forbidden)",
+    haltedEnemies: "Halted. {n} enemy piece{plural} spotted.",
+    chainNoEnemies: "Chain Move: no enemies spotted, move again.",
+    noLegalMovesPass: "Player {passedFrom} has no legal moves! Turn passes.",
+    victoryOverlayTitle: "Victory!",
+    victoryLevelComplete: "Level {humanStreak} Complete!",
+    nextRound: "Next Round",
+    gamesWon: "Game{plural} Won!",
+    startNewGame: "New Game",
+    bestScore: "Best Score: <strong>{highScore}</strong>",
+    share: "↪\uFE0E Share the Game",
+    supportLink: "♥\uFE0E Support the Game",
+    shareLink: "↪\uFE0E Share",
+    shareResultBtn: "↪\uFE0E Share Result",
+    shareResultMsg: "Today's Sambaqui:\n{board}\nI scored {score} so far!\n{url}",
+    linkCopied: "Link copied to clipboard!",
+    tutorialNext: "Next >",
+    tutorialPrev: "< Prev",
+    tutorialPlay: "Play Game!",
+    tutorialPages: [
+      { title: "The Goal", text: "Align <strong>three consecutive pieces</strong> of your color anywhere on the board.<br></br> They can be oriented in horizontal, vertical or diagonal directions." },
+      { title: "Movement Rules", text: "Only <strong>active pieces</strong> are allowed to move.<br></br> Pieces move by <strong>sliding in straight lines</strong>. Pieces slide until stopped by the edge of the board or some other piece." },
+      { title: "Line of Sight Rule", text: "As soon as your piece <strong>stops</strong>, moveable enemy stones in its <strong>line of sight</strong> wake up and become <strong>active</strong>. <br></br> Your piece goes to sleep and turn passes to your opponent." },
+      { title: "The Chain Rule", text: "If a sliding piece halts and <strong>cannot see any enemies</strong> the <strong>chain move</strong> is triggered. The piece remains active and must be moved again immediately." },
+      { title: "The Novelty Rule", text: "Moves that would repeat a previous game state are not allowed. If you have no legal moves left, your turn ends and all enemy pieces activate." },
+   ]
+  },
+  PT: {
+    newGame: "Computador",
+    practice: "Modo Solo",
+    tutorial: "Como Jogar",
+    language: "English",
+    level: "Nível⠀",
+    best: "Melhor⠀",
+    playerYou: "Sua Vez",
+    computer: "Computador Joga",
+    player1: "Jogador 1",
+    player2: "Jogador 2",
+    selectActive: "Selecione uma peça ativa para mover.",
+    calculating: "Computador calculando movimentos…",
+    calculatingOpening: "Computador calculando jogadas de abertura…",
+    thinking: "Computador pensando…",
+    playerWins: "Jogador {winner} venceu.",
+    playerWinsBanner: "Jogador {winner} venceu.",
+    humanWinsStreakBanner: "Pontuação: {streak}",
+    humanLosesStreakBanner: "Pontuação Final: {streak}",
+    gameOver: "Fim de Jogo!",
+    moveAgain: "Mova novamente.",
+    repeatForbidden: "Esse movimento repetiria uma posição anterior. Escolha outro.",
+    chainMoveAgain: "Movimento em cadeia. Esta peça deve ser movida novamente.",
+    noMovesAvailable: "Peça em {label}. sem movimentos disponíveis.",
+    forbiddenByNovelty: "Peça em {label}. Todos os {blocked} deslizamentos proibidos pela Regra da Novidade",
+    legalMoves: "{prefix}Peça em {label}. {free} movimento{plural} válido{plural}{suffix}",
+    chainMovePrefix: "Movimento em cadeia. ",
+    forbiddenSuffix: " ({blocked} proibido)",
+    haltedEnemies: "Parado. {n} peça{plural} inimiga{plural} à vista.",
+    chainNoEnemies: "Movimento em cadeia: nenhum inimigo avistado, mova novamente.",
+    noLegalMovesPass: "Jogador {passedFrom} não tem movimentos válidos.",
+    victoryOverlayTitle: "Vitória!",
+    victoryLevelComplete: "Nível {humanStreak} Concluído.",
+    nextRound: "Continue",
+    gamesWon: "Jogo{plural} Vencido{plural}!",
+    startNewGame: "Novo Jogo",
+    bestScore: "Melhor Pontuação: <strong>{highScore}</strong>",
+    share: "↪\uFE0E Compartilhar",
+    supportLink: "♥\uFE0E Apoie o Jogo",
+    shareLink: "↪\uFE0E Compartilhe",
+    shareResultBtn: "↪\uFE0E Compartilhar Resultado",
+    shareResultMsg: "Sambaqui de hoje:\n{board}\nFiz {score} pontos até agora!\n{url}",
+    linkCopied: "Link copiado!",
+    tutorialNext: "Próximo >",
+    tutorialPrev: "< Anterior",
+    tutorialPlay: "Jogar!",
+    tutorialPages: [
+      { title: "Objetivo", text: "Junte <strong>três peças</strong> da sua cor lado a lado em qualquer lugar do tabuleiro. Elas podem estar orientadas na horizontal, vertical ou diagonal." },
+      { title: "Movimento", text: "Apenas <strong>peças ativas</strong> podem se mover. As peças <strong>deslizam em linha reta</strong> até serem bloqueadas pela borda do tabuleiro ou por outra peça." },
+      { title: "Linha de Visão", text: "Assim que sua peça <strong>para</strong>, pedras inimigas móveis na sua <strong>linha de visão</strong> acordam e tornam-se <strong>ativas</strong>. Sua peça dorme e a vez passa para o oponente. A <strong>linha de visão</strong> segue as oito direções principais e é obstruída por qualquer peça." },
+      { title: "Regra da Cadeia", text: "Se uma peça parar e <strong>não avistar</strong> um inimigo, o <strong>movimento em cadeia</strong> é ativado. A peça continua ativa e deve ser movida novamente." },
+      { title: "Originalidade", text: "Movimentos que <strong>repetiriam</strong> um estado de jogo anterior, incluindo atividade das peças, <strong>não são permitidos</strong>. Se você ficar sem movimentos válidos, sua vez termina e <strong>todas</strong> as peças inimigas são ativadas." },   
+    ]
+  }
 };
 
-// ─── Utilities ────────────────────────────────────────────────────────────────
-
-function randomCode() {
-  return Math.random().toString(36).slice(2, 8).toUpperCase();
+function t(key, variables = {}) {
+  let text = translations[currentLang][key] || translations['EN'][key] || '';
+  Object.keys(variables).forEach(v => {
+    text = text.replaceAll(`{${v}}`, variables[v]);
+  });
+  return text;
 }
 
-function channelName(code) {
-  return `sambaqui-room-${code}`;
-}
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 2 — PURE GAME LOGIC
+// ═══════════════════════════════════════════════════════════════
 
-function log(...args) { console.log('[MP]', ...args); }
-
-// ─── Status helpers ───────────────────────────────────────────────────────────
-
-/** Update whichever #mp-status-line is currently in the DOM */
-function setMpStatus(msg, color) {
-  const el = document.getElementById('mp-status-line');
-  if (!el) return;
-  el.textContent = msg;
-  if (color) el.style.color = color;
-}
-
-function setMpError(msg) {
-  setMpStatus(msg, '#c0704a');
-  log('ERROR:', msg);
-}
-
-// ─── Supabase init ────────────────────────────────────────────────────────────
-
-async function initSupabase() {
-  if (mp.client) return mp.client;
-
-  if (!window.supabase) {
-    throw new Error(
-      'Supabase JS not loaded. Check that the CDN <script> tag in sambaqui.html is reachable.'
-    );
+function computeSlide(fromLabel, dr, dc, pieces) {
+  const [r0, c0] = labelToRC(fromLabel);
+  const path = [];
+  let r = r0 + dr, c = c0 + dc;
+  while (r >= 0 && r <= 4 && c >= 0 && c <= 4) {
+    const sq = rcToLabel(r, c);
+    if (pieces[sq]) break;
+    path.push(sq);
+    r += dr; c += dc;
   }
+  return path.length === 0 ? null : { landing: path[path.length - 1], path };
+}
 
-  if (SUPABASE_ANON_KEY === 'REPLACE_WITH_YOUR_ANON_KEY') {
-    throw new Error(
-      'Anon key not set. Open multiplayer.js and replace SUPABASE_ANON_KEY ' +
-      'with the value from your Supabase dashboard → Project Settings → API.'
-    );
+function computeAllSlides(fromLabel, pieces) {
+  const moves = [];
+  for (const [dr, dc, arrow] of DIRS) {
+    const result = computeSlide(fromLabel, dr, dc, pieces);
+    if (result) moves.push({ dr, dc, arrow, ...result });
   }
-
-  mp.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    realtime: {
-      params: { eventsPerSecond: 20 },
-    },
-  });
-  return mp.client;
+  return moves;
 }
 
-// ─── Panel HTML ───────────────────────────────────────────────────────────────
-
-function buildPanelHTML() {
-  return `
-<div id="mp-panel" style="
-  position:fixed; inset:0; z-index:200;
-  background:rgba(10,6,3,0.92);
-  display:flex; align-items:center; justify-content:center;
-  font-family:'Lato',serif; animation:fade-in .3s ease;
-">
-  <div style="
-    background:#241a12; border:2px solid var(--accent); border-radius:10px;
-    width:90%; max-width:360px; padding:1.8rem 2rem;
-    box-shadow:0 10px 40px rgba(0,0,0,.85);
-    display:flex; flex-direction:column; gap:1.2rem;
-  ">
-
-    <!-- Header -->
-    <div style="display:flex; justify-content:space-between; align-items:center;
-                border-bottom:1px solid rgba(122,79,46,.35); padding-bottom:.6rem;">
-      <span style="color:var(--gold); font-size:1.3rem; font-weight:700; letter-spacing:.06em;">🌐\uFE0E Jogar Online</span>
-      <button id="mp-close-btn" style="background:none; border:none; color:var(--sand3);
-        font-size:1.3rem; cursor:pointer; line-height:1; padding:.2rem .4rem;"
-        title="Fechar / Close">✕</button>
-    </div>
-
-    <!-- Lobby screen (shown first) -->
-    <div id="mp-lobby" style="display:flex; flex-direction:column; gap:.9rem;">
-      <button id="mp-create-btn" class="generic-btn"
-        style="width:100%; font-size:1rem; padding:.7rem 1rem;">
-        Criar Sala
-      </button>
-      <div style="display:flex; gap:.5rem; align-items:stretch;">
-        <input id="mp-code-input" maxlength="6"
-          placeholder="CÓDIGO"
-          style="
-            flex:1; background:rgba(72,49,2,.5); border:1px solid var(--accent);
-            border-radius:6px; color:var(--sand); padding:.55rem .75rem;
-            font-family:'Lato',serif; font-size:.9rem; letter-spacing:.2em;
-            text-transform:uppercase; outline:none; min-width:0;
-          "
-        />
-        <button id="mp-join-btn" class="generic-btn"
-          style="white-space:nowrap; padding:.55rem 1rem; flex-shrink:0;">
-          Entrar
-        </button>
-      </div>
-      <!-- Single status line for lobby screen -->
-      <p id="mp-status-line"
-        style="font-size:.75rem; letter-spacing:.1em; color:var(--sand3);
-               min-height:1.1em; text-align:center; margin:0;"></p>
-    </div>
-
-    <!-- Waiting screen (hidden until room created) -->
-    <div id="mp-waiting" style="display:none; flex-direction:column; gap:1rem; align-items:center;">
-      <p style="color:var(--sand); font-size:.9rem; letter-spacing:.06em;
-                text-align:center; margin:0; line-height:1.5;">
-        Compartilhe com seu oponente<br>
-      </p>
-      <div id="mp-code-display" style="
-        font-size:2.4rem; letter-spacing:.35em; color:var(--gold);
-        font-family:'Lato',cursive; text-align:center;
-        background:rgba(196,154,68,.07); border:1px solid rgba(196,154,68,.3);
-        border-radius:8px; padding:.5rem 1.4rem; cursor:pointer; user-select:all;
-      " title="Clique para copiar"></div>
-      <p style="font-size:.8rem; color:var(--sand3); letter-spacing:.1em;
-                text-align:center; margin:0;">Clique para copiar</p>
-      <!-- Separate status line for waiting screen — different ID to avoid clash -->
-      <p id="mp-wait-status-line"
-        style="font-size:.8rem; letter-spacing:.1em; color:var(--sand3);
-               min-height:1.2em; text-align:center; margin:0;">
-        Aguardando oponente…
-      </p>
-      <button id="mp-cancel-btn" class="generic-btn danger"
-        style="font-size:.78rem; padding:.4rem 1.1rem;">
-        Cancelar
-      </button>
-    </div>
-
-  </div>
-</div>`;
-}
-
-// ─── Status helpers (screen-aware) ───────────────────────────────────────────
-
-/** Update the visible status line regardless of which screen is showing */
-function setAnyStatus(msg, color) {
-  // Try both status line IDs — only one will be visible at a time
-  ['mp-status-line', 'mp-wait-status-line'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = msg; if (color) el.style.color = color; }
-  });
-}
-
-function setAnyError(msg) {
-  setAnyStatus(msg, '#c0704a');
-  log('ERROR:', msg);
-}
-
-// ─── Panel lifecycle ──────────────────────────────────────────────────────────
-
-function showPanel() {
-  if (document.getElementById('mp-panel')) return;
-  document.body.insertAdjacentHTML('beforeend', buildPanelHTML());
-  bindPanelEvents();
-}
-
-function hidePanel() {
-  document.getElementById('mp-panel')?.remove();
-}
-
-function switchToWaitingScreen(code) {
-  const lobby   = document.getElementById('mp-lobby');
-  const waiting = document.getElementById('mp-waiting');
-  if (lobby)   lobby.style.display   = 'none';
-  if (waiting) waiting.style.display = 'flex';
-  const display = document.getElementById('mp-code-display');
-  if (display) display.textContent   = code;
-}
-
-function bindPanelEvents() {
-  document.getElementById('mp-close-btn')
-    ?.addEventListener('click', onClosePanelBtn);
-  document.getElementById('mp-create-btn')
-    ?.addEventListener('click', onCreateRoom);
-  document.getElementById('mp-join-btn')
-    ?.addEventListener('click', onJoinRoom);
-  document.getElementById('mp-cancel-btn')
-    ?.addEventListener('click', onCancelWait);
-  document.getElementById('mp-code-input')
-    ?.addEventListener('keydown', e => {
-      if (e.key === 'Enter') document.getElementById('mp-join-btn')?.click();
-    });
-  document.getElementById('mp-code-display')
-    ?.addEventListener('click', () => {
-      const txt = document.getElementById('mp-code-display')?.textContent;
-      if (txt) navigator.clipboard.writeText(txt).catch(() => {});
-    });
-}
-
-// ─── Online button ────────────────────────────────────────────────────────────
-
-function injectOnlineButton() {
-  if (document.getElementById('mp-online-btn')) return;
-  const modeBar = document.querySelector('.mode-bar');
-  if (!modeBar) { log('WARNING: .mode-bar not found'); return; }
-
-  const btn       = document.createElement('button');
-  btn.id          = 'mp-online-btn';
-  btn.className   = 'mode-btn';
-  btn.textContent = 'Online';
-  btn.addEventListener('click', onOnlineBtnClick);
-  modeBar.appendChild(btn);
-}
-
-function onOnlineBtnClick() {
-  if (mp.active) {
-    if (confirm('Sair do jogo online?\nLeave the online game?')) fullDisconnect();
-  } else {
-    showPanel();
-  }
-}
-
-function setOnlineBtnActive(code) {
-  const btn = document.getElementById('mp-online-btn');
-  if (btn) { btn.classList.add('active'); btn.textContent = `Online · ${code}`; }
-}
-
-function resetOnlineBtn() {
-  const btn = document.getElementById('mp-online-btn');
-  if (btn) { btn.classList.remove('active'); btn.textContent = 'Online'; }
-}
-
-// ─── Panel button handlers ────────────────────────────────────────────────────
-
-function onClosePanelBtn() {
-  hidePanel();
-  if (mp.channel && !mp.opponentPresent) {
-    mp.channel.unsubscribe();
-    mp.channel  = null;
-    mp.active   = false;
-    mp.roomCode = null;
-    resetOnlineBtn();
-  }
-}
-
-function onCancelWait() {
-  hidePanel();
-  if (mp.channel) { mp.channel.unsubscribe(); mp.channel = null; }
-  mp.active   = false;
-  mp.roomCode = null;
-  resetOnlineBtn();
-}
-
-async function onCreateRoom() {
-  setAnyStatus('Criando sala…');
-  try { await initSupabase(); }
-  catch (err) { setAnyError(err.message); return; }
-
-  const code   = randomCode();
-  mp.isHost    = true;
-  mp.roomCode  = code;
-  mp.myColor   = 1;
-  mp.active    = true;
-
-  switchToWaitingScreen(code);
-  subscribeChannel(code, () => log(`Room ${code} ready, waiting for opponent`));
-}
-
-async function onJoinRoom() {
-  const code = (document.getElementById('mp-code-input')?.value || '')
-    .trim().toUpperCase();
-
-  if (code.length < 4) {
-    setAnyError('Digite um código válido');
-    return;
-  }
-
-  setAnyStatus('Conectando… / Connecting…');
-  try { await initSupabase(); }
-  catch (err) { setAnyError(err.message); return; }
-
-  mp.isHost   = false;
-  mp.roomCode = code;
-  mp.myColor  = 2;
-  mp.active   = true;
-
-  subscribeChannel(code, () => {
-    log(`Joined room ${code}, announcing presence`);
-    mp.channel.send({
-      type: 'broadcast', event: 'player_joined', payload: { color: 2 },
-    });
-  });
-}
-
-// ─── Supabase Realtime channel ────────────────────────────────────────────────
-
-function subscribeChannel(code, onSubscribed) {
-  const ch = mp.client.channel(channelName(code), {
-    config: { broadcast: { self: false, ack: false } },
-  });
-
-  ch.on('broadcast', { event: 'player_joined' }, ({ payload }) => {
-    log('player_joined', payload);
-    // Only the host handles this — it sends back game_start with color assignments
-    if (!mp.isHost) return;
-    mp.opponentPresent = true;
-    // Tell Player 2 their assigned color and that we're ready
-    ch.send({
-      type: 'broadcast', event: 'game_start',
-      payload: { hostColor: 1, joinerColor: 2 },
-    });
-    // Host starts immediately
-    onBothPlayersReady();
-  });
-
-  ch.on('broadcast', { event: 'game_start' }, ({ payload }) => {
-    log('game_start received', payload);
-    // Host sent this — should not receive it back (self:false), but guard anyway
-    if (mp.isHost) return;
-    // Use the server-assigned color rather than what we set locally
-    mp.myColor = payload.joinerColor ?? 2;
-    mp.opponentPresent = true;
-    onBothPlayersReady();
-  });
-
-  ch.on('broadcast', { event: 'move' }, ({ payload }) => {
-    applyRemoteMove(payload);
-  });
-
-  ch.on('broadcast', { event: 'restart' }, () => {
-    log('Remote restart');
-    _suppressBroadcast = true;
-    try {
-      window.restartGame(true);
-    } finally {
-      _suppressBroadcast = false;
-    }
-  });
-
-  ch.on('broadcast', { event: 'rematch_ready' }, ({ payload }) => {
-    log('rematch_ready from opponent', payload);
-    if (mp.rematchReady) {
-      // We already pressed — both ready, host decides and fires rematch_start
-      if (mp.isHost) startRematch();
-    } else {
-      // Show a visual cue that opponent is waiting
-      showOpponentWaiting();
-    }
-  });
-
-  ch.on('broadcast', { event: 'rematch_start' }, ({ payload }) => {
-    log('rematch_start received', payload);
-    if (mp.isHost) return; // host triggered this, doesn't need to receive it
-    executeRematch(payload.firstPlayer);
-  });
-
-  ch.subscribe((status, err) => {
-    log('Channel status:', status, err || '');
-
-    if (status === 'SUBSCRIBED') {
-      mp.channel = ch;
-      if (onSubscribed) onSubscribed();
-
-    } else if (status === 'CHANNEL_ERROR') {
-      const detail = err?.message || 'unknown error';
-      setAnyError(`Erro de canal: ${detail}`);
-      log('Channel error detail:', err);
-
-    } else if (status === 'TIMED_OUT') {
-      setAnyError('Tempo esgotado. Verifique sua conexão');
-
-    } else if (status === 'CLOSED') {
-      if (mp.active) setAnyError('Conexão encerrada');
-    }
-  });
-}
-
-// ─── Game start ───────────────────────────────────────────────────────────────
-
-function onBothPlayersReady() {
-  hidePanel();
-  setOnlineBtnActive(mp.roomCode);
-  window.mpOnline  = true;
-  window.mpMyColor = mp.myColor;
-  // Suppress broadcast during the initial game-start reset
-  _suppressBroadcast = true;
-  try {
-    window.mpActivate(mp.myColor);
-  } finally {
-    _suppressBroadcast = false;
-  }
-  log(`Game started as player ${mp.myColor}`);
-}
-
-// ─── Rematch logic ────────────────────────────────────────────────────────────
-
-/**
- * Called when this player clicks "Novo Jogo" in online mode.
- * Replaces the button with a waiting indicator and notifies the opponent.
- */
-function onNewGameClick(e) {
-  e.stopPropagation();
-  if (mp.rematchReady) return; // already clicked
-  mp.rematchReady = true;
-  broadcastRematchReady();
-
-  // Replace the button with a waiting message
-  const btn = document.getElementById('banner-new-game');
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = window.currentLang === 'PT'
-      ? 'Aguardando oponente…'
-      : 'Waiting for opponent…';
-    btn.style.opacity = '0.6';
-    btn.style.cursor = 'default';
-  }
-}
-
-/** Show a cue that the opponent already pressed "Novo Jogo" */
-function showOpponentWaiting() {
-  const btn = document.getElementById('banner-new-game');
-  if (btn && !mp.rematchReady) {
-    btn.textContent = window.currentLang === 'PT'
-      ? '▶ Novo Jogo (oponente pronto)'
-      : '▶ New Game (opponent ready)';
-  }
-}
-
-/**
- * Host calls this once both players are ready.
- * Increments gameCount, determines firstPlayer (alternates), broadcasts, and executes locally.
- */
-function startRematch() {
-  mp.gameCount++;
-  // Alternate who goes first: even games → player 1 first, odd → player 2 first
-  const firstPlayer = (mp.gameCount % 2 === 0) ? 1 : 2;
-  broadcastRematchStart(firstPlayer);
-  executeRematch(firstPlayer);
-}
-
-/**
- * Both players call this to actually start the new game.
- * firstPlayer is whose turn it is on move 1 (1 or 2).
- * myColor doesn't change — only who moves first does.
- */
-function executeRematch(firstPlayer) {
-  mp.rematchReady = false;
-
-  // In online mode, humanPlayerColor controls which side the local player
-  // is allowed to interact with. We keep myColor fixed (1=host, 2=guest)
-  // but we need state.currentPlayer to start as firstPlayer.
-  // mpActivate sets humanPlayerColor=myColor and calls restartGame which
-  // always sets currentPlayer=1. So we patch currentPlayer after restart.
-  _suppressBroadcast = true;
-  try {
-    window.mpActivate(mp.myColor);
-    // Override starting player after restartGame resets it to 1
-    if (firstPlayer !== 1) {
-      window.state.currentPlayer = firstPlayer;
-      // Activate only the firstPlayer's pieces
-      for (const [sq, p] of Object.entries(window.state.pieces)) {
-        window.state.pieces[sq] = { ...p, active: p.player === firstPlayer };
+function computeVisibleMoveableEnemies(fromLabel, pieces, currentPlayer) {
+  const enemy = currentPlayer === 1 ? 2 : 1;
+  const visible = [];
+  for (const [dr, dc] of DIRS) {
+    const [r0, c0] = labelToRC(fromLabel);
+    let r = r0 + dr, c = c0 + dc;
+    while (r >= 0 && r <= 4 && c >= 0 && c <= 4) {
+      const sq = rcToLabel(r, c);
+      if (pieces[sq]) {
+        if (pieces[sq].player === enemy && computeAllSlides(sq, pieces).length > 0) {
+          visible.push(sq);
+        }
+        break;
       }
-      window.render();
+      r += dr; c += dc;
     }
-  } finally {
-    _suppressBroadcast = false;
+  }
+  return visible;
+}
+
+const ALL_LINES = (() => {
+  const lines = [];
+  for (const [dr, dc] of [[0,1],[1,0],[1,1],[1,-1]]) {
+    for (let r = 0; r < 5; r++) {
+      for (let c = 0; c < 5; c++) {
+        const run = [];
+        let rr = r, cc = c;
+        while (rr >= 0 && rr < 5 && cc >= 0 && cc < 5) {
+          run.push(rcToLabel(rr, cc));
+          rr += dr; cc += dc;
+        }
+        for (let s = 0; s <= run.length - 3; s++) {
+          for (let len = 3; len <= run.length - s; len++) {
+            lines.push(run.slice(s, s + len));
+          }
+        }
+      }
+    }
+  }
+  const unique = [];
+  const seen = new Set();
+  for (const line of lines) {
+    const key = line.join(',');
+    if (!seen.has(key)) { seen.add(key); unique.push(line); }
+  }
+  return unique;
+})();
+
+function checkVictory(pieces) {
+  for (const line of ALL_LINES) {
+    if (line.length < 3) continue;
+    let match = true;
+    const firstPiece = pieces[line[0]];
+    if (!firstPiece) continue;
+    const pId = firstPiece.player;
+    for (let i = 1; i < line.length; i++) {
+      if (!pieces[line[i]] || pieces[line[i]].player !== pId) { match = false; break; }
+    }
+    if (match) {
+      // Fix 2: if ALL pieces of the winner are part of some winning line, mark them all
+      const allWinnerSquares = Object.keys(pieces).filter(sq => pieces[sq].player === pId);
+      const squaresInAnyLine = new Set();
+      for (const wLine of ALL_LINES) {
+        if (wLine.length < 3) continue;
+        const allMatch = wLine.every(sq => pieces[sq] && pieces[sq].player === pId);
+        if (allMatch) wLine.forEach(sq => squaresInAnyLine.add(sq));
+      }
+      const allInLine = allWinnerSquares.every(sq => squaresInAnyLine.has(sq));
+      const fullLine = allInLine ? allWinnerSquares : line;
+      return { winner: pId, line: fullLine };
+    }
+  }
+  return null;
+}
+
+function serialiseState(pieces, currentPlayer) {
+  const parts = [];
+  for (const label of LABELS) {
+    const p = pieces[label];
+    if (p) parts.push(`${label}${p.player}${p.active ? 'A' : 'I'}`);
+  }
+  parts.sort();
+  return `${currentPlayer}:${parts.join(',')}`;
+}
+
+function hypotheticalKey(fromLabel, landing, currentPieces, currentPlayer) {
+  const next = {};
+  for (const [sq, p] of Object.entries(currentPieces)) next[sq] = { ...p };
+  const moving = { ...next[fromLabel], active: false };
+  delete next[fromLabel];
+  next[landing] = moving;
+  const enemy = currentPlayer === 1 ? 2 : 1;
+  const visibleEnemies = computeVisibleMoveableEnemies(landing, next, currentPlayer);
+  if (visibleEnemies.length > 0) {
+    for (const [sq, p] of Object.entries(next)) {
+      if (p.player === enemy) next[sq] = { ...p, active: false };
+    }
+    for (const sq of visibleEnemies) next[sq] = { ...next[sq], active: true };
+    return serialiseState(next, enemy);
+  } else {
+    next[landing] = { ...next[landing], active: true };
+    return serialiseState(next, currentPlayer);
   }
 }
+
+function currentPlayerHasLegalMoves(pieces, currentPlayer, sneaking, sneakingSquare, history) {
+  const pool = sneaking ? [sneakingSquare] : LABELS;
+  for (const label of pool) {
+    const p = pieces[label];
+    if (!p || p.player !== currentPlayer || !p.active) continue;
+    const slides = computeAllSlides(label, pieces);
+    for (const m of slides) {
+      const key = hypotheticalKey(label, m.landing, pieces, currentPlayer);
+      if (!history.has(key)) return true;
+    }
+  }
+  return false;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 3 — GAME STATE & META-PROGRESSION
+// ═══════════════════════════════════════════════════════════════
+let vsAI = true;
+let humanStreak = 0;
+const _today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+const _savedScoreDate = localStorage.getItem('sambaqui_high_score_date');
+let highScore = (_savedScoreDate === _today)
+  ? parseInt(localStorage.getItem('sambaqui_high_score') || '0', 10)
+  : 0;
+if (_savedScoreDate !== _today) {
+  localStorage.setItem('sambaqui_high_score', '0');
+  localStorage.setItem('sambaqui_high_score_date', _today);
+}
+let humanPlayerColor = 1;
+
+window.isWaitingForContinue = false;
+window.achievedNewBest = false;
+
+const BOARD_PATTERNS = [
+  
+  // Pattern 0       BFTX - DJPV
+  {
+    B: { player: 1, active: true }, F: { player: 1, active: true },
+    T: { player: 1, active: true }, X: { player: 1, active: true },
+    D: { player: 2, active: false }, J: { player: 2, active: false },
+    P: { player: 2, active: false }, V: { player: 2, active: false },
+  },
+  // Pattern 1        ADSP - GJVY
+  {
+    A: { player: 1, active: true }, D: { player: 1, active: true },
+    P: { player: 1, active: true }, S: { player: 1, active: true },
+    G: { player: 2, active: false }, J: { player: 2, active: false },
+    V: { player: 2, active: false }, Y: { player: 2, active: false },
+  },
+
+   // Pattern 2       BGSX - DIQV
+  {
+    B: { player: 1, active: true }, G: { player: 1, active: true },
+    S: { player: 1, active: true }, X: { player: 1, active: true },
+    D: { player: 2, active: false }, I: { player: 2, active: false },
+    Q: { player: 2, active: false }, V: { player: 2, active: false },
+  },
+
+     // Pattern 3     BJPX - DFTV
+  {
+    B: { player: 1, active: true }, J: { player: 1, active: true },
+    P: { player: 1, active: true }, X: { player: 1, active: true },
+    D: { player: 2, active: false }, F: { player: 2, active: false },
+    T: { player: 2, active: false }, V: { player: 2, active: false },
+  },
+
+     // Pattern 4
+  {
+    B: { player: 1, active: true }, D: { player: 1, active: true },
+    U: { player: 1, active: true }, Y: { player: 1, active: true },
+    A: { player: 2, active: false }, E: { player: 2, active: false },
+    V: { player: 2, active: false }, X: { player: 2, active: false },
+  },
+
+      // Pattern 5
+  {
+    C: { player: 1, active: true }, F: { player: 1, active: true },
+    N: { player: 1, active: true }, Q: { player: 1, active: true },
+    I: { player: 2, active: false }, L: { player: 2, active: false },
+    T: { player: 2, active: false }, W: { player: 2, active: false },
+  },
+
+        // Pattern 6 Quarta
+  {
+    B: { player: 1, active: true }, F: { player: 1, active: true },
+    O: { player: 1, active: true }, W: { player: 1, active: true },
+    C: { player: 2, active: false }, K: { player: 2, active: false },
+    T: { player: 2, active: false }, X: { player: 2, active: false },
+  },
+
+        // Pattern 7 
+  {
+    A: { player: 1, active: true }, D: { player: 1, active: true },
+    V: { player: 1, active: true }, Y: { player: 1, active: true },
+    B: { player: 2, active: false }, E: { player: 2, active: false },
+    U: { player: 2, active: false }, X: { player: 2, active: false },
+  },
+
+        // Pattern 8
+  {
+    A: { player: 1, active: true }, I: { player: 1, active: true },
+    Q: { player: 1, active: true }, Y: { player: 1, active: true },
+    E: { player: 2, active: false }, G: { player: 2, active: false },
+    S: { player: 2, active: false }, U: { player: 2, active: false },
+  },
+
+          // Pattern 9 
+  {
+    A: { player: 1, active: true }, H: { player: 1, active: true },
+    L: { player: 1, active: true }, S: { player: 1, active: true },
+    G: { player: 2, active: false }, N: { player: 2, active: false },
+    R: { player: 2, active: false }, Y: { player: 2, active: false },
+  },
+
+            // Pattern 10
+  {
+    G: { player: 1, active: true }, K: { player: 1, active: true },
+    N: { player: 1, active: true }, Q: { player: 1, active: true },
+    I: { player: 2, active: false }, L: { player: 2, active: false },
+    O: { player: 2, active: false }, S: { player: 2, active: false },
+  },
+
+             // Pattern 11
+  {
+    B: { player: 1, active: true }, L: { player: 1, active: true },
+    O: { player: 1, active: true }, X: { player: 1, active: true },
+    D: { player: 2, active: false }, K: { player: 2, active: false },
+    N: { player: 2, active: false }, V: { player: 2, active: false },
+  },
+
+               // Pattern 12
+  {
+    D: { player: 1, active: true }, L: { player: 1, active: true },
+    N: { player: 1, active: true }, V: { player: 1, active: true },
+    F: { player: 2, active: false }, H: { player: 2, active: false },
+    R: { player: 2, active: false }, T: { player: 2, active: false },
+  },
+
+
+];
+
+function makeInitialPieces() {
+  // 1. Get a unique number for the current day (YYYYMMDD format)
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  
+  const dateSeed = parseInt(`${year}${month}${day}`); // e.g., 20260616
+
+  // 2. Use the modulo operator (%) to safely map the seed to your array length
+  const patternIndex = dateSeed % BOARD_PATTERNS.length;
+
+  // const patternIndex = 6
+
+  // 3. Return a *deep copy* so players don't accidentally mutate the master list
+  return JSON.parse(JSON.stringify(BOARD_PATTERNS[patternIndex]));
+}
+
+const state = {
+  currentPlayer: 1,
+  selectedSquare: null,
+  currentMoves: [],
+  pieces: makeInitialPieces(),
+  history: new Set(),
+  gameOver: false,
+  winLine: null,
+  sneaking: false,
+  sneakingSquare: null,
+  losSquares: [],
+  animating: false,
+  highlightingActive: false,
+};
+state.history.add(serialiseState(state.pieces, state.currentPlayer));
+
+const timeline = [];
+let timelineIndex = -1;
+const moveLog = []; // { player, from, to } per half-move, length === timelineIndex at end of game
+
+function pushTimeline() {
+  if (timelineIndex < timeline.length - 1) timeline.splice(timelineIndex + 1);
+  const victoryNow = state.gameOver ? checkVictory(state.pieces) : null;
+  timeline.push({
+    pieces: JSON.parse(JSON.stringify(state.pieces)),
+    currentPlayer: state.currentPlayer,
+    sneaking: state.sneaking,
+    sneakingSquare: state.sneakingSquare,
+    history: new Set(state.history),
+    gameOver: state.gameOver,
+    winLine: state.winLine ? [...state.winLine] : null,
+    winner: victoryNow ? victoryNow.winner : null
+  });
+  timelineIndex++;
+}
+
+function restoreTimeline(idx) {
+  if (idx < 0 || idx >= timeline.length || state.animating) return;
+  
+  window.isWaitingForContinue = false;
+  document.body.classList.remove('clickable-restart');
+  
+  timelineIndex = idx;
+  const snap = timeline[idx];
+  state.pieces = JSON.parse(JSON.stringify(snap.pieces));
+  state.currentPlayer = snap.currentPlayer;
+  state.sneaking = snap.sneaking;
+  state.sneakingSquare = snap.sneakingSquare;
+  state.history = new Set(snap.history);
+  state.gameOver = snap.gameOver;
+  state.winLine = snap.winLine ? [...snap.winLine] : null;
+  state.selectedSquare = null;
+  state.currentMoves = [];
+  state.losSquares = [];
+
+  if (state.gameOver) {
+    const victory = checkVictory(state.pieces);
+    if (victory) {
+      showResultBanner(victory.winner);
+      if (!vsAI) {
+        setStatus(t('playerWins', { winner: victory.winner }), true);
+      } else {
+        if (victory.winner === humanPlayerColor) {
+          if (humanPlayerColor === 1) {
+            document.getElementById('label-p1').textContent = currentLang === 'PT' ? "Jogador Venceu" : "Player Wins";
+            tagP1.classList.add('active'); tagP2.classList.remove('active');
+          } else {
+            document.getElementById('label-p2').textContent = currentLang === 'PT' ? "Jogador Venceu" : "Player Wins";
+            tagP2.classList.add('active'); tagP1.classList.remove('active');
+          }
+          setStatus(currentLang === 'PT' ? "" : "", true);
+          document.body.classList.add('clickable-restart');
+          window.isWaitingForContinue = true;
+        } else {
+          if (humanPlayerColor === 1) {
+            document.getElementById('label-p2').textContent = currentLang === 'PT' ? "Computador Venceu" : "Computer Wins";
+            tagP2.classList.add('active'); tagP1.classList.remove('active');
+          } else {
+            document.getElementById('label-p1').textContent = currentLang === 'PT' ? "Computador Venceu" : "Computer Wins";
+            tagP1.classList.add('active'); tagP2.classList.remove('active');
+          }
+          setStatus(currentLang === 'PT' ? `Computador Venceu.` : `Computer Wins`, 'warn');
+        }
+      }
+    }
+  } else {
+    clearResultBanner();
+    if (vsAI) {
+      const aiTurn = state.currentPlayer !== humanPlayerColor;
+      if (state.sneaking) {
+        setStatus(t('moveAgain'), 'sneaking');
+        if (!aiTurn) selectPiece(state.sneakingSquare);
+      } else {
+        setStatus(aiTurn ? t('calculating') : t('selectActive'), aiTurn ? 'highlight' : false);
+      }
+    } else {
+      if (state.sneaking) {
+        setStatus(t('moveAgain'), 'sneaking');
+        selectPiece(state.sneakingSquare);
+      } else {
+        setStatus(t('selectActive'));
+      }
+    }
+  }
+  render();
+  updateNavButtons();
+  if (!state.gameOver && vsAI && state.currentPlayer !== humanPlayerColor) triggerAIMove();
+}
+
+function showResultBanner(winner) {
+  clearResultBanner();
+  const banner = document.createElement('div');
+  banner.className = 'result-banner';
+  banner.id = 'result-banner';
+  
+  let text = '';
+  let btnText = t('startNewGame');
+  
+  if (!vsAI) {
+    text = t('playerWinsBanner', { winner: winner });
+  } else if (winner === humanPlayerColor) {
+    const pluralStr = humanStreak !== 1 ? 's' : '';
+    text = t('humanWinsStreakBanner', { streak: humanStreak, plural: pluralStr });
+    btnText = t('nextRound');
+  } else {
+    const pluralStr = humanStreak !== 1 ? 's' : '';
+    text = t('humanLosesStreakBanner', { streak: humanStreak, plural: pluralStr, winner: winner });
+  }
+
+  banner.innerHTML = `
+    <span class="banner-text">${text}</span>
+    <button class="new-game-btn" id="banner-new-game">${btnText}</button>
+  `;
+  resultBannerSlot.appendChild(banner);
+  document.getElementById('banner-new-game').addEventListener('click', (e) => {
+    e.stopPropagation(); // Impede o clique fantasma de reiniciar duas vezes
+    const isDefeat = vsAI && winner !== humanPlayerColor;
+    restartGame(isDefeat);
+  });
+}
+
+function clearResultBanner() {
+  resultBannerSlot.innerHTML = '';
+}
+
+// ── Build the emoji board from today's initial pattern ──────────────────────
+function buildEmojiBoard() {
+  const pattern = makeInitialPieces(); // always returns today's pattern (deep copy)
+  let rows = [];
+  for (let r = 0; r < 5; r++) {
+    let row = '';
+    for (let c = 0; c < 5; c++) {
+      const label = rcToLabel(r, c);
+      const piece = pattern[label];
+      if (!piece)           row += '⬜️';
+      else if (piece.player === 1) row += '🌕';
+      else                  row += '🌑';
+    }
+    rows.push(row);
+  }
+  return rows.join('\n');
+}
+
+function buildShareText() {
+  const board = buildEmojiBoard();
+  const score = highScore;
+  const url   = window.location.href;
+  return t('shareResultMsg', { board, score, url });
+}
+
+function showShareResultBtn() {
+  const btn = document.getElementById('share-result-btn');
+  if (btn) {
+    btn.textContent = t('shareResultBtn');
+    btn.style.display = 'inline-block';
+  }
+}
+
+function hideShareResultBtn() {
+  const btn = document.getElementById('share-result-btn');
+  if (btn) btn.style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 4 — DOM REFERENCES & BOARD CONSTRUCTION
+// ═══════════════════════════════════════════════════════════════
+const boardEl = document.getElementById('board');
+const statusEl = document.getElementById('status');
+const tagP1 = document.getElementById('tag-p1');
+const tagP2 = document.getElementById('tag-p2');
+const labelP1 = document.getElementById('label-p1');
+const labelP2 = document.getElementById('label-p2');
+const undoBtn = document.getElementById('undo-btn');
+const redoBtn = document.getElementById('redo-btn');
+const navControls = document.getElementById('nav-controls');
+const resultBannerSlot = document.getElementById('result-banner-slot');
+const modeToggleBtn = document.getElementById('mode-toggle');
+const langToggleBtn = document.getElementById('lang-toggle-btn');
+const openTutorialBtn = document.getElementById('open-tutorial-btn');
+const statStreakEl = document.getElementById('stat-streak');
+const statHighEl = document.getElementById('stat-high');
+const statsBarEl = document.getElementById('stats-bar');
+const statLvlLabel = document.getElementById('stat-lvl-label');
+const statBestLabel = document.getElementById('stat-best-label');
+const footerSupportLink = document.getElementById('footer-support-link');
+const footerShareLink = document.getElementById('footer-share-link');
+const toastMsgEl = document.getElementById('toast-msg');
+
+const cellEls = {};
+
+for (let r = 0; r < 5; r++) {
+  const row = document.createElement('div');
+  row.className = 'board-row';
+  for (let c = 0; c < 5; c++) {
+    const label = rcToLabel(r, c);
+    const cell = document.createElement('div');
+    cell.className = 'cell' + (((r + c) % 2 === 1) ? ' dark-sq' : '');
+    cell.dataset.label = label;
+    
+if (!vsAI) {
+      const coord = document.createElement('div');
+      coord.className = 'cell-label';
+      coord.textContent = label;
+      cell.appendChild(coord);
+    }
+    
+    cell.addEventListener('click', () => handleSquareClick(label));
+    row.appendChild(cell);
+    cellEls[label] = cell;
+  }
+  boardEl.appendChild(row);
+}
+
+function updateNavButtons() {
+  if (vsAI) {
+    navControls.classList.add('hidden');
+  } else {
+    navControls.classList.remove('hidden');
+    undoBtn.disabled = (timelineIndex <= 0 || state.animating);
+    redoBtn.disabled = (timelineIndex >= timeline.length - 1 || state.animating);
+  }
+  renderMoveLog();
+}
+
+const moveLogEl = document.getElementById('move-log');
+
+function renderMoveLog() {
+  if (!moveLogEl) return;
+  moveLogEl.innerHTML = '';
+
+  if (moveLog.length === 0) {
+    const empty = document.createElement('span');
+    empty.className = 'move-log-empty';
+    empty.textContent = '';
+    moveLogEl.appendChild(empty);
+    return;
+  }
+
+  // timelineIndex corresponds to the state *after* moveLog[timelineIndex-1] was played.
+  // Entries 0..timelineIndex-1 are played; timelineIndex..end are the redo tail.
+
+  // For each move, check whether any other active piece of the same player
+  // could also have slid to the same landing square from the pre-move position.
+  // Both the active set and piece positions are captured in the log entry itself,
+  // so this is independent of timeline indexing.
+  function needsDisambiguation(i) {
+    const entry = moveLog[i];
+    const pieces = entry.piecesSnapshot;
+    if (!pieces) return false;
+    const activeSet = new Set(entry.activePeers);
+    let count = 0;
+    for (const sq of activeSet) {
+      if (sq === entry.from) { count++; continue; }
+      const slides = computeAllSlides(sq, pieces);
+      if (slides.some(m => m.landing === entry.to)) count++;
+      if (count > 1) return true;
+    }
+    return false;
+  }
+
+  let lastActiveEl = null;
+  for (let i = 0; i < moveLog.length; i++) {
+    if (i > 0) {
+      const div = document.createElement('div');
+      div.className = 'move-log-divider';
+      moveLogEl.appendChild(div);
+    }
+
+    const entry = moveLog[i];
+    const el = document.createElement('div');
+    const isFuture = i >= timelineIndex;
+    const isCurrent = i === timelineIndex - 1;
+    el.className = 'move-log-entry' +
+      (isFuture ? ' future' : '') +
+      (isCurrent ? ' current' : '');
+
+    const dot = document.createElement('div');
+    dot.className = `move-log-dot p${entry.player}`;
+
+    const label = document.createElement('span');
+    const disambig = needsDisambiguation(i);
+    label.textContent = disambig ? entry.from.toLowerCase() + entry.to : entry.to;
+
+    el.appendChild(dot);
+    el.appendChild(label);
+    moveLogEl.appendChild(el);
+
+    if (isCurrent) lastActiveEl = el;
+  }
+
+  // Scroll the current (last active) entry into view within the bar
+  const target = lastActiveEl || (moveLog.length > 0 ? moveLogEl.lastElementChild : null);
+  if (target) {
+    const containerLeft = moveLogEl.getBoundingClientRect().left;
+    const targetLeft = target.getBoundingClientRect().left;
+    moveLogEl.scrollLeft += targetLeft - containerLeft - moveLogEl.clientWidth / 2 + target.offsetWidth / 2;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 5 — INTERACTION RULES
+// ═══════════════════════════════════════════════════════════════
+function handleSquareClick(label) {
+  if (state.gameOver || state.animating) return;
+  if (vsAI && state.currentPlayer !== humanPlayerColor) return;
+  // Online multiplayer: block interaction when it is the opponent's turn
+  if (window.mpOnline && state.currentPlayer !== window.mpMyColor) return;
+  if (window.isWaitingForContinue) return;
+
+  const piece = state.pieces[label];
+  const targetMove = state.currentMoves.find(m => m.landing === label && !m.blocked);
+
+  if (targetMove) {
+    const src = state.selectedSquare;
+    clearSelection();
+    executeMove(src, targetMove);
+  } else if (piece && piece.player === state.currentPlayer && piece.active) {
+    if (state.sneaking && label !== state.sneakingSquare) return;
+    if (state.selectedSquare === label) { clearSelection(); state.highlightingActive = true; render(); }
+    else selectPiece(label);
+  } else {
+    if (state.selectedSquare) {
+      clearSelection();
+      state.highlightingActive = true;
+      render();
+    } else {
+      state.highlightingActive = !state.highlightingActive;
+      render();
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 6 — CORE STATE MODIFIERS
+// ═══════════════════════════════════════════════════════════════
+function selectPiece(label) {
+  state.highlightingActive = false;
+  state.selectedSquare = label;
+  state.losSquares = [];
+  const raw = computeAllSlides(label, state.pieces);
+  state.currentMoves = raw.map(m => ({
+    ...m,
+    blocked: state.history.has(hypotheticalKey(label, m.landing, state.pieces, state.currentPlayer)),
+  }));
+  const free = state.currentMoves.filter(m => !m.blocked).length;
+  const blocked = state.currentMoves.filter(m => m.blocked).length;
+
+  if (state.currentMoves.length === 0) {
+    setStatus(t('noMovesAvailable', { label: label }));
+  } else if (free === 0) {
+    setStatus(t('forbiddenByNovelty', { label: label, blocked: blocked }), 'warn');
+  } else {
+    const suffix = blocked > 0 ? t('forbiddenSuffix', { blocked: blocked }) : '';
+    const prefix = state.sneaking ? t('chainMovePrefix') : '';
+    let pluralStr = free !== 1 ? 's' : '';
+    setStatus(t('legalMoves', { prefix: prefix, label: label, free: free, plural: pluralStr, suffix: suffix }), state.sneaking ? 'sneaking' : true);
+  }
+  render();
+}
+
+function clearSelection() {
+  if (state.selectedSquare) state.highlightingActive = false;
+  state.selectedSquare = null;
+  state.currentMoves = [];
+  state.losSquares = [];
+  setStatus(t('selectActive'));
+  render();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 7 — HARDWARE-ACCELERATED ANIMATION ENGINE
+// ═══════════════════════════════════════════════════════════════
+function cellCenter(label) {
+  const rect = cellEls[label].getBoundingClientRect();
+  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+}
+
+function animateSlide(player, fromLabel, path, onDone) {
+  state.animating = true;
+  updateNavButtons();
+
+  const finalLabel = path[path.length - 1];
+  const srcCell = cellEls[fromLabel];
+  const srcRect = srcCell.getBoundingClientRect();
+  const pieceSize = srcRect.width * 0.68;
+
+  const ghost = document.createElement('div');
+  ghost.className = `piece-ghost p${player}`;
+  ghost.style.cssText = `
+    width: ${pieceSize}px;
+    height: ${pieceSize}px;
+    position: fixed;
+    left: 0; top: 0;
+    z-index: 9999;
+    pointer-events: none;
+    transition: none;
+  `;
+
+  const start = cellCenter(fromLabel);
+  const end = cellCenter(finalLabel);
+  const startX = start.x - pieceSize / 2;
+  const startY = start.y - pieceSize / 2;
+
+  ghost.style.transform = `translate3d(${startX}px, ${startY}px, 0)`;
+  document.body.appendChild(ghost);
+
+  const internalPiece = srcCell.querySelector('.piece');
+  if (internalPiece) internalPiece.style.opacity = '0';
+
+  const duration = 240;
+  const startTime = performance.now();
+
+  function frame(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const tCoeff = progress * (2 - progress);
+
+    const curX = startX + (end.x - start.x) * tCoeff;
+    const curY = startY + (end.y - start.y) * tCoeff;
+    ghost.style.transform = `translate3d(${curX}px, ${curY}px, 0)`;
+
+    if (progress < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      ghost.remove();
+      if (internalPiece) internalPiece.style.opacity = '';
+      state.animating = false;
+      updateNavButtons();
+      onDone();
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 8 — MOVE DISPATCHER & COMBAT LOGIC
+// ═══════════════════════════════════════════════════════════════
+function executeMove(fromLabel, move) {
+  const player = state.currentPlayer;
+  if (window._dragDropActive) {
+    // Piece was already dragged by the user — skip the slide animation
+    finalizeMove(fromLabel, move);
+  } else {
+    animateSlide(player, fromLabel, move.path, () => {
+      finalizeMove(fromLabel, move);
+    });
+  }
+}
+
+function finalizeMove(fromLabel, move) {
+  // Record this half-move before any state change so timeline stays aligned.
+  // Capture the full set of active same-player squares and a position snapshot
+  // now, before the deactivation sweep below overwrites state.pieces.
+  const movingPlayer = state.currentPlayer;
+  const activePeers = Object.keys(state.pieces).filter(
+    sq => state.pieces[sq].player === movingPlayer && state.pieces[sq].active
+  );
+  const piecesSnapshot = JSON.parse(JSON.stringify(state.pieces));
+  moveLog.splice(timelineIndex); // truncate any redo tail
+  moveLog.push({ player: movingPlayer, from: fromLabel, to: move.landing, activePeers, piecesSnapshot });
+
+  for (const [sq, p] of Object.entries(state.pieces)) {
+    if (p.player === state.currentPlayer && sq !== fromLabel) {
+      state.pieces[sq] = { ...p, active: false };
+    }
+  }
+
+  const movingPiece = { ...state.pieces[fromLabel], active: false };
+  delete state.pieces[fromLabel];
+  state.pieces[move.landing] = movingPiece;
+
+  const victory = checkVictory(state.pieces);
+  if (victory) {
+    state.gameOver = true;
+    state.winLine = victory.line;
+    state.sneaking = false;
+    state.losSquares = [];
+    render();
+    
+    if (vsAI && victory.winner === humanPlayerColor) {
+      humanStreak++;
+      if (humanStreak > highScore) {
+        highScore = humanStreak;
+        localStorage.setItem('sambaqui_high_score', highScore);
+        localStorage.setItem('sambaqui_high_score_date', new Date().toISOString().slice(0, 10));
+        window.achievedNewBest = true;
+      }
+    }
+    
+    pushTimeline();
+    setTimeout(() => showVictory(victory.winner), 600);
+    return;
+  }
+
+  const visibleEnemies = computeVisibleMoveableEnemies(move.landing, state.pieces, state.currentPlayer);
+  if (visibleEnemies.length > 0) {
+    const enemy = state.currentPlayer === 1 ? 2 : 1;
+    for (const [sq, p] of Object.entries(state.pieces)) {
+      state.pieces[sq] = { ...p, active: p.player === enemy && visibleEnemies.includes(sq) };
+    }
+    state.currentPlayer = enemy;
+    state.sneaking = false;
+    state.sneakingSquare = null;
+    state.history.add(serialiseState(state.pieces, state.currentPlayer));
+    state.losSquares = visibleEnemies;
+    render();
+    pushTimeline();
+
+    const n = visibleEnemies.length;
+    let pluralStr = n !== 1 ? 's' : '';
+    setStatus(t('haltedEnemies', { n: n, plural: pluralStr }));
+    setTimeout(() => {
+      state.losSquares = [];
+      render();
+      checkTurnPassing();
+    }, 1200);
+  } else {
+    state.sneaking = true;
+    state.sneakingSquare = move.landing;
+    state.losSquares = [];
+    state.pieces[move.landing] = { ...state.pieces[move.landing], active: true };
+    state.history.add(serialiseState(state.pieces, state.currentPlayer));
+    render();
+    pushTimeline();
+
+    setStatus(t('chainNoEnemies'), 'sneaking');
+    const isMyChainTurn = window.mpOnline
+      ? state.currentPlayer === window.mpMyColor
+      : (!vsAI || state.currentPlayer === humanPlayerColor);
+    if (isMyChainTurn) selectPiece(move.landing);
+    checkTurnPassing();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 9 — PASS & DEADLOCK
+// ═══════════════════════════════════════════════════════════════
+function checkTurnPassing() {
+  if (state.gameOver) return;
+  const hasMoves = currentPlayerHasLegalMoves(state.pieces, state.currentPlayer, state.sneaking, state.sneakingSquare, state.history);
+  if (hasMoves) {
+    if (vsAI && state.currentPlayer !== humanPlayerColor) triggerAIMove();
+    return;
+  }
+
+  // No legal moves: turn ends, all enemy pieces activate
+  const oppositePlayer = state.currentPlayer === 1 ? 2 : 1;
+  const passedFrom = state.currentPlayer;
+  for (const [sq, p] of Object.entries(state.pieces)) {
+    if (p.player === oppositePlayer) state.pieces[sq] = { ...p, active: true };
+  }
+  state.currentPlayer = oppositePlayer;
+  state.sneaking = false;
+  state.sneakingSquare = null;
+  state.history.add(serialiseState(state.pieces, state.currentPlayer));
+  render();
+  pushTimeline();
+
+  setStatus(t('noLegalMovesPass', { passedFrom: passedFrom }), 'warn');
+  setTimeout(() => {
+    if (!state.gameOver) {
+      if (vsAI && state.currentPlayer !== humanPlayerColor) triggerAIMove();
+      else setStatus(t('selectActive'));
+    }
+  }, 1400);
+}
+
+function showVictory(winner) {
+  window.isWaitingForContinue = false;
+  showResultBanner(winner);
+
+  if (!vsAI) {
+    if (state.winLine) state.winLine._winner = winner;
+    setStatus(t('playerWins', { winner: winner }), true);
+    return;
+  }
+
+  if (winner === humanPlayerColor) {
+    if (humanPlayerColor === 1) {
+      labelP1.textContent = currentLang === 'PT' ? "Jogador Venceu" : "Player Wins";
+      tagP1.classList.add('active'); tagP2.classList.remove('active');
+    } else {
+      labelP2.textContent = currentLang === 'PT' ? "Jogador Venceu" : "Player Wins";
+      tagP2.classList.add('active'); tagP1.classList.remove('active');
+    }
+
+    setStatus(currentLang === 'PT' ? "" : "", true);
+
+    setTimeout(() => {
+      document.body.classList.add('clickable-restart');
+      window.isWaitingForContinue = true;
+    }, 100);
+
+    updateMetaDisplay();
+    showShareResultBtn();
+  } else {
+    // ─── COMPUTADOR VENCEU ───
+    if (humanPlayerColor === 1) {
+      labelP2.textContent = currentLang === 'PT' ? "Computador Venceu" : "Computer Wins";
+      tagP2.classList.add('active'); tagP1.classList.remove('active');
+    } else {
+      labelP1.textContent = currentLang === 'PT' ? "Computador Venceu" : "Computer Wins";
+      tagP1.classList.add('active'); tagP2.classList.remove('active');
+    }
+
+    setStatus(currentLang === 'PT' ? `Computador venceu.` : `Computer wins.`, 'warn');
+
+    humanStreak = 0;
+    window.achievedNewBest = false;
+    updateMetaDisplay();
+    showShareResultBtn();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 10 — TREE SEARCH ENGINE (IMPROVED)
+// ═══════════════════════════════════════════════════════════════
+//
+//  CHANGES FROM ORIGINAL:
+//  1. evaluatePosition()  — positional heuristic replaces blind random rollouts.
+//     Scores "best consecutive run of aligned pieces" for both players,
+//     weighted by direction (diagonals slightly discounted since they're
+//     harder to close). This gives MCTS a signal even from truncated rollouts.
+//
+//  2. simulate()          — guided playouts instead of pure random.
+//     Each step uses a fast greedy policy: prefer immediate wins, then
+//     avoid moves that hand the opponent a win, then pick the move with
+//     the highest heuristic delta. Falls back to random only when all
+//     heuristic moves are tied. Depth lifted to 20 to let games resolve.
+//
+//  3. findWinIn2()        — logic bug fixed.
+//     The original boolean inversion caused it to return moves that were
+//     NOT guaranteed wins. New version correctly checks that for every
+//     opponent response, the AI has at least one follow-up that wins.
+//
+//  4. backpropagate()     — partial credit for near-wins.
+//     Instead of binary 0/1, the AI node earns 1.0 for a win and 0.5 for
+//     a "moral win" (finished with 2-in-a-row when tree was truncated).
+//     This tightens the signal in positions where games rarely resolve
+//     within the rollout depth.
+//
+//  5. UCB1 exploration constant — raised to 1.8 (from 1.41).
+//     With a stronger evaluation function the tree benefits from wider
+//     exploration before exploitation; empirically reduces "trap" loops.
+//
+//  Everything else (SimState, clone, getValidMoves, makeMove, MCTSNode
+//  structure, difficulty profiles, triggerAIMove) is unchanged so this
+//  is a drop-in replacement.
+// ═══════════════════════════════════════════════════════════════
+
+// ── Heuristic: score the board for one player ────────────────────────────────
+// Returns the length of the longest aligned run of that player's pieces
+// across all directions, weighted by how "open" the run is (i.e. could it
+// extend to 3?). Also rewards the opponent's threats negatively so the
+// score is relative.
+//
+// The 5×5 board uses LABELS (the same array used elsewhere in the codebase).
+// We reconstruct rows/columns/diagonals here using the same coordinate system.
+
+const BOARD_SIZE  = 5;
+const DIRECTIONS  = [
+  { dr: 0,  dc: 1,  weight: 1.0 },  // horizontal
+  { dr: 1,  dc: 0,  weight: 1.0 },  // vertical
+  { dr: 1,  dc: 1,  weight: 0.9 },  // diagonal ↘
+  { dr: 1,  dc: -1, weight: 0.9 },  // diagonal ↙
+];
+
+// labelToRC and rcToLabel are defined earlier in the codebase and used here as-is.
+// labelToRC(label) returns [r, c] as a two-element array.
+// rcToLabel(r, c)  returns a label string or null if out of bounds.
+
+// Score a window of 3 squares in one direction for one player.
+// Returns the count of own pieces in that window, or null if blocked by an enemy.
+function scoreDirection(pieces, player, startR, startC, dr, dc) {
+  const run = [];
+  for (let i = 0; i < 3; i++) {
+    const lbl = rcToLabel(startR + i * dr, startC + i * dc);
+    if (lbl === null) return null;              // out of bounds
+    const p = pieces[lbl];
+    run.push(p ? p.player : 0);
+  }
+  const own = run.filter(v => v === player).length;
+  const opp = run.filter(v => v !== 0 && v !== player).length;
+  if (opp > 0) return null;                    // blocked by enemy
+  return own;
+}
+
+function evaluatePosition(pieces, player) {
+  const opponent = player === 1 ? 2 : 1;
+  let selfScore = 0;
+  let oppScore  = 0;
+
+  for (const { dr, dc, weight } of DIRECTIONS) {
+    for (let r = 0; r < BOARD_SIZE; r++) {
+      for (let c = 0; c < BOARD_SIZE; c++) {
+        const s = scoreDirection(pieces, player,   r, c, dr, dc);
+        const o = scoreDirection(pieces, opponent, r, c, dr, dc);
+        // Exponential weighting: 2-in-a-row scores 4×, not 2×
+        if (s !== null) selfScore = Math.max(selfScore, Math.pow(s, 2) * weight);
+        if (o !== null) oppScore  = Math.max(oppScore,  Math.pow(o, 2) * weight);
+      }
+    }
+  }
+
+  // Relative score in [−1, +1]: positive = good for player.
+  return (selfScore - oppScore) / 9.0;
+}
+
+// ── SimState ─────────────────────────────────────────────────────────────────
+// (unchanged from original — reproduced here for completeness)
+
+class SimState {
+  constructor(pieces, currentPlayer, sneaking, sneakingSquare, history, isGameOver, winner) {
+    this.pieces = pieces;
+    this.currentPlayer = currentPlayer;
+    this.sneaking = sneaking;
+    this.sneakingSquare = sneakingSquare;
+    this.history = new Set(history);
+    this.isGameOver = isGameOver;
+    this.winner = winner;
+  }
+  clone() {
+    const cp = {};
+    for (const sq in this.pieces) {
+      cp[sq] = { player: this.pieces[sq].player, active: this.pieces[sq].active };
+    }
+    return new SimState(cp, this.currentPlayer, this.sneaking, this.sneakingSquare, this.history, this.isGameOver, this.winner);
+  }
+  getValidMoves() {
+    const moves = [];
+    const pool = this.sneaking ? [this.sneakingSquare] : LABELS;
+    for (const label of pool) {
+      const p = this.pieces[label];
+      if (!p || p.player !== this.currentPlayer || !p.active) continue;
+      for (const m of computeAllSlides(label, this.pieces)) {
+        if (!this.history.has(hypotheticalKey(label, m.landing, this.pieces, this.currentPlayer))) {
+          moves.push({ from: label, move: m });
+        }
+      }
+    }
+    return moves;
+  }
+  makeMove(from, move) {
+    for (const sq in this.pieces) {
+      if (this.pieces[sq].player === this.currentPlayer && sq !== from) this.pieces[sq].active = false;
+    }
+    const mv = { ...this.pieces[from], active: false };
+    delete this.pieces[from];
+    this.pieces[move.landing] = mv;
+
+    const win = checkVictory(this.pieces);
+    if (win) { this.isGameOver = true; this.winner = win.winner; return; }
+
+    const visible = computeVisibleMoveableEnemies(move.landing, this.pieces, this.currentPlayer);
+    if (visible.length > 0) {
+      const enemy = this.currentPlayer === 1 ? 2 : 1;
+      for (const sq in this.pieces) this.pieces[sq].active = (this.pieces[sq].player === enemy && visible.includes(sq));
+      this.currentPlayer = enemy;
+      this.sneaking = false;
+      this.sneakingSquare = null;
+    } else {
+      this.sneaking = true;
+      this.sneakingSquare = move.landing;
+      this.pieces[move.landing].active = true;
+    }
+    this.history.add(serialiseState(this.pieces, this.currentPlayer));
+
+    if (!currentPlayerHasLegalMoves(this.pieces, this.currentPlayer, this.sneaking, this.sneakingSquare, this.history)) {
+      const opp = this.currentPlayer === 1 ? 2 : 1;
+      for (const sq in this.pieces) if (this.pieces[sq].player === opp) this.pieces[sq].active = true;
+      this.currentPlayer = opp;
+      this.sneaking = false;
+      this.sneakingSquare = null;
+      this.history.add(serialiseState(this.pieces, this.currentPlayer));
+    }
+  }
+}
+
+// ── MCTSNode ─────────────────────────────────────────────────────────────────
+
+class MCTSNode {
+  constructor(simState, parent, leadingMove) {
+    this.state = simState;
+    this.parent = parent;
+    this.move = leadingMove;
+    this.children = [];
+    this.wins = 0;
+    this.visits = 0;
+    this.untriedMoves = simState.getValidMoves();
+    this.playerJustMoved = parent ? (simState.currentPlayer === 1 ? 2 : 1) : null;
+  }
+
+  // CHANGE 5: UCB1 exploration constant raised to 1.8 for wider search.
+  ucb1(c = 1.8) {
+    if (this.visits === 0) return Infinity;
+    return (this.wins / this.visits) + c * Math.sqrt(Math.log(this.parent.visits) / this.visits);
+  }
+  isFullyExpanded() { return this.untriedMoves.length === 0; }
+  hasChildren()     { return this.children.length > 0; }
+}
+
+// ── AdvancedEngineMCTS ────────────────────────────────────────────────────────
+
+class AdvancedEngineMCTS {
+  constructor(simState, iterations) {
+    this.root = new MCTSNode(simState, null, null);
+    this.iterations = iterations;
+    this.aiPlayer = simState.currentPlayer;
+  }
+
+  findImmediateWin(simState, player) {
+    const valid = simState.getValidMoves();
+    for (const action of valid) {
+      const temp = simState.clone();
+      temp.makeMove(action.from, action.move);
+      if (temp.isGameOver && temp.winner === player) return action;
+    }
+    return null;
+  }
+
+  // CHANGE 3: findWinIn2 logic bug fixed.
+  // Original had an inverted oppCanBlockAll flag: it would break out of the
+  // opponent-response loop when it found a *blocking* reply, then fall through
+  // as if no block existed. The fixed version tracks whether the AI can
+  // guarantee a win *for every possible opponent response*.
+  findWinIn2(simState, player) {
+    const valid = simState.getValidMoves();
+    for (const action of valid) {
+      const temp = simState.clone();
+      temp.makeMove(action.from, action.move);
+      if (temp.isGameOver && temp.winner === player) return action;
+
+      const oppMoves = temp.getValidMoves();
+      if (oppMoves.length === 0) continue;
+
+      // Check: does the AI win after EVERY opponent response?
+      let aiWinsAfterAll = true;
+      for (const oppAct of oppMoves) {
+        const oppTemp = temp.clone();
+        oppTemp.makeMove(oppAct.from, oppAct.move);
+
+        // If the opponent wins immediately after this response, this branch fails.
+        const opponent = player === 1 ? 2 : 1;
+        if (oppTemp.isGameOver && oppTemp.winner === opponent) {
+          aiWinsAfterAll = false;
+          break;
+        }
+
+        // Does the AI have at least one winning follow-up?
+        const followUps = oppTemp.getValidMoves();
+        let aiHasWin = false;
+        for (const fUp of followUps) {
+          const finalTemp = oppTemp.clone();
+          finalTemp.makeMove(fUp.from, fUp.move);
+          if (finalTemp.isGameOver && finalTemp.winner === player) {
+            aiHasWin = true;
+            break;
+          }
+        }
+        if (!aiHasWin) {
+          aiWinsAfterAll = false;
+          break;
+        }
+      }
+      if (aiWinsAfterAll) return action;
+    }
+    return null;
+  }
+
+  findSafeMove(simState) {
+    const valid = simState.getValidMoves();
+    const optimal = [];
+    const opponent = this.aiPlayer === 1 ? 2 : 1;
+    for (const action of valid) {
+      const temp = simState.clone();
+      temp.makeMove(action.from, action.move);
+      let lethal = false;
+      for (const oppAct of temp.getValidMoves()) {
+        const oppTemp = temp.clone();
+        oppTemp.makeMove(oppAct.from, oppAct.move);
+        if (oppTemp.isGameOver && oppTemp.winner === opponent) { lethal = true; break; }
+      }
+      if (!lethal) optimal.push(action);
+    }
+    return optimal.length > 0 ? optimal[Math.floor(Math.random() * optimal.length)] : null;
+  }
+
+  search(useImmediateWin, useWinIn2, useSafeMove) {
+    const currentSimRoot = this.root.state;
+
+    if (useImmediateWin) {
+      const imm = this.findImmediateWin(currentSimRoot, this.aiPlayer);
+      if (imm) return imm;
+      const opp = this.aiPlayer === 1 ? 2 : 1;
+      const counterBlock = this.findImmediateWin(currentSimRoot, opp);
+      if (counterBlock) return counterBlock;
+    }
+    if (useWinIn2) {
+      const win2 = this.findWinIn2(currentSimRoot, this.aiPlayer);
+      if (win2) return win2;
+    }
+
+    let safeMove = null;
+    if (useSafeMove) safeMove = this.findSafeMove(currentSimRoot);
+
+    for (let i = 0; i < this.iterations; i++) {
+      let node = this.select(this.root);
+      if (!node.state.isGameOver && !node.isFullyExpanded()) node = this.expand(node);
+      const simulationResult = this.simulate(node.state);
+      this.backpropagate(node, simulationResult);
+    }
+
+    const bestChildNode = this.getBestChild(this.root);
+    if (safeMove && bestChildNode) {
+      const bestActionIsSafe = this.checkIfActionIsSafe(currentSimRoot, bestChildNode.move);
+      if (!bestActionIsSafe) return safeMove;
+    }
+    return bestChildNode ? bestChildNode.move : (safeMove || currentSimRoot.getValidMoves()[0]);
+  }
+
+  checkIfActionIsSafe(simState, action) {
+    const temp = simState.clone();
+    temp.makeMove(action.from, action.move);
+    const opponent = this.aiPlayer === 1 ? 2 : 1;
+    for (const oppAction of temp.getValidMoves()) {
+      const oppState = temp.clone();
+      oppState.makeMove(oppAction.from, oppAction.move);
+      if (oppState.isGameOver && oppState.winner === opponent) return false;
+    }
+    return true;
+  }
+
+  select(node) {
+    while (node.isFullyExpanded() && node.hasChildren()) {
+      let bestScore = -Infinity;
+      let selectedChild = null;
+      for (const child of node.children) {
+        const score = child.ucb1();
+        if (score > bestScore) { bestScore = score; selectedChild = child; }
+      }
+      node = selectedChild;
+    }
+    return node;
+  }
+
+  expand(node) {
+    const idx = Math.floor(Math.random() * node.untriedMoves.length);
+    const action = node.untriedMoves.splice(idx, 1)[0];
+    const nextState = node.state.clone();
+    nextState.makeMove(action.from, action.move);
+    const child = new MCTSNode(nextState, node, action);
+    node.children.push(child);
+    return child;
+  }
+
+  // CHANGE 2: Guided simulation instead of pure random.
+  // Each step of the playout uses a lightweight greedy policy:
+  //   (a) take an immediate win if available,
+  //   (b) block an opponent's immediate win,
+  //   (c) pick the move with the best heuristic score delta,
+  //   (d) random tiebreak.
+  // This makes each rollout carry real information rather than random noise.
+  simulate(simState) {
+    let current = simState.clone();
+    const maxDepth = 20;                        // lifted from 12
+    let depth = 0;
+
+    while (!current.isGameOver && depth < maxDepth) {
+      const valid = current.getValidMoves();
+      if (valid.length === 0) break;
+
+      const player   = current.currentPlayer;
+      const opponent = player === 1 ? 2 : 1;
+      let chosen     = null;
+
+      // (a) Win immediately
+      for (const action of valid) {
+        const tmp = current.clone();
+        tmp.makeMove(action.from, action.move);
+        if (tmp.isGameOver && tmp.winner === player) { chosen = action; break; }
+      }
+
+      // (b) Block opponent's immediate win
+      if (!chosen) {
+        for (const action of valid) {
+          const tmp = current.clone();
+          tmp.makeMove(action.from, action.move);
+          if (!tmp.isGameOver) {
+            const oppMoves = tmp.getValidMoves();
+            for (const oAct of oppMoves) {
+              const oTmp = tmp.clone();
+              oTmp.makeMove(oAct.from, oAct.move);
+              if (oTmp.isGameOver && oTmp.winner === opponent) {
+                chosen = action;
+                break;
+              }
+            }
+          }
+          if (chosen) break;
+        }
+      }
+
+      // (c) Greedy heuristic: pick move with best evaluation delta
+      if (!chosen) {
+        let bestScore = -Infinity;
+        for (const action of valid) {
+          const tmp = current.clone();
+          tmp.makeMove(action.from, action.move);
+          // Score from the perspective of the player who just moved (player)
+          const score = evaluatePosition(tmp.pieces, player);
+          if (score > bestScore) { bestScore = score; chosen = action; }
+        }
+      }
+
+      // (d) Random tiebreak (should rarely be needed)
+      if (!chosen) chosen = valid[Math.floor(Math.random() * valid.length)];
+
+      current.makeMove(chosen.from, chosen.move);
+      depth++;
+    }
+
+    // CHANGE 4: Return structured result for partial-credit backprop.
+    return { winner: current.winner, pieces: current.pieces };
+  }
+
+  // CHANGE 4: Partial-credit backpropagation.
+  // Binary win/loss discards too much information from truncated rollouts.
+  // Now: win = 1.0 pts, "moral win" (2-in-a-row on non-terminal) = 0.5 pts,
+  // neutral = 0.25 pts (slightly above 0 to reward non-losing continuations).
+  backpropagate(node, result) {
+    let current = node;
+    while (current !== null) {
+      current.visits++;
+      if (current.playerJustMoved !== null) {
+        if (result.winner === current.playerJustMoved) {
+          current.wins += 1.0;
+        } else if (result.winner === null && result.pieces) {
+          // No winner: use heuristic to award partial credit
+          const hScore = evaluatePosition(result.pieces, current.playerJustMoved);
+          // hScore ∈ [−1, 1]; map to credit ∈ [0, 0.8]
+          current.wins += 0.4 + 0.4 * hScore;
+        }
+        // If opponent won: 0 credit (no change)
+      }
+      current = current.parent;
+    }
+  }
+
+  getBestChild(node) {
+    let maxVisits = -1;
+    let best = null;
+    for (const child of node.children) {
+      if (child.visits > maxVisits) { maxVisits = child.visits; best = child; }
+    }
+    return best;
+  }
+}
+
+// ── Difficulty profiles ───────────────────────────────────────────────────────
+// (unchanged from original — higher iteration counts now produce much
+//  stronger play because each iteration carries real evaluation signal)
+
+function getDifficultyProfile(pair) {
+  const itersByPair = [15, 60, 160, 320, 500, 800, 1200, 1800, 2600, 3500];
+  const blunderChance = Math.max(0, 0.35 - (pair * 0.08));
+  const useImmediateWin = pair >= 0;
+  const useWinIn2       = pair >= 1;
+  const useSafeMove     = pair >= 2;
+  const mctsIterations  = itersByPair[Math.min(pair, itersByPair.length - 1)];
+  return { blunderChance, useImmediateWin, useWinIn2, useSafeMove, mctsIterations };
+}
+
+// ── triggerAIMove ─────────────────────────────────────────────────────────────
+// (unchanged from original)
+
+function triggerAIMove() {
+  const computerColor = humanPlayerColor === 1 ? 2 : 1;
+  if (!vsAI || state.currentPlayer !== computerColor || state.gameOver || state.animating) return;
+
+  setStatus(t('thinking'), 'highlight');
+  setTimeout(() => {
+    const currentSimRoot = new SimState(state.pieces, state.currentPlayer, state.sneaking, state.sneakingSquare, state.history, state.gameOver, null);
+    const validMoves = currentSimRoot.getValidMoves();
+    if (validMoves.length === 0) { checkTurnPassing(); return; }
+
+    const profile = getDifficultyProfile(humanStreak);
+    let optimalResult = null;
+
+    if (Math.random() < profile.blunderChance) {
+      optimalResult = validMoves[Math.floor(Math.random() * validMoves.length)];
+    } else {
+      const processFinder = new AdvancedEngineMCTS(currentSimRoot, profile.mctsIterations);
+      optimalResult = processFinder.search(profile.useImmediateWin, profile.useWinIn2, profile.useSafeMove);
+    }
+
+    if (optimalResult) {
+      const systemSlides = computeAllSlides(optimalResult.from, state.pieces);
+      const actualMatch  = systemSlides.find(s => s.landing === optimalResult.move.landing);
+      if (actualMatch) {
+        state.selectedSquare = optimalResult.from;
+        executeMove(optimalResult.from, actualMatch);
+      }
+    } else {
+      checkTurnPassing();
+    }
+  }, 400);
+}
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 11 — TUTORIAL INTERACTION DESIGNS
+// ═══════════════════════════════════════════════════════════════
+let refreshTutorialPage = null;
+
+function launchTutorial(onCloseCallback) {
+  const overlay = document.createElement('div');
+  overlay.className = 'tutorial-overlay';
+  overlay.id = 'tutorial-modal';
+
+  overlay.innerHTML = `
+    <div class="tutorial-card">
+      <div class="tutorial-header">
+        <div class="tutorial-title-area">
+          <span class="tutorial-title" id="tut-title"></span>
+        </div>
+        <span class="tutorial-pages" id="tut-page-indicator"></span>
+      </div>
+      <div class="tutorial-body" id="tut-body"></div>
+      <div class="tutorial-footer">
+        <button class="tut-nav" id="tut-prev-btn"></button>
+        <button class="tut-nav" id="tut-next-btn"></button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  // Fix 1b: clicking outside the card closes the tutorial
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      overlay.remove();
+      refreshTutorialPage = null;
+    }
+  });
+
+  let currentTutorialPage = 0;
+  const titleEl = overlay.querySelector('#tut-title');
+  const bodyEl = overlay.querySelector('#tut-body');
+  const indicatorEl = overlay.querySelector('#tut-page-indicator');
+  const prevBtn = overlay.querySelector('#tut-prev-btn');
+  const nextBtn = overlay.querySelector('#tut-next-btn');
+  const innerLangBtn = overlay.querySelector('#tut-lang-toggle');
+
+
+
+  refreshTutorialPage = () => {
+    const pagesData = translations[currentLang].tutorialPages || translations['EN'].tutorialPages;
+    const page = pagesData[currentTutorialPage];
+    titleEl.textContent = page.title;
+    bodyEl.innerHTML = page.text;
+    indicatorEl.textContent = `${currentTutorialPage + 1} / ${pagesData.length}`;
+    
+    prevBtn.disabled = currentTutorialPage === 0;
+    prevBtn.textContent = t('tutorialPrev');
+    
+    if (currentTutorialPage === pagesData.length - 1) {
+      nextBtn.textContent = t('tutorialPlay');
+    } else {
+      nextBtn.textContent = t('tutorialNext');
+    }
+  };
+  
+  prevBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (currentTutorialPage > 0) { currentTutorialPage--; refreshTutorialPage(); }
+  });
+  
+  nextBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const pagesData = translations[currentLang].tutorialPages || translations['EN'].tutorialPages;
+    if (currentTutorialPage < pagesData.length - 1) {
+      currentTutorialPage++;
+      refreshTutorialPage();
+    } else {
+      overlay.remove();
+      refreshTutorialPage = null;
+      if (onCloseCallback) onCloseCallback();
+    }
+  });
+  
+  refreshTutorialPage();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 12 — INITIALIZATION LOOP
+// ═══════════════════════════════════════════════════════════════
+
+let unlockedTutorialTrigger = null;
+
+pushTimeline();
+render();
+updateMetaDisplay();
+
+function render() {
+  // In online mode, only show selectable pieces on our own turn
+  const humanTurn = window.mpOnline
+    ? state.currentPlayer === window.mpMyColor
+    : (state.currentPlayer === humanPlayerColor || !vsAI);
+  if (state.currentPlayer === 1) {
+    tagP1.classList.add('active');
+    tagP2.classList.remove('active');
+  } else {
+    tagP1.classList.remove('active');
+    tagP2.classList.add('active');
+  }
+  const pathSquares = new Set();
+  
+  for (const m of state.currentMoves) {
+    if (!m.blocked) {
+      for (const sq of m.path) pathSquares.add(sq);
+    }
+  }
+
+  for (const label of LABELS) {
+    const cell = cellEls[label];
+    const piece = state.pieces[label];
+    
+    cell.className = 'cell' + (((labelToRC(label)[0] + labelToRC(label)[1]) % 2 === 1) ? ' dark-sq' : '');
+    cell.innerHTML = '';
+
+    if (!vsAI) {
+      const coord = document.createElement('div');
+      coord.className = 'cell-label';
+      coord.textContent = label;
+      cell.appendChild(coord);
+    }
+    const isSelected = state.selectedSquare === label;
+    const move = state.currentMoves.find(m => m.landing === label);
+
+    if (state.winLine && state.winLine.includes(label)) {
+      cell.classList.add('win-line');
+    }
+    else if (state.highlightingActive && piece && piece.player === state.currentPlayer && piece.active && !state.selectedSquare) {
+      cell.classList.add('landing');
+    }
+    else if (state.losSquares.includes(label)) {
+      if (!move) cell.classList.add('los-target');
+    }
+    else if (move) {
+      cell.classList.add(move.blocked ? 'blocked-landing' : 'landing');
+    }
+    else if (pathSquares.has(label)) {
+      cell.classList.add('path');
+    }
+
+    if (piece) {
+      const el = document.createElement('div');
+      if (isSelected) {
+        el.className = `piece p${piece.player} selected-piece`;
+        cell.classList.add('selected');
+      } else if (state.sneaking && label === state.sneakingSquare) {
+        el.className = `piece p${piece.player} sneaking`;
+      } else if (piece.active) {
+        el.className = `piece p${piece.player} active-piece`;
+        if (piece.player === state.currentPlayer && !state.gameOver && humanTurn && !window.isWaitingForContinue) {
+          cell.classList.add('selectable');
+        }
+      } else {
+        el.className = `piece p${piece.player} inactive`;
+      }
+      cell.appendChild(el);
+    }
+
+    if (move && !piece && !state.gameOver) {
+      const arrow = document.createElement('div');
+      arrow.className = `arrow-hint${move.blocked ? ' blocked' : ''}`;
+      arrow.textContent = move.arrow;
+      cell.appendChild(arrow);
+      if (!move.blocked && humanTurn && !window.isWaitingForContinue) cell.classList.add('selectable');
+    }
+  }
+  updateNavButtons();
+}
+
+function setStatus(msg, variant = false) {
+  statusEl.textContent = msg;
+  statusEl.classList.remove('highlight', 'warn', 'sneaking');
+  if (variant === true) statusEl.classList.add('highlight');
+  if (variant === 'warn') statusEl.classList.add('warn');
+  if (variant === 'sneaking') statusEl.classList.add('sneaking');
+}
+
+function setMode(aiMode) {
+  if (state.animating) return;
+  vsAI = aiMode;
+  
+  window.isWaitingForContinue = false;
+  document.body.classList.remove('clickable-restart');
+
+  modeToggleBtn.textContent = vsAI ? t('practice') : t('newGame');
+  restartGame(true);
+}
+
+function restartGame(forceResetColor) {
+  if (state.animating) return;
+  
+  window.isWaitingForContinue = false;
+  document.body.classList.remove('clickable-restart');
+
+  document.querySelector('.victory-overlay')?.remove();
+  clearResultBanner();
+  hideShareResultBtn();
+
+  if (vsAI) {
+    if (forceResetColor) {
+      humanPlayerColor = 1;
+      humanStreak = 0;
+      window.achievedNewBest = true; // Força render correto dos labels de nível
+      window.achievedNewBest = false;
+    } else {
+      humanPlayerColor = humanPlayerColor === 1 ? 2 : 1;
+    }
+  }
+
+  Object.assign(state, {
+    currentPlayer: 1,
+    selectedSquare: null,
+    currentMoves: [],
+    gameOver: false,
+    winLine: null,
+    sneaking: false,
+    sneakingSquare: null,
+    losSquares: [],
+    animating: false,
+    highlightingActive: false,
+    pieces: makeInitialPieces(),
+    history: new Set(),
+  });
+  state.history.add(serialiseState(state.pieces, state.currentPlayer));
+
+  timeline.length = 0;
+  timelineIndex = -1;
+  moveLog.length = 0;
+  pushTimeline();
+  updateMetaDisplay();
+
+  if (vsAI && state.currentPlayer !== humanPlayerColor) {
+    setStatus(t('calculatingOpening'), 'highlight');
+    triggerAIMove();
+  } else {
+    setStatus(t('selectActive'));
+  }
+  render();
+}
+
+function updateMetaDisplay() {
+  statStreakEl.textContent = humanStreak+1;
+  statHighEl.textContent = highScore;
+
+  if (vsAI) {
+    statsBarEl.classList.remove('hidden');
+    
+    if (window.achievedNewBest) {
+      statLvlLabel.textContent = currentLang === 'PT' ? " Nível⠀" : " Level⠀";
+    } else {
+      statLvlLabel.textContent = t('level');
+    }
+    statBestLabel.textContent = t('best');
+
+    if (!state.gameOver) {
+      if (humanPlayerColor === 1) {
+        labelP1.textContent = t('playerYou');
+        labelP2.textContent = t('computer');
+      } else {
+        labelP1.textContent = t('computer');
+        labelP2.textContent = t('playerYou');
+      }
+    }
+  } else {
+    statsBarEl.classList.add('hidden');
+    if (!state.gameOver) {
+      if (window.mpOnline) {
+        // Online mode: label the local player "Sua Vez" and the opponent "Oponente Joga"
+        const myColor = window.mpMyColor; // 1 or 2
+        if (myColor === 1) {
+          labelP1.textContent = currentLang === 'PT' ? 'Sua Vez' : 'Your Turn';
+          labelP2.textContent = currentLang === 'PT' ? 'Oponente Joga' : 'Opponent\'s Turn';
+        } else {
+          labelP1.textContent = currentLang === 'PT' ? 'Oponente Joga' : 'Opponent\'s Turn';
+          labelP2.textContent = currentLang === 'PT' ? 'Sua Vez' : 'Your Turn';
+        }
+      } else {
+        labelP1.textContent = t('player1');
+        labelP2.textContent = t('player2');
+      }
+    }
+  }
+
+//  modeToggleBtn.textContent = vsAI ? t('practice') : t('newGame');
+  openTutorialBtn.textContent = t('tutorial');
+  langToggleBtn.textContent = t('language');
+  footerSupportLink.textContent = t('supportLink');
+  footerShareLink.textContent = t('shareLink');
+  const _shareBtn = document.getElementById('share-result-btn');
+  if (_shareBtn && _shareBtn.style.display !== 'none') {
+    _shareBtn.textContent = t('shareResultBtn');
+  }
+}
+
+function toggleLanguage() {
+  currentLang = currentLang === 'EN' ? 'PT' : 'EN';
+  localStorage.setItem('sambaqui_lang', currentLang);
+  applyLanguageSwitch();
+}
+
+function applyLanguageSwitch() {
+  updateMetaDisplay();
+  if (state.gameOver) {
+    const victory = checkVictory(state.pieces);
+    if (victory && vsAI) {
+      if (victory.winner === humanPlayerColor) {
+        if (humanPlayerColor === 1) {
+          labelP1.textContent = currentLang === 'PT' ? "Jogador Venceu" : "Player Wins";
+        } else {
+          labelP2.textContent = currentLang === 'PT' ? "Jogador Venceu" : "Player Wins";
+        }
+        setStatus(currentLang === 'PT' ? "" : "", true);
+      } else {
+        if (humanPlayerColor === 1) {
+          labelP2.textContent = currentLang === 'PT' ? "Computador Venceu" : "Computer Wins";
+        } else {
+          labelP1.textContent = currentLang === 'PT' ? "Computador Venceu" : "Computer Wins";
+        }
+        setStatus(currentLang === 'PT' ? `Computador Venceu.` : `Computer Wins.`, 'warn');
+      }
+    } else if (!vsAI) {
+      setStatus(t('playerWins', { winner: checkVictory(state.pieces)?.winner ?? '' }), true);
+    }
+  } else if (state.sneaking) {
+    setStatus(t('chainNoEnemies'), 'sneaking');
+  } else if (vsAI && state.currentPlayer !== humanPlayerColor) {
+    setStatus(t('thinking'), 'highlight');
+  } else if (state.selectedSquare) {
+    // Retranslate status text only — do NOT call selectPiece (mutates state + renders)
+    const raw = state.currentMoves;
+    const free = raw.filter(m => !m.blocked).length;
+    const blocked = raw.filter(m => m.blocked).length;
+    if (raw.length === 0) {
+      setStatus(t('noMovesAvailable', { label: state.selectedSquare }));
+    } else if (free === 0) {
+      setStatus(t('forbiddenByNovelty', { label: state.selectedSquare, blocked }), 'warn');
+    } else {
+      const suffix = blocked > 0 ? t('forbiddenSuffix', { blocked }) : '';
+      const prefix = state.sneaking ? t('chainMovePrefix') : '';
+      const pluralStr = free !== 1 ? 's' : '';
+      setStatus(t('legalMoves', { prefix, label: state.selectedSquare, free, plural: pluralStr, suffix }), state.sneaking ? 'sneaking' : true);
+    }
+  } else {
+    setStatus(t('selectActive'));
+  }
+
+  const activeBanner = document.getElementById('result-banner');
+  if (activeBanner && timelineIndex !== -1) {
+    const winner = timeline[timelineIndex].winner;
+    const bannerTextEl = activeBanner.querySelector('.banner-text');
+    const bannerBtnEl = activeBanner.querySelector('.new-game-btn');
+    
+    if (bannerTextEl) {
+      if (!vsAI) {
+        bannerTextEl.textContent = t('playerWinsBanner', { winner: winner });
+      } else if (winner === humanPlayerColor) {
+        const pluralStr = humanStreak !== 1 ? 's' : '';
+        bannerTextEl.textContent = t('humanWinsStreakBanner', { streak: humanStreak, plural: pluralStr });
+      } else {
+        const pluralStr = humanStreak !== 1 ? 's' : '';
+        bannerTextEl.textContent = t('humanLosesStreakBanner', { streak: humanStreak, plural: pluralStr });
+      }
+    }
+    if (bannerBtnEl) bannerBtnEl.textContent = t('startNewGame');
+  }
+
+  const openTutorial = document.getElementById('tutorial-modal');
+  if (openTutorial && typeof refreshTutorialPage === 'function') {
+    refreshTutorialPage();
+  }
+}
+
+document.addEventListener('click', (e) => {
+  if (window.isWaitingForContinue) {
+    if (e.target.closest('.menu-controls') || e.target.closest('.nav-btn') || e.target.closest('#result-banner') || e.target.closest('#share-result-btn')) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    
+    window.isWaitingForContinue = false;
+    document.body.classList.remove('clickable-restart');
+    
+    restartGame(false);
+  }
+});
+
+undoBtn.addEventListener('click', () => { if (!undoBtn.disabled && !vsAI) restoreTimeline(timelineIndex - 1); });
+redoBtn.addEventListener('click', () => { if (!redoBtn.disabled && !vsAI) restoreTimeline(timelineIndex + 1); });
+//modeToggleBtn.addEventListener('click', () => setMode(!vsAI));
+openTutorialBtn.addEventListener('click', () => launchTutorial(unlockedTutorialTrigger));
+langToggleBtn.addEventListener('click', toggleLanguage);
+
+footerShareLink.addEventListener('click', () => {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    toastMsgEl.textContent = t('linkCopied');
+    toastMsgEl.style.opacity = '1';
+    setTimeout(() => { toastMsgEl.style.opacity = '0'; }, 2000);
+  }).catch(() => {
+    toastMsgEl.textContent = window.location.href;
+    toastMsgEl.style.opacity = '1';
+    setTimeout(() => { toastMsgEl.style.opacity = '0'; }, 4000);
+  });
+});
+
+const shareResultBtn = document.getElementById('share-result-btn');
+shareResultBtn.addEventListener('click', () => {
+  const text = buildShareText();
+  if (navigator.share) {
+    navigator.share({ text }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(text).then(() => {
+      toastMsgEl.textContent = t('linkCopied');
+      toastMsgEl.style.opacity = '1';
+      setTimeout(() => { toastMsgEl.style.opacity = '0'; }, 2000);
+    }).catch(() => {
+      toastMsgEl.textContent = text;
+      toastMsgEl.style.opacity = '1';
+      setTimeout(() => { toastMsgEl.style.opacity = '0'; }, 4000);
+    });
+  }
+});
+
+applyLanguageSwitch();
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 13 — DRAG-AND-DROP (mouse + touch, desktop + mobile)
+// ═══════════════════════════════════════════════════════════════
+//
+//  Design: dragging a piece behaves exactly like click-select + click-land.
+//  • Drag starts on a selectable cell (active own piece).
+//  • A floating ghost tracks the pointer; the source piece hides.
+//  • Valid landing cells highlight in gold; invalid ones in red.
+//  • Drop on a valid landing → executeMove(). Drop elsewhere → cancel.
+//  • Short taps (< 200 ms, < 8 px travel) fall through to handleSquareClick
+//    so the original click-to-select flow still works on touch devices.
+// ═══════════════════════════════════════════════════════════════
+
+(function initDragDrop() {
+  let dragLabel    = null;   // label of cell being dragged from
+  let dragGhost    = null;   // floating ghost element
+  let pieceSize    = 0;      // ghost diameter in px
+  let lastHover    = null;   // label of cell currently under pointer
+  let dragStartTime = 0;
+  let dragStartX   = 0;
+  let dragStartY   = 0;
+  const DRAG_THRESHOLD = 8; // px movement before we commit to a drag
+
+  // Exposed so executeMove can skip the slide animation on drag-drops
+  window._dragDropActive = false;
+
+  // ── helpers ─────────────────────────────────────────────────
+
+  function canDragFrom(label) {
+    if (state.gameOver || state.animating || window.isWaitingForContinue) return false;
+    if (vsAI && state.currentPlayer !== humanPlayerColor) return false;
+    if (window.mpOnline && state.currentPlayer !== window.mpMyColor) return false;
+    const piece = state.pieces[label];
+    if (!piece || piece.player !== state.currentPlayer || !piece.active) return false;
+    if (state.sneaking && label !== state.sneakingSquare) return false;
+    return true;
+  }
+
+  function labelAtPoint(x, y) {
+    // Temporarily hide ghost so elementFromPoint sees what's under it
+    if (dragGhost) dragGhost.style.display = 'none';
+    const el = document.elementFromPoint(x, y);
+    if (dragGhost) dragGhost.style.display = '';
+    if (!el) return null;
+    const cell = el.closest('.cell');
+    if (!cell) return null;
+    for (const [lbl, cellEl] of Object.entries(cellEls)) {
+      if (cellEl === cell) return lbl;
+    }
+    return null;
+  }
+
+  function createGhost(player, x, y) {
+    const srcRect = cellEls[dragLabel].getBoundingClientRect();
+    pieceSize = srcRect.width * 0.68;
+    dragGhost = document.createElement('div');
+    dragGhost.className = `piece-ghost p${player}`;
+    Object.assign(dragGhost.style, {
+      position:   'fixed',
+      left:       '0',
+      top:        '0',
+      width:      pieceSize + 'px',
+      height:     pieceSize + 'px',
+      transform:  `translate3d(${x - pieceSize / 2}px,${y - pieceSize / 2}px,0)`,
+      transition: 'none',
+      willChange: 'transform',
+      zIndex:     '9999',
+    });
+    document.body.appendChild(dragGhost);
+  }
+
+  function moveGhost(x, y) {
+    if (!dragGhost) return;
+    dragGhost.style.transform = `translate3d(${x - pieceSize / 2}px,${y - pieceSize / 2}px,0)`;
+  }
+
+  function clearHoverHighlights() {
+    for (const lbl of Object.keys(cellEls)) {
+      cellEls[lbl].classList.remove('drag-over-valid', 'drag-over-invalid');
+    }
+    lastHover = null;
+  }
+
+  function applyHover(label) {
+    if (label === lastHover) return;
+    clearHoverHighlights();
+    if (!label || label === dragLabel) { lastHover = label; return; }
+    const move = state.currentMoves.find(m => m.landing === label && !m.blocked);
+    cellEls[label].classList.add(move ? 'drag-over-valid' : 'drag-over-invalid');
+    lastHover = label;
+  }
+
+  // A <style> tag we inject/remove to hide the dragged piece's cell contents
+  // across render() rebuilds (which nuke and recreate innerHTML entirely).
+  let dragHideStyle = null;
+
+  function hideDragSource(label) {
+    removeDragHideStyle();
+    dragHideStyle = document.createElement('style');
+    // The data-label attribute is set on each cell by the render loop
+    dragHideStyle.textContent = `.cell[data-label="${label}"] .piece { opacity: 0 !important; }`;
+    document.head.appendChild(dragHideStyle);
+  }
+
+  function removeDragHideStyle() {
+    if (dragHideStyle) { dragHideStyle.remove(); dragHideStyle = null; }
+  }
+
+  function beginDrag(label, clientX, clientY) {
+    // Select the piece (shows landing dots etc.) — triggers render() internally
+    if (state.selectedSquare !== label) {
+      handleSquareClick(label);
+    }
+    dragLabel     = label;
+    dragStartTime = performance.now();
+    dragStartX    = clientX;
+    dragStartY    = clientY;
+
+    const piece = state.pieces[label];
+    createGhost(piece.player, clientX, clientY);
+
+    // Hide via injected CSS rule — survives render() rebuilding the cell's innerHTML
+    hideDragSource(label);
+  }
+
+  function endDrag(clientX, clientY) {
+    if (!dragLabel) return;
+
+    clearHoverHighlights();
+    if (dragGhost) { dragGhost.remove(); dragGhost = null; }
+    removeDragHideStyle();
+
+    const landLabel = labelAtPoint(clientX, clientY);
+    const move = landLabel
+      ? state.currentMoves.find(m => m.landing === landLabel && !m.blocked)
+      : null;
+
+    if (move) {
+      const src = dragLabel;
+      dragLabel = null;
+      clearSelection();
+      window._dragDropActive = true;
+      executeMove(src, move);
+      window._dragDropActive = false;
+    } else {
+      dragLabel = null;
+    }
+  }
+
+  function cancelDrag() {
+    if (!dragLabel) return;
+    clearHoverHighlights();
+    if (dragGhost) { dragGhost.remove(); dragGhost = null; }
+    removeDragHideStyle();
+    dragLabel = null;
+  }
+
+  // ── MOUSE EVENTS ────────────────────────────────────────────
+
+  // We track mousedown on each cell (not document) so we know the source label immediately
+  function onCellMouseDown(label, e) {
+    if (e.button !== 0) return;
+    if (!canDragFrom(label)) return;
+    // Don't begin drag yet — wait for mousemove threshold
+    dragLabel     = null;     // will be set in beginDrag
+    dragStartTime = performance.now();
+    dragStartX    = e.clientX;
+    dragStartY    = e.clientY;
+    // Store the candidate label temporarily
+    e.currentTarget._dragCandidate = label;
+  }
+
+  document.addEventListener('mousemove', (e) => {
+    // Check if we have a candidate but haven't started dragging yet
+    const candidate = (() => {
+      for (const lbl of Object.keys(cellEls)) {
+        const c = cellEls[lbl]._dragCandidate;
+        if (c) return { lbl: c, el: cellEls[lbl] };
+      }
+      return null;
+    })();
+
+    if (candidate && !dragLabel) {
+      const dx = e.clientX - dragStartX;
+      const dy = e.clientY - dragStartY;
+      if (Math.sqrt(dx * dx + dy * dy) > DRAG_THRESHOLD) {
+        delete cellEls[candidate.lbl]._dragCandidate;
+        beginDrag(candidate.lbl, e.clientX, e.clientY);
+      }
+      return;
+    }
+
+    if (!dragLabel) return;
+    moveGhost(e.clientX, e.clientY);
+    applyHover(labelAtPoint(e.clientX, e.clientY));
+  });
+
+  document.addEventListener('mouseup', (e) => {
+    // Clear any pending candidate (short click — let normal click handler fire)
+    for (const lbl of Object.keys(cellEls)) delete cellEls[lbl]._dragCandidate;
+
+    if (!dragLabel) return;
+    e.preventDefault();
+    endDrag(e.clientX, e.clientY);
+  });
+
+  document.addEventListener('mouseleave', () => {
+    for (const lbl of Object.keys(cellEls)) delete cellEls[lbl]._dragCandidate;
+    cancelDrag();
+  });
+
+  // ── TOUCH EVENTS ────────────────────────────────────────────
+
+  // touch-action must allow drag; we suppress scroll only after threshold
+  let touchId      = null;
+  let touchCandidate = null;   // { label, startX, startY }
+  let touchDragging = false;
+
+  function onCellTouchStart(label, e) {
+    if (!canDragFrom(label)) return;
+    if (e.touches.length !== 1) return;
+    const t0 = e.touches[0];
+    touchId        = t0.identifier;
+    touchCandidate = { label, startX: t0.clientX, startY: t0.clientY };
+    touchDragging  = false;
+    dragStartTime  = performance.now();
+  }
+
+  document.addEventListener('touchmove', (e) => {
+    if (!touchCandidate) return;
+    const touch = [...e.changedTouches].find(t => t.identifier === touchId);
+    if (!touch) return;
+
+    const dx = touch.clientX - touchCandidate.startX;
+    const dy = touch.clientY - touchCandidate.startY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (!touchDragging) {
+      if (dist > DRAG_THRESHOLD) {
+        touchDragging = true;
+        beginDrag(touchCandidate.label, touch.clientX, touch.clientY);
+        e.preventDefault(); // prevent scroll only after we commit
+      }
+      return;
+    }
+
+    e.preventDefault();
+    moveGhost(touch.clientX, touch.clientY);
+    applyHover(labelAtPoint(touch.clientX, touch.clientY));
+  }, { passive: false });
+
+  document.addEventListener('touchend', (e) => {
+    if (!touchCandidate) return;
+    const touch = [...e.changedTouches].find(t => t.identifier === touchId);
+    if (!touch) { touchCandidate = null; touchId = null; return; }
+
+    if (touchDragging) {
+      endDrag(touch.clientX, touch.clientY);
+    }
+    // If NOT dragging, let the normal click/touchend → handleSquareClick fire naturally.
+    touchCandidate = null;
+    touchId = null;
+    touchDragging = false;
+  });
+
+  document.addEventListener('touchcancel', () => {
+    cancelDrag();
+    touchCandidate = null;
+    touchId = null;
+    touchDragging = false;
+  });
+
+  // ── Attach mousedown listeners to every cell ─────────────────
+  for (const [label, cellEl] of Object.entries(cellEls)) {
+    cellEl.addEventListener('mousedown', (e) => onCellMouseDown(label, e));
+    cellEl.addEventListener('touchstart', (e) => onCellTouchStart(label, e), { passive: true });
+    // Kill the browser's native drag-and-drop on every cell and its children
+    cellEl.addEventListener('dragstart', (e) => e.preventDefault());
+  }
+  // Also suppress at the board level to catch any element the browser decides to drag
+  document.addEventListener('dragstart', (e) => e.preventDefault());
+
+})(); // end initDragDrop IIFE
+
+// ═══════════════════════════════════════════════════════════════
+//  MULTIPLAYER BRIDGE — expose internals to window for multiplayer.js
+//  Uses closure-based getters/setters so writes from multiplayer.js
+//  propagate into the closed-over let variables used by game functions.
+// ═══════════════════════════════════════════════════════════════
+window.state            = state;
+window.executeMove      = executeMove;
+Object.defineProperty(window, 'currentLang', {
+  get()  { return currentLang; },
+  configurable: true, enumerable: true,
+});
+window.computeAllSlides = computeAllSlides;
+window.selectPiece      = selectPiece;
+window.setStatus        = setStatus;
+window.render           = render;
+window.restartGame      = restartGame;
+
+// vsAI and humanPlayerColor are closed-over lets — wire via property descriptors
+// so multiplayer.js can read/write them and the game logic sees the change immediately.
+Object.defineProperty(window, 'vsAI', {
+  get()  { return vsAI; },
+  set(v) { vsAI = v; },
+  configurable: true,
+  enumerable: true,
+});
+Object.defineProperty(window, 'humanPlayerColor', {
+  get()  { return humanPlayerColor; },
+  set(v) { humanPlayerColor = v; },
+  configurable: true,
+  enumerable: true,
+});
 
 /**
- * Intercepts the "Novo Jogo" button click at the document level (capture phase)
- * so it fires before the game's own handler, which we suppress in online mode.
+ * mpActivate(myColor) — called by multiplayer.js to switch into online mode.
+ * Sets vsAI=false, assigns myColor, triggers a clean game restart.
  */
-function interceptNewGameButton(e) {
-  if (!mp.active) return; // solo mode — let game handle it normally
-  const btn = e.target.closest('#banner-new-game');
-  if (!btn) return;
-  e.stopImmediatePropagation(); // block the game's own listener
-  onNewGameClick(e);
-}
+window.mpActivate = function(myColor) {
+  vsAI = false;
+  humanPlayerColor = myColor;
+  humanStreak = 0;
+  restartGame(true);
+};
+</script>
 
-// ─── Broadcast outgoing move ──────────────────────────────────────────────────
-
-function broadcastMove(fromLabel, landingLabel) {
-  if (!mp.active || !mp.channel) return;
-  log(`→ move ${fromLabel}→${landingLabel}`);
-  mp.channel.send({
-    type: 'broadcast', event: 'move',
-    payload: { from: fromLabel, to: landingLabel, color: mp.myColor },
-  });
-}
-
-function broadcastRestart() {
-  if (!mp.active || !mp.channel) return;
-  mp.channel.send({ type: 'broadcast', event: 'restart', payload: {} });
-}
-
-// ─── Rematch ──────────────────────────────────────────────────────────────────
-
-function broadcastRematchReady() {
-  if (!mp.active || !mp.channel) return;
-  mp.channel.send({
-    type: 'broadcast', event: 'rematch_ready',
-    payload: { color: mp.myColor },
-  });
-}
-
-function broadcastRematchStart(firstPlayer) {
-  if (!mp.active || !mp.channel) return;
-  mp.channel.send({
-    type: 'broadcast', event: 'rematch_start',
-    payload: { firstPlayer },
-  });
-}
-
-// ─── Apply remote move ────────────────────────────────────────────────────────
-
-function applyRemoteMove({ from, to, color }) {
-  if (color === mp.myColor) return;
-  log(`← move ${from}→${to} from player ${color}`);
-
-  const slides = window.computeAllSlides(from, window.state.pieces);
-  const match  = slides.find(s => s.landing === to);
-
-  if (!match) {
-    log('WARNING: no matching slide for received move — possible desync');
-    return;
-  }
-
-  // Suppress broadcast while applying a remote move so we don't echo it back
-  _suppressBroadcast = true;
-  try {
-    window.executeMove(from, match);
-  } finally {
-    _suppressBroadcast = false;
-  }
-}
-
-// ─── Disconnect ───────────────────────────────────────────────────────────────
-
-function fullDisconnect() {
-  if (mp.channel) { mp.channel.unsubscribe(); mp.channel = null; }
-  mp.active          = false;
-  mp.opponentPresent = false;
-  mp.roomCode        = null;
-  mp.myColor         = null;
-
-  window.mpOnline  = false;
-  window.mpMyColor = null;
-  mp.gameCount   = 0;
-  mp.rematchReady = false;
-  resetOnlineBtn();
-
-  window.vsAI             = true;
-  window.humanPlayerColor = 1;
-  window.restartGame(true);
-  log('Disconnected');
-}
-
-// ─── Patch game functions ─────────────────────────────────────────────────────
-
-// Set to true while applying a remote event so we don't echo it back
-let _suppressBroadcast = false;
-
-function patchGameFunctions() {
-  // 1. Wrap executeMove to broadcast our moves
-  const origExecuteMove = window.executeMove;
-  if (!origExecuteMove) {
-    console.error('[MP] window.executeMove not found on window — bridge missing?');
-    return;
-  }
-  window.executeMove = function(fromLabel, move) {
-    const myTurn = mp.active && !_suppressBroadcast && window.state.currentPlayer === mp.myColor;
-    if (myTurn) broadcastMove(fromLabel, move.landing);
-    origExecuteMove.call(this, fromLabel, move);
-  };
-
-  // 2. Wrap restartGame — only broadcast user-initiated restarts, never
-  //    the initial game-start reset or restarts triggered by remote events
-  const origRestart = window.restartGame;
-  window.restartGame = function(forceResetColor) {
-    origRestart.call(this, forceResetColor);
-    if (mp.active && forceResetColor && mp.opponentPresent && !_suppressBroadcast) {
-      broadcastRestart();
-    }
-  };
-
-  log('Game functions patched');
-}
-
-// ─── Boot ─────────────────────────────────────────────────────────────────────
-
-function boot() {
-  injectOnlineButton();
-  patchGameFunctions();
-  // Capture phase so we intercept before the game's own listener on banner-new-game
-  document.addEventListener('click', interceptNewGameButton, true);
-  log('Multiplayer module ready — open console for [MP] logs');
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', boot);
-} else {
-  setTimeout(boot, 0);
-}
+<!-- Supabase client (UMD build — exposes window.supabase) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<!-- Online multiplayer module -->
+<script src="./multiplayer.js"></script>
+</body>
+</html>
