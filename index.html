@@ -50,7 +50,7 @@ body {
   header { text-align: center; }
   h1 {
     font-size: clamp(2.8rem, 12vw, 4.5rem);
-    letter-spacing: 0em; color: var(--sand3); line-height: 0.8; text-shadow: 0px 1px 2px var(--gold);
+    letter-spacing: 0em; color: var(--sand3); line-height: 0.8; text-shadow: 1px 2px 4px var(--accent);
      font-family: "Lily Script One", cursive; font-weight: 300; 
   }
 
@@ -478,6 +478,9 @@ body {
 //  SECTION 1 — CONSTANTS, COORDINATE HELPERS & LOCALIZATION
 // ═══════════════════════════════════════════════════════════════
 
+console.log("vibrate" in navigator);
+console.log(navigator.vibrate?.(100));
+
 const LABELS = 'ABCDEFGHIJKLMNOPQRSTUVWXY';
 
 const DIRS = [
@@ -556,7 +559,7 @@ const translations = {
   PT: {
     newGame: "Computador",
     practice: "Modo Solo",
-    tutorial: "Como Jogar",
+    tutorial: "Como Jogar*",
     language: "English",
     level: "Nível⠀",
     best: "Melhor⠀",
