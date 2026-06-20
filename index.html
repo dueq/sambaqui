@@ -133,6 +133,9 @@ body {
     padding: clamp(10px, 2vw, 18px); border: 2px solid var(--accent); border-radius: 8px;
     box-shadow: 0 0 0 1px rgba(196,154,68,0.15), 0 0 60px rgba(60,30,10,0.8), inset 0 0 20px rgba(35, 23, 3, 0.426);
     background: rgba(202, 172, 121, 0.572);
+    
+    /* Prevents mobile scrolling and pull-to-refresh when touching the board */
+    touch-action: none; 
   }
   .board-wrapper { display: flex; flex-direction: column; align-items: center; gap: var(--gap); }
   .board-row    { display: flex; gap: var(--gap); }
