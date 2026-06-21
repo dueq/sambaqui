@@ -1985,17 +1985,17 @@ class AdvancedEngineMCTS {
   }
 }
 
-// ── Difficulty profiles ───────────────────────────────────────────────────────
+// ── Difficulty profiles 3.0───────────────────────────────────────────────────────
 // (unchanged from original — higher iteration counts now produce much
-//  stronger play because each iteration carries real evaluation signal)
 
-function getDifficultyProfile(pair) {
-  const itersByPair = [15, 60, 160, 320, 500, 800, 1200, 1800, 2600, 3500];
-  const blunderChance = Math.max(0, 0.35 - (pair * 0.08));
-  const useImmediateWin = pair >= 0;
-  const useWinIn2       = pair >= 1;
-  const useSafeMove     = pair >= 2;
-  const mctsIterations  = itersByPair[Math.min(pair, itersByPair.length - 1)];
+
+function getDifficultyProfile(streak) {
+  const itersByStreak = [16, 24, 36, 54, 80, 120, 180, 270, 400, 600, 900, 1200, 1800, 2700, 4000, 6000, 9000, 12000];
+  const blunderChance = Math.max(0, 0.80 - (streak * 0.05));
+  const useImmediateWin = streak >= 2;
+  const useSafeMove     = streak >= 4;
+  const useWinIn2       = streak >= 8;
+  const mctsIterations  = itersByStreak[Math.min(streak, itersByStreak.length - 1)];
   return { blunderChance, useImmediateWin, useWinIn2, useSafeMove, mctsIterations };
 }
 
