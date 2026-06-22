@@ -460,8 +460,6 @@ body {
     <a href="https://ko-fi.com/eduardoeller" target="_blank" id="footer-support-link">♥↪\uFE0E Apoiar o jogo</a>
     <div class="footer-divider"></div>
     <span id="footer-share-link">↪\uFE0E Compartilhar</span>
-    <div class="footer-divider"></div>
-    <span id="lb-footer-btn">🏆 Ranking</span>
   </div>
   <div id="toast-msg"></div>
 
@@ -590,7 +588,7 @@ const translations = {
     victoryLevelComplete: "Nível {humanStreak} Concluído.",
     nextRound: "Continue",
     gamesWon: "Jogo{plural} Vencido{plural}!",
-    startNewGame: "	↻\uFE0E Novo Jogo",
+    startNewGame: "Novo Jogo",
     bestScore: "Melhor Pontuação: <strong>{highScore}</strong>",
     share: "↪\uFE0E Compartilhar",
     supportLink: "♥\uFE0E Apoie o Jogo",
@@ -1524,11 +1522,6 @@ function showVictory(winner) {
 
     updateMetaDisplay();
     showShareResultBtn();
-
-    // Leaderboard hook — fires after every human win vs AI
-    if (typeof window.lbOnWin === 'function') {
-      window.lbOnWin(humanStreak, window.achievedNewBest);
-    }
   } else {
     // ─── COMPUTADOR VENCEU ───
     if (humanPlayerColor === 1) {
@@ -1992,7 +1985,7 @@ class AdvancedEngineMCTS {
   }
 }
 
-// ── Difficulty profile 3.0 ───────────────────────────────────────────────────────
+// ── Difficulty profile 3.1───────────────────────────────────────────────────────
 // (unchanged from original — higher iteration counts now produce much
 //  stronger play because each iteration carries real evaluation signal)
 
@@ -2768,16 +2761,6 @@ Object.defineProperty(window, 'currentLang', {
   get()  { return currentLang; },
   configurable: true, enumerable: true,
 });
-
-// Expose score variables so leaderboard.js can read them
-Object.defineProperty(window, 'humanStreak', {
-  get()  { return humanStreak; },
-  configurable: true, enumerable: true,
-});
-Object.defineProperty(window, 'highScore', {
-  get()  { return highScore; },
-  configurable: true, enumerable: true,
-});
 window.computeAllSlides = computeAllSlides;
 window.selectPiece      = selectPiece;
 window.setStatus        = setStatus;
@@ -2815,7 +2798,5 @@ window.mpActivate = function(myColor) {
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <!-- Online multiplayer module -->
 <script src="./multiplayer.js"></script>
-<!-- Leaderboard module -->
-<script src="./leaderboard.js"></script>
 </body>
 </html>
