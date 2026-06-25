@@ -251,6 +251,8 @@ body {
   .cell.los-target            { color: rgba(229, 180, 119, 0.944); }
   .cell.win-line              { border-color: var(--gold) !important; background-color: rgba(194, 135, 19, 0.762) !important;  }
   .cell.dark-sq.win-line      { background-color: rgba(175, 125, 25, 0.762) !important;}
+  .cell.win-line.enemy-win         { border-color: #c0704a !important; background-color: rgba(192, 112, 74, 0.762) !important; }
+  .cell.dark-sq.win-line.enemy-win { background-color: rgba(172, 92, 54, 0.762) !important; }
 
   @keyframes win-flash {
     0%,100% { background-color: rgba(236, 218, 182, 0.805); }
@@ -976,6 +978,11 @@ function restoreTimeline(idx) {
   state.history = new Set(snap.history);
   state.gameOver = snap.gameOver;
   state.winLine = snap.winLine ? [...snap.winLine] : null;
+  // --- ADD THIS BLOCK ---
+  if (state.winLine && snap.winner) {
+    state.winLine._winner = snap.winner;
+  }
+  // ----------------------
   state.selectedSquare = null;
   state.currentMoves = [];
   state.losSquares = [];
@@ -1439,6 +1446,7 @@ function finalizeMove(fromLabel, move) {
   if (victory) {
     state.gameOver = true;
     state.winLine = victory.line;
+    state.winLine._winner = victory.winner; // <--- ADD THIS LINE
     state.sneaking = false;
     state.losSquares = [];
     render();
@@ -2206,6 +2214,16 @@ function render() {
 
     if (state.winLine && state.winLine.includes(label)) {
       cell.classList.add('win-line');
+      
+      // --- ADD THIS BLOCK ---
+      const isEnemyWin = window.mpOnline 
+        ? state.winLine._winner !== window.mpMyColor 
+        : (vsAI && state.winLine._winner !== humanPlayerColor);
+        
+      if (isEnemyWin) {
+        cell.classList.add('enemy-win');
+      }
+      // ----------------------
     }
     else if (state.highlightingActive && piece && piece.player === state.currentPlayer && piece.active && !state.selectedSquare) {
       cell.classList.add('landing');
