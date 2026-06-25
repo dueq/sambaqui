@@ -56,12 +56,21 @@ body {
 
   /* ── Stats Bar ── */
   .stats-bar {
-    font-family: 'Quicksand'; scale:1 ;
-    display: flex; gap: 2.3rem; font-size: 1.2rem; line-height: 1;
+    font-family: 'Quicksand'; scale:1;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; line-height: 1;
     letter-spacing: 0.08em; background: rgba(72, 49, 2, 0.646);
     padding: 0.6rem 2rem; border-radius: 40px; border: 1px solid rgba(199, 131, 3, 0.3);
   }
-  .stats-bar strong { color: var(--gold);      font-family: "Lily Script One"; font-weight: 100; }
+  .stats-bar strong { color: var(--gold); font-family: "Lily Script One"; font-weight: 100; }
+  #stats-normal { display: flex; align-items: baseline; gap: 0.35rem; }
+  #stats-normal .stats-sep { color: var(--accent); opacity: 0.7; }
+  #stats-loss { display: flex; align-items: baseline; gap: 0.6rem; font-size: 1.05rem; }
+  #stats-loss .stats-sep-pipe { color: var(--accent); opacity: 0.5; margin: 0 0.1rem; }
+  #stats-loss #stats-loss-text { color: var(--sand3); }
+  #stats-loss #stats-loss-text strong { color: var(--sand); font-family: "Lily Script One"; font-weight: 100; }
+  #stats-loss #stats-best-text { color: var(--gold); opacity: 0.85; }
+  #stats-loss #stats-best-text strong { color: var(--gold); font-family: "Lily Script One"; font-weight: 100; }
   
   /* ── Mode & Help toggles ── */
   .menu-controls { scale:1.1; font-size: 2rem; display: flex; flex-direction: column; align-items: center; gap: 0.6rem;}
@@ -202,34 +211,19 @@ body {
 
   /* ── Result banner ── */
   .result-banner {
-    display: flex; align-items: center; justify-content: center; gap: 1.2rem;
-    background: #26180c 100%; border: 1px solid #644021 ; border-radius: 8px;
-    color: var(--sand3);   padding: 0.55rem 1.2rem;
-    font-size: clamp(1rem, 1.8vw, 0.85rem); letter-spacing: 0.15em;
-    color: var(--gold); animation: fade-in 0.4s ease;
+    display: flex; align-items: center; justify-content: center; gap: 0.7rem;
+    animation: fade-in 0.4s ease;
     width: 100%;
     max-width: calc(var(--cell-size) * 5 + var(--gap) * 4 + clamp(20px, 4vw, 36px) + 4px);
   }
-  .result-banner .banner-text { flex: 1; text-align: center; }
-  .result-banner .new-game-btn {
+  .result-banner .banner-btn {
     background: transparent; border: 1px solid rgba(196,154,68,0.45); border-radius: 4px;
-    color: var(--gold); padding: 0.25rem 0.75rem; cursor: pointer; white-space: nowrap;
-    font-family: 'Quicksand', serif; font-size: inherit; letter-spacing: inherit;
-    transition: background 0.2s, border-color 0.2s; flex-shrink: 0;
+    color: var(--gold); padding: 0.25rem 0.85rem; cursor: pointer; white-space: nowrap;
+    font-family: 'Quicksand', serif; font-size: clamp(0.75rem, 1.8vw, 0.88rem); letter-spacing: 0.13em;
+    transition: background 0.2s, border-color 0.2s;
   }
-  .result-banner .new-game-btn:hover { background: rgba(196,154,68,0.12); border-color: var(--gold); }
-
-  /* ── Share-result button (below board, after game ends) ── */
-  #share-result-btn {
-    display: none;
-    background: rgba(196,154,68,0.08); border: 1px solid rgba(196,154,68,0.45);
-    border-radius: 6px; color: var(--gold);
-    padding: 0.45rem 1.3rem; cursor: pointer; white-space: nowrap;
-    font-family: 'Quicksand', serif; font-size: clamp(0.72rem, 2vw, 1rem);
-    letter-spacing: 0.12em; transition: background 0.2s, border-color 0.2s;
-    margin-top: 0.2rem;
-  }
-  #share-result-btn:hover { background: rgba(196,154,68,0.18); border-color: var(--gold); }
+  .result-banner .banner-btn:hover { background: rgba(196,154,68,0.12); border-color: var(--gold); }
+  .result-banner .banner-btn.primary { border-color: rgba(196,154,68,0.7); }
 
   /* ── Cells ── */
   .cell {
@@ -428,9 +422,16 @@ body {
   </div>
 
 <div class="stats-bar" id="stats-bar">
-  <div><span id="stat-lvl-label">Nível</span> <strong id="stat-streak">0</strong></div>
-    <div class="turn-divider"></div>
-  <div><span id="stat-best-label">Melhor</span> <strong id="stat-high">0</strong></div>
+  <div id="stats-normal">
+    <span id="stat-lvl-label">Nível</span> <strong id="stat-streak">1</strong>
+    <span class="stats-sep">⠀–⠀</span>
+    <strong id="stat-high">0</strong> <span id="stat-best-label">pts</span>
+  </div>
+  <div id="stats-loss" class="hidden">
+    <span id="stats-loss-text"></span>
+    <span class="stats-sep-pipe">|</span>
+    <span id="stats-best-text"></span>
+  </div>
 </div>
 
 
@@ -449,8 +450,6 @@ body {
   </div>
 </div>
 
-  <button id="share-result-btn">↪\uFE0E; Compartilhar Resultado</button>
-
   <div class="status" id="status">Selecione uma peça ativa para mover</div>
 
 
@@ -467,7 +466,7 @@ body {
 
 
 <div class="author">
-  Sambaqui • v1.3.3 • © 2026 Eduardo Eller
+  Sambaqui • v1.3.4 • © 2026 Eduardo Eller
 </div>
 </footer>
 
@@ -505,7 +504,8 @@ const translations = {
     tutorial: "How to Play",
     language: "Português",
     level: "Level⠀",
-    best: "Best⠀",
+    best: "Score⠀",
+    pts: "⠀Points",
     playerYou: "Your Move",
     computer: "Computer Moves",
     player1: "Player 1",
@@ -516,8 +516,8 @@ const translations = {
     thinking: "Computer is thinking…",
     playerWins: "Player {winner} wins!",
     playerWinsBanner: "Player {winner} wins",
-    humanWinsStreakBanner: "You won {streak} round{plural}.",
-    humanLosesStreakBanner: "Final Score: {streak}",
+    humanWinsStreakBanner: "Score: {score} move{plural}. Next Round →",
+    humanLosesStreakBanner: "Final Score: {score} move{plural}.",
     gameOver: "Game Over!",
     moveAgain: "Move again!",
     repeatForbidden: "That move would repeat a previous position. Choose another move.",
@@ -540,7 +540,7 @@ const translations = {
     supportLink: "♥\uFE0E Support the Game",
     shareLink: "↪\uFE0E Share",
     shareResultBtn: "↪\uFE0E Share Result",
-    shareResultMsg: "Today's Sambaqui:\n{board}\nI scored {score} so far!\n{url}",
+    shareResultMsg: "Today's Sambaqui:\n{board}\nLevel {level}, {moves} moves\nBest: {bestLevel}–{bestMoves}\n{url}",
     linkCopied: "Link copied to clipboard!",
     tutorialNext: "Next >",
     tutorialPrev: "< Prev",
@@ -559,7 +559,8 @@ const translations = {
     tutorial: "Como Jogar",
     language: "English",
     level: "Nível⠀",
-    best: "Melhor⠀",
+    best: "Pontos⠀",
+    pts: "⠀Pontos",
     playerYou: "Sua Vez",
     computer: "Computador Joga",
     player1: "Jogador 1",
@@ -570,8 +571,8 @@ const translations = {
     thinking: "Computador pensando…",
     playerWins: "Jogador {winner} venceu.",
     playerWinsBanner: "Jogador {winner} venceu.",
-    humanWinsStreakBanner: "Pontuação: {streak}",
-    humanLosesStreakBanner: "Pontuação Final: {streak}",
+    humanWinsStreakBanner: "Pontuação: {score} movimento{plural}. Continue →",
+    humanLosesStreakBanner: "Pontuação Final: {score} movimento{plural}.",
     gameOver: "Fim de Jogo!",
     moveAgain: "Mova novamente.",
     repeatForbidden: "Esse movimento repetiria uma posição anterior. Escolha outro.",
@@ -594,7 +595,7 @@ const translations = {
     supportLink: "♥\uFE0E Apoie o Jogo",
     shareLink: "↪\uFE0E Compartilhe",
     shareResultBtn: "↪\uFE0E Compartilhar Resultado",
-    shareResultMsg: "Sambaqui de hoje:\n{board}\nFiz {score} pontos até agora!\n{url}",
+    shareResultMsg: "Sambaqui de hoje:\n{board}\nNível {level}, {moves} movimentos\nMelhor: {bestLevel}–{bestMoves}\n{url}",
     linkCopied: "Link copiado!",
     tutorialNext: "Próximo >",
     tutorialPrev: "< Anterior",
@@ -767,15 +768,32 @@ function currentPlayerHasLegalMoves(pieces, currentPlayer, sneaking, sneakingSqu
 // ═══════════════════════════════════════════════════════════════
 let vsAI = true;
 let humanStreak = 0;
+let playerMoveCount = 0; // cumulative human moves made this session (the score)
 const _today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
 const _savedScoreDate = localStorage.getItem('sambaqui_high_score_date');
-let highScore = (_savedScoreDate === _today)
-  ? parseInt(localStorage.getItem('sambaqui_high_score') || '0', 10)
-  : 0;
+// Best result is stored as a composite: { level, moves }
+// "Better" means higher level first, then more moves at same level.
+function _loadBest() {
+  if (_savedScoreDate !== _today) return { level: 0, moves: 0 };
+  try { return JSON.parse(localStorage.getItem('sambaqui_best') || 'null') || { level: 0, moves: 0 }; }
+  catch(e) { return { level: 0, moves: 0 }; }
+}
+let bestResult = _loadBest();
 if (_savedScoreDate !== _today) {
-  localStorage.setItem('sambaqui_high_score', '0');
+  localStorage.setItem('sambaqui_best', JSON.stringify({ level: 0, moves: 0 }));
   localStorage.setItem('sambaqui_high_score_date', _today);
 }
+function isBetterResult(level, moves) {
+  if (level > bestResult.level) return true;
+  if (level === bestResult.level && moves > bestResult.moves) return true;
+  return false;
+}
+function saveBestResult(level, moves) {
+  bestResult = { level, moves };
+  localStorage.setItem('sambaqui_best', JSON.stringify(bestResult));
+  localStorage.setItem('sambaqui_high_score_date', _today);
+}
+let highScore = bestResult.moves; // kept for share text compatibility
 let humanPlayerColor = 1;
 
 window.isWaitingForContinue = false;
@@ -1016,35 +1034,47 @@ function restoreTimeline(idx) {
   if (!state.gameOver && vsAI && state.currentPlayer !== humanPlayerColor) triggerAIMove();
 }
 
+function doShare() {
+  const text = buildShareText();
+  if (navigator.share) {
+    navigator.share({ text }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(text).then(() => {
+      toastMsgEl.textContent = t('linkCopied');
+      toastMsgEl.style.opacity = '1';
+      setTimeout(() => { toastMsgEl.style.opacity = '0'; }, 2000);
+    }).catch(() => {
+      toastMsgEl.textContent = text;
+      toastMsgEl.style.opacity = '1';
+      setTimeout(() => { toastMsgEl.style.opacity = '0'; }, 4000);
+    });
+  }
+}
+
 function showResultBanner(winner) {
   clearResultBanner();
   const banner = document.createElement('div');
   banner.className = 'result-banner';
   banner.id = 'result-banner';
-  
-  let text = '';
-  let btnText = t('startNewGame');
-  
-  if (!vsAI) {
-    text = t('playerWinsBanner', { winner: winner });
-  } else if (winner === humanPlayerColor) {
-    const pluralStr = humanStreak !== 1 ? 's' : '';
-    text = t('humanWinsStreakBanner', { streak: humanStreak, plural: pluralStr });
-    btnText = t('nextRound');
-  } else {
-    const pluralStr = humanStreak !== 1 ? 's' : '';
-    text = t('humanLosesStreakBanner', { streak: humanStreak, plural: pluralStr, winner: winner });
-  }
+
+  const isWin   = vsAI && winner === humanPlayerColor;
+  const isLoss  = vsAI && winner !== humanPlayerColor;
+  const mainBtnText = isWin ? t('nextRound') : t('startNewGame');
+  const shareBtnText = t('shareResultBtn');
 
   banner.innerHTML = `
-    <span class="banner-text">${text}</span>
-    <button class="new-game-btn" id="banner-new-game">${btnText}</button>
+    <button class="banner-btn" id="banner-share">${shareBtnText}</button>
+    <button class="banner-btn primary" id="banner-new-game">${mainBtnText}</button>
   `;
   resultBannerSlot.appendChild(banner);
+
   document.getElementById('banner-new-game').addEventListener('click', (e) => {
-    e.stopPropagation(); // Impede o clique fantasma de reiniciar duas vezes
-    const isDefeat = vsAI && winner !== humanPlayerColor;
-    restartGame(isDefeat);
+    e.stopPropagation();
+    restartGame(isLoss);
+  });
+  document.getElementById('banner-share').addEventListener('click', (e) => {
+    e.stopPropagation();
+    doShare();
   });
 }
 
@@ -1072,22 +1102,12 @@ function buildEmojiBoard() {
 
 function buildShareText() {
   const board = buildEmojiBoard();
-  const score = highScore;
+  const level = humanStreak + 1;
+  const moves = playerMoveCount;
+  const bestLevel = bestResult.level || 0;
+  const bestMoves = bestResult.moves || 0;
   const url   = window.location.href;
-  return t('shareResultMsg', { board, score, url });
-}
-
-function showShareResultBtn() {
-  const btn = document.getElementById('share-result-btn');
-  if (btn) {
-    btn.textContent = t('shareResultBtn');
-    btn.style.display = 'inline-block';
-  }
-}
-
-function hideShareResultBtn() {
-  const btn = document.getElementById('share-result-btn');
-  if (btn) btn.style.display = 'none';
+  return t('shareResultMsg', { board, level, moves, bestLevel, bestMoves, url });
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1111,6 +1131,10 @@ const statHighEl = document.getElementById('stat-high');
 const statsBarEl = document.getElementById('stats-bar');
 const statLvlLabel = document.getElementById('stat-lvl-label');
 const statBestLabel = document.getElementById('stat-best-label');
+const statsNormalEl = document.getElementById('stats-normal');
+const statsLossEl = document.getElementById('stats-loss');
+const statsLossTextEl = document.getElementById('stats-loss-text');
+const statsBestTextEl = document.getElementById('stats-best-text');
 const footerSupportLink = document.getElementById('footer-support-link');
 const footerShareLink = document.getElementById('footer-share-link');
 const toastMsgEl = document.getElementById('toast-msg');
@@ -1381,6 +1405,19 @@ function finalizeMove(fromLabel, move) {
   // Capture the full set of active same-player squares and a position snapshot
   // now, before the deactivation sweep below overwrites state.pieces.
   const movingPlayer = state.currentPlayer;
+
+  // Count human moves (vs AI mode only)
+  if (vsAI && movingPlayer === humanPlayerColor) {
+    playerMoveCount++;
+    const currentLevel = humanStreak + 1;
+    if (isBetterResult(currentLevel, playerMoveCount)) {
+      saveBestResult(currentLevel, playerMoveCount);
+      highScore = playerMoveCount;
+      window.achievedNewBest = true;
+    }
+    updateMetaDisplay();
+  }
+
   const activePeers = Object.keys(state.pieces).filter(
     sq => state.pieces[sq].player === movingPlayer && state.pieces[sq].active
   );
@@ -1408,12 +1445,6 @@ function finalizeMove(fromLabel, move) {
     
     if (vsAI && victory.winner === humanPlayerColor) {
       humanStreak++;
-      if (humanStreak > highScore) {
-        highScore = humanStreak;
-        localStorage.setItem('sambaqui_high_score', highScore);
-        localStorage.setItem('sambaqui_high_score_date', new Date().toISOString().slice(0, 10));
-        window.achievedNewBest = true;
-      }
     }
     
     pushTimeline();
@@ -1521,7 +1552,6 @@ function showVictory(winner) {
     }, 100);
 
     updateMetaDisplay();
-    showShareResultBtn();
   } else {
     // ─── COMPUTADOR VENCEU ───
     if (humanPlayerColor === 1) {
@@ -1534,10 +1564,18 @@ function showVictory(winner) {
 
     setStatus(currentLang === 'PT' ? `Computador venceu.` : `Computer wins.`, 'warn');
 
-    humanStreak = 0;
-    window.achievedNewBest = false;
+    // Save best if this run was better, then show the final/best comparison in the bar
+    const finalLevel = humanStreak + 1;
+    if (isBetterResult(finalLevel, playerMoveCount)) {
+      saveBestResult(finalLevel, playerMoveCount);
+      highScore = playerMoveCount;
+    }
+    // updateMetaDisplay while counters still hold the final values — it will render loss mode
     updateMetaDisplay();
-    showShareResultBtn();
+
+    humanStreak = 0;
+    playerMoveCount = 0;
+    window.achievedNewBest = false;
   }
 }
 
@@ -2238,12 +2276,12 @@ function restartGame(forceResetColor) {
 
   document.querySelector('.victory-overlay')?.remove();
   clearResultBanner();
-  hideShareResultBtn();
 
   if (vsAI) {
     if (forceResetColor) {
       humanPlayerColor = 1;
       humanStreak = 0;
+      playerMoveCount = 0;
       window.achievedNewBest = true; // Força render correto dos labels de nível
       window.achievedNewBest = false;
     } else {
@@ -2283,18 +2321,44 @@ function restartGame(forceResetColor) {
 }
 
 function updateMetaDisplay() {
-  statStreakEl.textContent = humanStreak+1;
-  statHighEl.textContent = highScore;
-
   if (vsAI) {
     statsBarEl.classList.remove('hidden');
-    
-    if (window.achievedNewBest) {
-      statLvlLabel.textContent = currentLang === 'PT' ? " Nível⠀" : " Level⠀";
-    } else {
-      statLvlLabel.textContent = t('level');
+
+    if (state.gameOver && vsAI) {
+      const victory = checkVictory(state.pieces);
+      const humanLost = victory && victory.winner !== humanPlayerColor;
+
+      if (humanLost) {
+        // Loss state: show "Final N–M | Melhor N–M"
+        statsNormalEl.classList.add('hidden');
+        statsLossEl.classList.remove('hidden');
+
+        const finalLevel = humanStreak + 1;
+        const finalMoves = playerMoveCount;
+        const lvlWord  = currentLang === 'PT' ? 'Final' : 'Final';
+        const bestWord = currentLang === 'PT' ? 'Melhor' : 'Best';
+
+        statsLossTextEl.innerHTML =
+          `${lvlWord} <strong>${finalLevel}</strong>–<strong>${finalMoves}</strong>`;
+
+        if (bestResult.level === 0 && bestResult.moves === 0) {
+          statsBestTextEl.innerHTML = `${bestWord} –`;
+        } else {
+          statsBestTextEl.innerHTML =
+            `${bestWord} <strong>${bestResult.level}</strong>–<strong>${bestResult.moves}</strong>`;
+        }
+        return;
+      }
     }
-    statBestLabel.textContent = t('best');
+
+    // Normal play state (also covers win state, where level/moves have already been updated)
+    statsNormalEl.classList.remove('hidden');
+    statsLossEl.classList.add('hidden');
+
+    if (statLvlLabel) statLvlLabel.textContent = t('level');
+    if (statBestLabel) statBestLabel.textContent = t('pts');
+    statStreakEl.textContent = humanStreak + 1;
+    statHighEl.textContent = playerMoveCount;
 
     if (!state.gameOver) {
       if (humanPlayerColor === 1) {
@@ -2309,8 +2373,7 @@ function updateMetaDisplay() {
     statsBarEl.classList.add('hidden');
     if (!state.gameOver) {
       if (window.mpOnline) {
-        // Online mode: label the local player "Sua Vez" and the opponent "Oponente Joga"
-        const myColor = window.mpMyColor; // 1 or 2
+        const myColor = window.mpMyColor;
         if (myColor === 1) {
           labelP1.textContent = currentLang === 'PT' ? 'Sua Vez' : 'Your Turn';
           labelP2.textContent = currentLang === 'PT' ? 'Oponente Joga' : 'Opponent\'s Turn';
@@ -2330,10 +2393,6 @@ function updateMetaDisplay() {
   langToggleBtn.textContent = t('language');
   footerSupportLink.textContent = t('supportLink');
   footerShareLink.textContent = t('shareLink');
-  const _shareBtn = document.getElementById('share-result-btn');
-  if (_shareBtn && _shareBtn.style.display !== 'none') {
-    _shareBtn.textContent = t('shareResultBtn');
-  }
 }
 
 function toggleLanguage() {
@@ -2391,21 +2450,16 @@ function applyLanguageSwitch() {
   const activeBanner = document.getElementById('result-banner');
   if (activeBanner && timelineIndex !== -1) {
     const winner = timeline[timelineIndex].winner;
-    const bannerTextEl = activeBanner.querySelector('.banner-text');
-    const bannerBtnEl = activeBanner.querySelector('.new-game-btn');
-    
-    if (bannerTextEl) {
-      if (!vsAI) {
-        bannerTextEl.textContent = t('playerWinsBanner', { winner: winner });
-      } else if (winner === humanPlayerColor) {
-        const pluralStr = humanStreak !== 1 ? 's' : '';
-        bannerTextEl.textContent = t('humanWinsStreakBanner', { streak: humanStreak, plural: pluralStr });
-      } else {
-        const pluralStr = humanStreak !== 1 ? 's' : '';
-        bannerTextEl.textContent = t('humanLosesStreakBanner', { streak: humanStreak, plural: pluralStr });
-      }
-    }
-    if (bannerBtnEl) bannerBtnEl.textContent = t('startNewGame');
+    const isWin = vsAI && winner === humanPlayerColor;
+    const mainBtn = activeBanner.querySelector('#banner-new-game');
+    const shareBtn = activeBanner.querySelector('#banner-share');
+    if (mainBtn) mainBtn.textContent = isWin ? t('nextRound') : t('startNewGame');
+    if (shareBtn) shareBtn.textContent = t('shareResultBtn');
+  }
+
+  // Re-render loss bar text if currently in loss state
+  if (state.gameOver && vsAI && statsLossEl && !statsLossEl.classList.contains('hidden')) {
+    updateMetaDisplay();
   }
 
   const openTutorial = document.getElementById('tutorial-modal');
@@ -2416,7 +2470,7 @@ function applyLanguageSwitch() {
 
 document.addEventListener('click', (e) => {
   if (window.isWaitingForContinue) {
-    if (e.target.closest('.menu-controls') || e.target.closest('.nav-btn') || e.target.closest('#result-banner') || e.target.closest('#share-result-btn')) return;
+    if (e.target.closest('.menu-controls') || e.target.closest('.nav-btn') || e.target.closest('#result-banner')) return;
 
     e.preventDefault();
     e.stopPropagation();
@@ -2444,24 +2498,6 @@ footerShareLink.addEventListener('click', () => {
     toastMsgEl.style.opacity = '1';
     setTimeout(() => { toastMsgEl.style.opacity = '0'; }, 4000);
   });
-});
-
-const shareResultBtn = document.getElementById('share-result-btn');
-shareResultBtn.addEventListener('click', () => {
-  const text = buildShareText();
-  if (navigator.share) {
-    navigator.share({ text }).catch(() => {});
-  } else {
-    navigator.clipboard.writeText(text).then(() => {
-      toastMsgEl.textContent = t('linkCopied');
-      toastMsgEl.style.opacity = '1';
-      setTimeout(() => { toastMsgEl.style.opacity = '0'; }, 2000);
-    }).catch(() => {
-      toastMsgEl.textContent = text;
-      toastMsgEl.style.opacity = '1';
-      setTimeout(() => { toastMsgEl.style.opacity = '0'; }, 4000);
-    });
-  }
 });
 
 applyLanguageSwitch();
