@@ -867,14 +867,14 @@ const BOARD_PATTERNS = [
   },
 
         // Pattern 8
-  {
-    A: { player: 1, active: true }, I: { player: 1, active: true },
-    Q: { player: 1, active: true }, Y: { player: 1, active: true },
-    E: { player: 2, active: false }, G: { player: 2, active: false },
-    S: { player: 2, active: false }, U: { player: 2, active: false },
-  },
+ // {
+ //   A: { player: 1, active: true }, I: { player: 1, active: true },
+ //   Q: { player: 1, active: true }, Y: { player: 1, active: true },
+ //   E: { player: 2, active: false }, G: { player: 2, active: false },
+ //   S: { player: 2, active: false }, U: { player: 2, active: false },
+ // },
 
-          // Pattern 9 
+          // Pattern 8 
   {
     A: { player: 1, active: true }, H: { player: 1, active: true },
     L: { player: 1, active: true }, S: { player: 1, active: true },
@@ -882,7 +882,7 @@ const BOARD_PATTERNS = [
     R: { player: 2, active: false }, Y: { player: 2, active: false },
   },
 
-            // Pattern 10
+            // Pattern 9
   {
     G: { player: 1, active: true }, K: { player: 1, active: true },
     N: { player: 1, active: true }, Q: { player: 1, active: true },
@@ -890,7 +890,7 @@ const BOARD_PATTERNS = [
     O: { player: 2, active: false }, S: { player: 2, active: false },
   },
 
-             // Pattern 11
+             // Pattern 10
   {
     B: { player: 1, active: true }, L: { player: 1, active: true },
     O: { player: 1, active: true }, X: { player: 1, active: true },
@@ -898,7 +898,7 @@ const BOARD_PATTERNS = [
     N: { player: 2, active: false }, V: { player: 2, active: false },
   },
 
-               // Pattern 12
+               // Pattern 11
   {
     D: { player: 1, active: true }, L: { player: 1, active: true },
     N: { player: 1, active: true }, V: { player: 1, active: true },
@@ -919,9 +919,9 @@ function makeInitialPieces() {
   const dateSeed = parseInt(`${year}${month}${day}`); // e.g., 20260616
 
   // 2. Use the modulo operator (%) to safely map the seed to your array length
-  const patternIndex = dateSeed % BOARD_PATTERNS.length;
+   const patternIndex = dateSeed % BOARD_PATTERNS.length;
 
-  // const patternIndex = 6
+   //const patternIndex = 8
 
   // 3. Return a *deep copy* so players don't accidentally mutate the master list
   return JSON.parse(JSON.stringify(BOARD_PATTERNS[patternIndex]));
