@@ -96,9 +96,9 @@ body {
   .help-btn:hover { background: rgba(196,154,68,0.15); border-color: var(--gold); color: var(--gold); }
 
   /* ── Turn bar ── */
-  .turn-bar { display: flex; align-items: center; gap: 1.4rem; font-size: clamp(0.8rem, 2vw, 1.2rem); letter-spacing: 0.1em; }
-  .player-tag { display: flex; align-items: center; gap: 0.5rem; opacity: 0.2; transition: opacity 0s; }
-  .player-tag.active { opacity: 1; }
+  .turn-bar { display: flex; align-items: center; gap: 1.4rem; font-size: clamp(1rem, 1.8vw, 0.78rem); letter-spacing: 0.1em; }
+  .player-tag { display: flex; align-items: center; gap: 0.5rem; opacity: 0.1; text-shadow: 0px 0px 2px; transition: opacity 0s; }
+  .player-tag.active { opacity: 1; text-shadow: 0px 0px 0px}
   .player-tag .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; }
   .player-tag.p1 .dot { background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90); border: 1.5px solid var(--accent); }
   .player-tag.p2 .dot{ background: radial-gradient(circle at 38% 32%, #5a3e28, #2a1a0e 55%, #1a0d05); border: 1.5px solid var(--accent); }
@@ -216,14 +216,15 @@ body {
     width: 100%;
     max-width: calc(var(--cell-size) * 5 + var(--gap) * 4 + clamp(20px, 4vw, 36px) + 4px);
   }
-  .result-banner .banner-btn {
-    background: transparent; border: 1px solid rgba(196,154,68,0.45); border-radius: 4px;
-    color: var(--gold); padding: 0.25rem 0.85rem; cursor: pointer; white-space: nowrap;
-    font-family: 'Quicksand', serif; font-size: clamp(0.75rem, 1.8vw, 0.88rem); letter-spacing: 0.13em;
-    transition: background 0.2s, border-color 0.2s;
+  .result-banner .banner-btn { padding: 0.6rem 2rem;
+    background: #26180c 100%; border: 1px solid #644021 ; border-radius: 8px;
+    color: var(--sand3); padding: 0.15rem 1rem; cursor: pointer;    
+    font-size: clamp(0.8rem, 1.8vw, 1rem); letter-spacing: 0.12em;
+    font-family: 'Quicksand', serif; 
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
   }
   .result-banner .banner-btn:hover { background: rgba(196,154,68,0.12); border-color: var(--gold); }
-  .result-banner .banner-btn.primary { border-color: rgba(196,154,68,0.7); }
+  .result-banner .banner-btn.primary { color: var(--sand2); background: #523a0de0 100%; background: rgba(72, 49, 2, 0.646) }
 
   /* ── Cells ── */
   .cell {
