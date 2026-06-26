@@ -946,9 +946,11 @@ state.history.add(serialiseState(state.pieces, state.currentPlayer));
 
 const timeline = [];
 let timelineIndex = -1;
+let stateVersion = 0;
 const moveLog = []; // { player, from, to } per half-move, length === timelineIndex at end of game
 
 function pushTimeline() {
+  stateVersion++;
   if (timelineIndex < timeline.length - 1) timeline.splice(timelineIndex + 1);
   const victoryNow = state.gameOver ? checkVictory(state.pieces) : null;
   timeline.push({
@@ -967,6 +969,7 @@ function pushTimeline() {
 function restoreTimeline(idx) {
   if (idx < 0 || idx >= timeline.length || state.animating) return;
   
+  stateVersion++;
   window.isWaitingForContinue = false;
   document.body.classList.remove('clickable-restart');
   
@@ -1478,7 +1481,9 @@ function finalizeMove(fromLabel, move) {
     const n = visibleEnemies.length;
     let pluralStr = n !== 1 ? 's' : '';
     setStatus(t('haltedEnemies', { n: n, plural: pluralStr }));
+    const currentVersion = stateVersion;
     setTimeout(() => {
+      if (stateVersion !== currentVersion) return;
       state.losSquares = [];
       render();
       checkTurnPassing();
@@ -1525,8 +1530,11 @@ function checkTurnPassing() {
   render();
   pushTimeline();
 
+  const currentVersion = stateVersion;
+
   setStatus(t('noLegalMovesPass', { passedFrom: passedFrom }), 'warn');
   setTimeout(() => {
+    if (stateVersion !== currentVersion) return;
     if (!state.gameOver) {
       if (vsAI && state.currentPlayer !== humanPlayerColor) triggerAIMove();
       else setStatus(t('selectActive'));
@@ -2041,7 +2049,7 @@ class AdvancedEngineMCTS {
 
 function getDifficultyProfile(streak) {
   const itersByStreak = [36, 54, 80, 120, 180, 270, 400, 600, 900, 1200, 1800, 2700, 4000, 6000, 9000, 12000, 18000];
-  const blunderChance = Math.max(0, 0.6 - (streak * 0.06));
+  const blunderChance = 0;
   const useImmediateWin = streak >= 2;
   const useSafeMove     = streak >= 4;
   const useWinIn2       = streak >= 8;
@@ -2057,7 +2065,9 @@ function triggerAIMove() {
   if (!vsAI || state.currentPlayer !== computerColor || state.gameOver || state.animating) return;
 
   setStatus(t('thinking'), 'highlight');
+  const currentVersion = stateVersion;
   setTimeout(() => {
+    if (stateVersion !== currentVersion || state.currentPlayer !== computerColor || state.gameOver) return;
     const currentSimRoot = new SimState(state.pieces, state.currentPlayer, state.sneaking, state.sneakingSquare, state.history, state.gameOver, null);
     const validMoves = currentSimRoot.getValidMoves();
     if (validMoves.length === 0) { checkTurnPassing(); return; }
