@@ -426,7 +426,7 @@ body {
 <div class="stats-bar" id="stats-bar">
   <div id="stats-normal">
     <span id="stat-lvl-label">Nível</span> <strong id="stat-streak">1</strong>
-    <span class="stats-sep">⠀–⠀</span>
+    <span class="stats-sep">⠀•⠀</span>
     <strong id="stat-high">0</strong> <span id="stat-best-label">pts</span>
   </div>
   <div id="stats-loss" class="hidden">
@@ -542,7 +542,7 @@ const translations = {
     supportLink: "♥\uFE0E Support the Game",
     shareLink: "↪\uFE0E Share",
     shareResultBtn: "↪\uFE0E Share Result",
-    shareResultMsg: "Today's Sambaqui:\n{board}\nLevel {level}, {moves} moves\nBest: {bestLevel}–{bestMoves}\n{url}",
+    shareResultMsg: "Today's Sambaqui:\n{board}\nLevel {level}, {moves} moves\nBest: {bestLevel}•{bestMoves}\n{url}",
     linkCopied: "Link copied to clipboard!",
     tutorialNext: "Next >",
     tutorialPrev: "< Prev",
@@ -597,7 +597,7 @@ const translations = {
     supportLink: "♥\uFE0E Apoie o Jogo",
     shareLink: "↪\uFE0E Compartilhe",
     shareResultBtn: "↪\uFE0E Compartilhar Resultado",
-    shareResultMsg: "Sambaqui de hoje:\n{board}\nNível {level}, {moves} movimentos\nMelhor: {bestLevel}–{bestMoves}\n{url}",
+    shareResultMsg: "Sambaqui de hoje:\n{board}\nNível {level}, {moves} movimentos\nMelhor: {bestLevel}•{bestMoves}\n{url}",
     linkCopied: "Link copiado!",
     tutorialNext: "Próximo >",
     tutorialPrev: "< Anterior",
@@ -2347,7 +2347,7 @@ function updateMetaDisplay() {
       const humanLost = victory && victory.winner !== humanPlayerColor;
 
       if (humanLost) {
-        // Loss state: show "Final N–M | Melhor N–M"
+        // Loss state: show "Final N•M | Melhor N•M"
         statsNormalEl.classList.add('hidden');
         statsLossEl.classList.remove('hidden');
 
@@ -2357,13 +2357,13 @@ function updateMetaDisplay() {
         const bestWord = currentLang === 'PT' ? 'Melhor' : 'Best';
 
         statsLossTextEl.innerHTML =
-          `${lvlWord} <strong>${finalLevel}</strong>–<strong>${finalMoves}</strong>`;
+          `${lvlWord} <strong>${finalLevel}</strong>•<strong>${finalMoves}</strong>`;
 
         if (bestResult.level === 0 && bestResult.moves === 0) {
-          statsBestTextEl.innerHTML = `${bestWord} –`;
+          statsBestTextEl.innerHTML = `${bestWord} •`;
         } else {
           statsBestTextEl.innerHTML =
-            `${bestWord} <strong>${bestResult.level}</strong>–<strong>${bestResult.moves}</strong>`;
+            `${bestWord} <strong>${bestResult.level}</strong>•<strong>${bestResult.moves}</strong>`;
         }
         return;
       }
