@@ -2044,17 +2044,16 @@ class AdvancedEngineMCTS {
 // (unchanged from original — higher iteration counts now produce much
 //  stronger play because each iteration carries real evaluation signal)
 
-//  1.5x search up to lvl 18
+//  ~1.5x search up to lvl 18
 // targeted search at lvl 2, 4, 8.
 
 function getDifficultyProfile(streak) {
-  const itersByStreak = [36, 54, 80, 120, 180, 270, 400, 600, 900, 1200, 1800, 2700, 4000, 6000, 9000, 12000, 18000];
-  const blunderChance = 0;
-  const useImmediateWin = streak >= 2;
+  const itersByStreak = [10, 16, 24, 36, 54, 80, 120, 180, 270, 400, 600, 900, 1200, 1800, 2700, 4000, 6000, 9000, 12000, 18000, 27000, 40000, 60000, 90000, 120000];
+  const useImmediateWin = true;
   const useSafeMove     = streak >= 4;
-  const useWinIn2       = streak >= 8;
+  const useWinIn2       = streak >= 16;
   const mctsIterations  = itersByStreak[Math.min(streak, itersByStreak.length - 1)];
-  return { blunderChance, useImmediateWin, useWinIn2, useSafeMove, mctsIterations };
+  return { useImmediateWin, useWinIn2, useSafeMove, mctsIterations };
 }
 
 // ── triggerAIMove ─────────────────────────────────────────────────────────────
@@ -2074,13 +2073,9 @@ function triggerAIMove() {
 
     const profile = getDifficultyProfile(humanStreak);
     let optimalResult = null;
-
-    if (Math.random() < profile.blunderChance) {
-      optimalResult = validMoves[Math.floor(Math.random() * validMoves.length)];
-    } else {
-      const processFinder = new AdvancedEngineMCTS(currentSimRoot, profile.mctsIterations);
-      optimalResult = processFinder.search(profile.useImmediateWin, profile.useWinIn2, profile.useSafeMove);
-    }
+ 
+    const processFinder = new AdvancedEngineMCTS(currentSimRoot, profile.mctsIterations);
+    optimalResult = processFinder.search(profile.useImmediateWin, profile.useWinIn2, profile.useSafeMove);
 
     if (optimalResult) {
       const systemSlides = computeAllSlides(optimalResult.from, state.pieces);
