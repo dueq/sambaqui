@@ -2040,8 +2040,8 @@ class AdvancedEngineMCTS {
 // targeted search at lvl 2, 4, 8.
 
 function getDifficultyProfile(streak) {
-  const itersByStreak = [16, 24, 36, 54, 80, 120, 180, 270, 400, 600, 900, 1200, 1800, 2700, 4000, 6000, 9000, 12000];
-  const blunderChance = Math.max(0, 0.7 - (streak * 0.1));
+  const itersByStreak = [36, 54, 80, 120, 180, 270, 400, 600, 900, 1200, 1800, 2700, 4000, 6000, 9000, 12000, 18000];
+  const blunderChance = Math.max(0, 0.6 - (streak * 0.06));
   const useImmediateWin = streak >= 2;
   const useSafeMove     = streak >= 4;
   const useWinIn2       = streak >= 8;
