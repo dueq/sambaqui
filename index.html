@@ -2048,10 +2048,10 @@ class AdvancedEngineMCTS {
 // targeted search at lvl 2, 4, 8.
 
 function getDifficultyProfile(streak) {
-  const itersByStreak = [10, 16, 24, 36, 54, 80, 120, 180, 270, 400, 600, 900, 1200, 1800, 2700, 4000, 6000, 9000, 12000, 18000, 27000, 40000, 60000, 90000, 120000];
+  const itersByStreak = [2, 4, 6, 10, 16, 24, 36, 54, 80, 120, 180, 270, 400, 600, 900, 1200, 1800, 2700, 4000, 6000, 9000, 12000, 18000, 27000, 40000, 60000, 90000, 120000];
   const useImmediateWin = true;
-  const useSafeMove     = streak >= 4;
-  const useWinIn2       = streak >= 16;
+  const useSafeMove     = streak >= 5;
+  const useWinIn2       = streak >= 10;
   const mctsIterations  = itersByStreak[Math.min(streak, itersByStreak.length - 1)];
   return { useImmediateWin, useWinIn2, useSafeMove, mctsIterations };
 }
