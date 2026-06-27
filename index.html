@@ -399,7 +399,7 @@ body {
   .victory-overlay, .tutorial-overlay {
     position: fixed; inset: 0; display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    background: rgba(10,6,3,0.88); z-index: 100; gap: 1.2rem;
+    background: rgba(10,6,3,0.88); z-index: 300; gap: 1.2rem;
     animation: fade-in 0.4s ease;
   }
   @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
@@ -465,7 +465,7 @@ body {
 
 <div class="menu-controls">
   <div class="menu-wrapper">
-    <button class="mode-btn" id="menu-btn">☰ Menu</button>
+    <button class="mode-btn" id="menu-btn">Menu</button>
 
     <div class="menu-dropdown hidden" id="main-menu">
       <button class="menu-item" id="open-tutorial-btn">
@@ -579,8 +579,8 @@ const translations = {
   EN: {
     newGame: "Computer",
     practice: "Solo Mode",
-    tutorial: "How to Play",
-    language: "Português",
+    tutorial: "❖\uFE0E How to Play",
+    language: "🅰\uFE0E Português",
     level: "Level⠀",
     best: "Score⠀",
     pts: "⠀Points",
@@ -634,8 +634,8 @@ const translations = {
   PT: {
     newGame: "Computador",
     practice: "Modo Solo",
-    tutorial: "Como Jogar",
-    language: "English",
+    tutorial: " ❖\uFE0E Como Jogar",
+    language: "🅰\uFE0E English",
     level: "Nível⠀",
     best: "Pontos⠀",
     pts: "⠀Pontos",
