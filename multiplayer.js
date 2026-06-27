@@ -106,7 +106,7 @@ function buildPanelHTML() {
   return `
 <div id="mp-panel" style="
   position:fixed; inset:0; z-index:200;
-  background:rgba(10,6,3,0.92);
+  background:rgba(10,6,3,0.92); z-index:300;
   display:flex; align-items:center; justify-content:center;
   font-family:'Lato',serif; animation:fade-in .3s ease;
 ">
