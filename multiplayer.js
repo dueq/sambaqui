@@ -244,15 +244,23 @@ function bindPanelEvents() {
 
 function injectOnlineButton() {
   if (document.getElementById('mp-online-btn')) return;
-  const modeBar = document.querySelector('.mode-bar');
-  if (!modeBar) { log('WARNING: .mode-bar not found'); return; }
+  const menu = document.getElementById('main-menu');
 
-  const btn       = document.createElement('button');
-  btn.id          = 'mp-online-btn';
-  btn.className   = 'mode-btn';
-  btn.textContent = 'Online';
-  btn.addEventListener('click', onOnlineBtnClick);
-  modeBar.appendChild(btn);
+if (!menu) {
+    log('WARNING: #main-menu not found');
+    return;
+}
+
+const btn = document.createElement('button');
+btn.id = 'mp-online-btn';
+btn.className = 'menu-item';
+btn.textContent = '🌐\uFE0E Jogo Online';
+btn.addEventListener('click', onOnlineBtnClick);
+
+menu.insertBefore(
+    btn,
+    document.getElementById('footer-share-link')
+);
 }
 
 function onOnlineBtnClick() {
