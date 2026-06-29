@@ -81,7 +81,7 @@ body {
 
 .menu-dropdown {
     position: absolute;
-    top: calc(100% + .4rem);
+    top: calc(100% + 1rem);
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -92,7 +92,7 @@ body {
     border: 1px solid var(--accent);
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 8px 30px rgba(0,0,0,.55);
+    box-shadow: 4px 16px 20px rgba(43, 17, 1, 0.854);
 }
 .menu-item{
     background:none;
@@ -117,7 +117,7 @@ body {
 
 
 .menu-controls {
-    scale: 1.1;
+    scale: 1.0;
     font-size: 2rem;
     display: flex;
     flex-direction: column;
@@ -131,13 +131,14 @@ body {
     font-size: clamp(0.65rem, 1.8vw, 0.78rem); letter-spacing: 0.12em; color: var(--sand3);
   }
   .mode-btn {
-    background: #26180c 100%; border: 1px solid #644021 ; border-radius: 8px;
+    background: #26180c 100%; border: 1px solid #644021 ; border-radius: 5px;
     color: var(--sand3); padding: 0.15rem 1rem; cursor: pointer;
     font-family: 'Quicksand', serif; font-size: inherit; letter-spacing: inherit;
     transition: background 0.2s, border-color 0.2s, color 0.2s;
   }
   .mode-btn.active { background: rgba(196,154,68,0.12); border-color: var(--gold); color: var(--gold); }
-  .mode-btn:hover:not(.active) { border-color: var(--sand3); color: var(--sand); }
+  .mode-btn:hover:not(.active) { border-color: var(--accent); background:rgba(196,154,68,.12); }
+
 
   .help-btn {
     background: rgba(196,154,68,0.06); border: 1px dashed rgba(196,154,68,0.4);
@@ -361,7 +362,7 @@ body {
       0 0 0 3px rgba(232,220,200,0.3), 0 0 14px rgba(232,220,200,0.15);
   }
   .piece.selected-piece {
-    transform: scale(1.05); border-color: var(--gold) !important;
+    transform: scale(1.0); border-color: var(--gold) !important;
     box-shadow: 0 6px 16px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.7),
       0 0 0 4px rgba(196,154,68,0.6), 0 0 24px rgba(196,154,68,0.5) !important;
   }
@@ -443,7 +444,7 @@ body {
     text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
     margin-top: 0.5rem; text-align: center;
   }
-  footer .author { opacity: 0.5; font-size: 0.7rem; letter-spacing: 0.1em; line-height: 0.01rem}
+  footer .author { opacity: 0.5; font-size: 0.5rem; letter-spacing: 0.25em; line-height: 0.01rem}
   footer .links { display: flex; align-items: center; gap: 1rem; line-height: 0.01rem }
   footer .links a, footer .links span {
     color: var(--gold); text-decoration: none; cursor: pointer;
@@ -534,9 +535,9 @@ body {
 
 <footer>
   <div class="links">
-    <a href="https://ko-fi.com/eduardoeller" target="_blank" id="footer-support-link">♥ Apoiar o jogo</a>
+    <a href="https://ko-fi.com/eduardoeller" target="_blank" id="footer-support-link"></a>
     <div class="footer-divider"></div>
-    <span id="footer-share-link">↪ Compartilhar</span>
+    <span id="footer-share-link"></span>
   </div>
   <div id="toast-msg"></div>
 
@@ -544,7 +545,7 @@ body {
 
 
 <div class="author">
-  Sambaqui • v1.3.6 • © 2026 Eduardo Eller
+  Sambaqui • v1.3.6 • © 2026 Eduardo Eller Quadros
 </div>
 </footer>
 
@@ -615,8 +616,8 @@ const translations = {
     startNewGame: "New Game",
     bestScore: "Best Score: <strong>{highScore}</strong>",
     share: "↪\uFE0E Share the Game",
-    supportLink: "♥\uFE0E Support the Game",
-    shareLink: "↪\uFE0E Share",
+    supportLink: "♥\uFE0E Support Me",
+    shareLink: "↪\uFE0E Share the Game",
     shareResultBtn: "↪\uFE0E Share Result",
     shareResultMsg: "Today's Sambaqui:\n{board}\nLevel {level}, {moves} moves\nBest: {bestLevel}•{bestMoves}\n{url}",
     linkCopied: "Link copied to clipboard!",
