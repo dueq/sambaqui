@@ -149,7 +149,7 @@ body {
   .help-btn:hover { background: rgba(196,154,68,0.15); border-color: var(--gold); color: var(--gold); }
 
   /* ── Turn bar ── */
-  .turn-bar { display: flex; align-items: center; gap: 1.4rem; font-size: clamp(1rem, 1.8vw, 0.78rem); letter-spacing: 0.1em; }
+  .turn-bar { display: flex; align-items: center; gap: 1.4rem; font-size: clamp(1rem, 1.8vw, 0.78rem); letter-spacing: 0.05em; }
   .player-tag { display: flex; align-items: center; gap: 0.5rem; opacity: 0.1; text-shadow: 0px 0px 2px; transition: opacity 0s; }
   .player-tag.active { opacity: 1; text-shadow: 0px 0px 0px}
   .player-tag .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; }
@@ -1051,8 +1051,8 @@ function restoreTimeline(idx) {
   state.sneakingSquare = snap.sneakingSquare;
   state.history = new Set(snap.history);
   state.gameOver = snap.gameOver;
+  state.lastWinner = snap.gameOver ? snap.winner : null;
   state.winLine = snap.winLine ? [...snap.winLine] : null;
-  // --- ADD THIS BLOCK ---
   if (state.winLine && snap.winner) {
     state.winLine._winner = snap.winner;
   }
@@ -1539,8 +1539,9 @@ function finalizeMove(fromLabel, move) {
   const victory = checkVictory(state.pieces);
   if (victory) {
     state.gameOver = true;
+    state.lastWinner = checkVictory(state.pieces)?.winner ?? null;
     state.winLine = victory.line;
-    state.winLine._winner = victory.winner; // <--- ADD THIS LINE
+    state.winLine._winner = victory.winner;
     state.sneaking = false;
     state.losSquares = [];
     render();
@@ -1548,7 +1549,8 @@ function finalizeMove(fromLabel, move) {
     if (vsAI && victory.winner === humanPlayerColor) {
       humanStreak++;
     }
-    
+    render();
+    updateMetaDisplay();
     pushTimeline();
     setTimeout(() => showVictory(victory.winner), 600);
     return;
@@ -1676,17 +1678,23 @@ function showVictory(winner) {
     setStatus(currentLang === 'PT' ? `Fim de Jogo` : `Game Over`, 'warn');
 
     // Save best if this run was better, then show the final/best comparison in the bar
-    const finalLevel = humanStreak + 1;
-    if (isBetterResult(finalLevel, playerMoveCount)) {
-      saveBestResult(finalLevel, playerMoveCount);
-      highScore = playerMoveCount;
-    }
-    // updateMetaDisplay while counters still hold the final values — it will render loss mode
-    updateMetaDisplay();
+const finalLevel = humanStreak + 1;
+if (isBetterResult(finalLevel, playerMoveCount)) {
+  saveBestResult(finalLevel, playerMoveCount);
+  highScore = playerMoveCount;
+}
 
-    humanStreak = 0;
-    playerMoveCount = 0;
-    window.achievedNewBest = false;
+  // Freeze the final result for display purposes
+  state.lastFinalLevel = finalLevel;
+  state.lastFinalMoves = playerMoveCount;
+
+  updateMetaDisplay();
+
+  humanStreak = 0;
+  playerMoveCount = 0;
+  window.achievedNewBest = false;
+
+
   }
 }
 
@@ -2145,7 +2153,7 @@ function getDifficultyProfile(streak) {
   const itersByStreak = [2, 4, 6, 10, 16, 24, 36, 54, 80, 120, 180, 270, 400, 600, 900, 1200, 1800, 2700, 4000, 6000, 9000, 12000, 18000, 27000, 40000, 60000, 90000, 120000];
   const useImmediateWin = true;
   const useSafeMove     = streak >= 4;
-  const useWinIn2       = streak >= 16;
+  const useWinIn2       = streak >= 8;
   const mctsIterations  = itersByStreak[Math.min(streak, itersByStreak.length - 1)];
   return { useImmediateWin, useWinIn2, useSafeMove, mctsIterations };
 }
@@ -2421,6 +2429,7 @@ function restartGame(forceResetColor) {
     pieces: makeInitialPieces(),
     history: new Set(),
   });
+  state.lastWinner = null;
   state.history.add(serialiseState(state.pieces, state.currentPlayer));
 
   timeline.length = 0;
@@ -2443,16 +2452,14 @@ function updateMetaDisplay() {
     statsBarEl.classList.remove('hidden');
 
     if (state.gameOver && vsAI) {
-      const victory = checkVictory(state.pieces);
-      const humanLost = victory && victory.winner !== humanPlayerColor;
+      const humanLost = state.lastWinner !== null && state.lastWinner !== humanPlayerColor;
 
-      if (humanLost) {
-        // Loss state: show "Final N•M | Melhor N•M"
-        statsNormalEl.classList.add('hidden');
-        statsLossEl.classList.remove('hidden');
+    if (humanLost) {
+  statsNormalEl.classList.add('hidden');
+  statsLossEl.classList.remove('hidden');
 
-        const finalLevel = humanStreak + 1;
-        const finalMoves = playerMoveCount;
+  const finalLevel = state.lastFinalLevel;
+  const finalMoves = state.lastFinalMoves;
         const lvlWord  = currentLang === 'PT' ? 'Final' : 'Final';
         const bestWord = currentLang === 'PT' ? 'Melhor' : 'Best';
 
@@ -2533,11 +2540,11 @@ function applyLanguageSwitch() {
         setStatus(currentLang === 'PT' ? "" : "", true);
       } else {
         if (humanPlayerColor === 1) {
-          labelP2.textContent = currentLang === 'PT' ? "Fim de Jogo" : "Game Over";
+          labelP2.textContent = currentLang === 'PT' ? "Computador Venceu" : "Computer Wins";
         } else {
-          labelP1.textContent = currentLang === 'PT' ? "Fim de Jogo" : "Game Over";
+          labelP1.textContent = currentLang === 'PT' ? "Computador Venceu" : "Computer Wins";
         }
-        setStatus(currentLang === 'PT' ? `Fim de Jogo` : `Game Over`, 'warn');
+        setStatus(currentLang === 'PT' ? `Computador Venceu.` : `Computer Wins.`, 'warn');
       }
     } else if (!vsAI) {
       setStatus(t('playerWins', { winner: checkVictory(state.pieces)?.winner ?? '' }), true);
@@ -2564,7 +2571,6 @@ function applyLanguageSwitch() {
   } else {
     setStatus(t('selectActive'));
   }
-
   const activeBanner = document.getElementById('result-banner');
   if (activeBanner && timelineIndex !== -1) {
     const winner = timeline[timelineIndex].winner;
@@ -2576,9 +2582,9 @@ function applyLanguageSwitch() {
   }
 
   // Re-render loss bar text if currently in loss state
-  if (state.gameOver && vsAI && statsLossEl && !statsLossEl.classList.contains('hidden')) {
-    updateMetaDisplay();
-  }
+ // if (state.gameOver && vsAI && statsLossEl && !statsLossEl.classList.contains('hidden')) {
+  //  updateMetaDisplay();
+  //}
 
   const openTutorial = document.getElementById('tutorial-modal');
   if (openTutorial && typeof refreshTutorialPage === 'function') {
