@@ -58,14 +58,14 @@ body {
   .stats-bar {
     font-family: 'Quicksand'; scale:1;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.2rem; line-height: 1;
+    font-size: 1.2rem; line-height: 1.2;
     letter-spacing: 0.08em; background: rgba(72, 49, 2, 0.646);
     padding: 0.6rem 2rem; border-radius: 40px; border: 1px solid rgba(199, 131, 3, 0.3);
   }
   .stats-bar strong { color: var(--gold); font-family: "Lily Script One"; font-weight: 100; }
   #stats-normal { display: flex; align-items: baseline; gap: 0.35rem; }
   #stats-normal .stats-sep { color: var(--accent); opacity: 0.7; }
-  #stats-loss { display: flex; align-items: baseline; gap: 0.6rem; font-size: 1.05rem; }
+  #stats-loss { display: flex; align-items: baseline; gap: 0.6rem; font-size: 1.2rem; min-height: 1.2;}
   #stats-loss .stats-sep-pipe { color: var(--accent); opacity: 0.5; margin: 0 0.1rem; }
   #stats-loss #stats-loss-text { color: var(--sand3); }
   #stats-loss #stats-loss-text strong { color: var(--sand); font-family: "Lily Script One"; font-weight: 100; }
@@ -267,7 +267,7 @@ body {
     display: flex; align-items: center; justify-content: center; gap: 0.7rem;
     animation: fade-in 0.4s ease;
     width: 100%;
-    max-width: calc(var(--cell-size) * 5 + var(--gap) * 4 + clamp(20px, 4vw, 36px) + 4px);
+    max-width: calc(var(--cell-size) * 5 + var(--gap) * 4 + clamp(20px, 2vw, 36px) + 4px);
   }
   .result-banner .banner-btn { 
     background: #26180c 100%; border: 1px solid #644021 ; border-radius: 5px;
@@ -322,7 +322,7 @@ body {
 
   .arrow-hint {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-    font-size: clamp(32px, 12vw, 32px); color: rgba(233, 212, 169, 0.593);
+    font-size: clamp(32px, 12vw, 32px); color: rgba(233, 212, 169, 0.0);
     pointer-events: none; user-select: none; line-height: 1;
    font-family: -apple-system, BlinkMacSystemFont,"Apple Symbols", "Google Sans", sans-serif;
     font-weight: 800; /* Crisp and thick enough on all mobile screens without being overly bold */ }
@@ -539,7 +539,7 @@ body {
 
 
 <div class="author">
-  Sambaqui • v1.3.6 • © 2026 Eduardo Eller Quadros
+  Sambaqui • v1.3.7 • © 2026 Eduardo Eller Quadros
 </div>
 </footer>
 
@@ -1539,22 +1539,26 @@ function finalizeMove(fromLabel, move) {
   const victory = checkVictory(state.pieces);
   if (victory) {
     state.gameOver = true;
-    state.lastWinner = checkVictory(state.pieces)?.winner ?? null;
-    state.winLine = victory.line;
-    state.winLine._winner = victory.winner;
-    state.sneaking = false;
-    state.losSquares = [];
-    render();
-    
-    if (vsAI && victory.winner === humanPlayerColor) {
-      humanStreak++;
-    }
-    render();
-    updateMetaDisplay();
-    pushTimeline();
-    setTimeout(() => showVictory(victory.winner), 600);
-    return;
+    state.lastWinner = victory.winner;
+  state.winLine = victory.line;
+  state.winLine._winner = victory.winner;
+  state.sneaking = false;
+  state.losSquares = [];
+
+  if (vsAI && victory.winner === humanPlayerColor) {
+    humanStreak++;
+  } else if (vsAI) {
+    // Freeze final result NOW, before anything resets playerMoveCount/humanStreak
+    state.lastFinalLevel = humanStreak + 1;
+    state.lastFinalMoves = playerMoveCount;
   }
+
+  render();
+  updateMetaDisplay();
+  pushTimeline();
+  setTimeout(() => showVictory(victory.winner), 600);
+  return;
+}
 
   // Response time was 1200
 
@@ -1678,15 +1682,10 @@ function showVictory(winner) {
     setStatus(currentLang === 'PT' ? `Fim de Jogo` : `Game Over`, 'warn');
 
     // Save best if this run was better, then show the final/best comparison in the bar
-const finalLevel = humanStreak + 1;
-if (isBetterResult(finalLevel, playerMoveCount)) {
-  saveBestResult(finalLevel, playerMoveCount);
-  highScore = playerMoveCount;
-}
-
-  // Freeze the final result for display purposes
-  state.lastFinalLevel = finalLevel;
-  state.lastFinalMoves = playerMoveCount;
+  if (isBetterResult(state.lastFinalLevel, state.lastFinalMoves)) {
+    saveBestResult(state.lastFinalLevel, state.lastFinalMoves);
+    highScore = state.lastFinalMoves;
+  }
 
   updateMetaDisplay();
 
