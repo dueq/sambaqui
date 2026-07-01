@@ -614,7 +614,7 @@ const translations = {
     supportLink: "♥\uFE0E Support Me",
     shareLink: "↪\uFE0E Share the Game",
     shareResultBtn: "↪\uFE0E Share Result",
-    shareResultMsg: "Today's Sambaqui:\n{board}\nLevel {level}, {moves} moves\nBest: {bestLevel}•{bestMoves}\n{url}",
+    shareResultMsg: "Sambaqui {bestLevel}•{bestMoves}\n{board}\n{url}",
     linkCopied: "Link copied to clipboard!",
     tutorialNext: "Next >",
     tutorialPrev: "< Prev",
@@ -669,7 +669,7 @@ const translations = {
     supportLink: "♥\uFE0E Apoie o Jogo",
     shareLink: "↪\uFE0E Compartilhe",
     shareResultBtn: "↪\uFE0E Compartilhar",
-    shareResultMsg: "Sambaqui de hoje:\n{board}\nNível {level}, {moves} movimentos\nMelhor: {bestLevel}•{bestMoves}\n{url}",
+    shareResultMsg: "Sambaqui {bestLevel}•{bestMoves}\n{board}\n{url}",
     linkCopied: "Link copiado!",
     tutorialNext: "Próximo >",
     tutorialPrev: "< Anterior",
@@ -1538,20 +1538,20 @@ function finalizeMove(fromLabel, move) {
   state.pieces[move.landing] = movingPiece;
 
   const victory = checkVictory(state.pieces);
-  if (victory) {
-    state.gameOver = true;
-    state.lastWinner = victory.winner;
+if (victory) {
+  state.gameOver = true;
+  state.lastWinner = victory.winner;
   state.winLine = victory.line;
   state.winLine._winner = victory.winner;
   state.sneaking = false;
   state.losSquares = [];
 
+  // Freeze BEFORE humanStreak is incremented for next round
+  state.lastFinalLevel = humanStreak + 1;
+  state.lastFinalMoves = playerMoveCount;
+
   if (vsAI && victory.winner === humanPlayerColor) {
     humanStreak++;
-  } else if (vsAI) {
-    // Freeze final result NOW, before anything resets playerMoveCount/humanStreak
-    state.lastFinalLevel = humanStreak + 1;
-    state.lastFinalMoves = playerMoveCount;
   }
 
   render();
