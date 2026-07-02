@@ -365,9 +365,8 @@ body {
   }
   .piece.sneaking {
     animation: pulse-sneak 1.2s ease-in-out infinite !important;
-    border-color: var(--teal) !important;
     box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.5),
-      0 0 0 3px rgba(122,184,192,0.4), 0 0 16px rgba(122,184,192,0.3) !important;
+      0 0 0 3px var(--gold), 0 0 16px rgba(122,184,192,0.3) !important;
   }
   @keyframes pulse-sneak {
     0%,100% { box-shadow: 0 3px 8px rgba(0,0,0,0.5), 0 0 0 3px rgba(122,184,192,0.4), 0 0 12px rgba(122,184,192,0.25); }
@@ -388,7 +387,7 @@ body {
   }
 
   /* ── Drag-and-drop states ── */
-  .cell.drag-over-valid   { border-color: var(--gold) !important; background-color: rgba(231, 158, 12, 0.891) !important; }
+  .cell.drag-over-valid   { border-color: var(--gold) !important; background-color: rgba(231, 158, 12, 0.891); }
   .cell.drag-over-invalid { border-color: rgba(192, 111, 74, 0) ; }
 
   /* ── Modals & Overlays ── */
@@ -639,7 +638,7 @@ const translations = {
     computer: "Computador Joga",
     player1: "Jogador 1",
     player2: "Jogador 2",
-    selectActive: "Selecione uma peça ativa para mover.",
+    selectActive: "Selecione uma peça ativa para mover",
     calculating: "Computador calculando movimentos…",
     calculatingOpening: "Computador calculando jogadas de abertura…",
     thinking: "Computador pensando…",
