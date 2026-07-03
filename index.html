@@ -364,13 +364,12 @@ body {
     box-shadow: 0 6px px rgba(0,0,0,0.6), inset 0 1px 4px rgba(255,255,255,0.7), 0 0 24px rgba(222, 150, 5, 0.5) !important;
   }
   .piece.sneaking {
-    animation: pulse-sneak 1.2s ease-in-out infinite !important;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.5),
-      0 0 0 3px var(--gold), 0 0 16px rgba(122,184,192,0.3) !important;
+    animation: pulse-sneak 0.4s ease-in-out infinite !important;
+    box-shadow: 0 0 24px rgba(222, 150, 5, 0.693);
   }
   @keyframes pulse-sneak {
-    0%,100% { box-shadow: 0 3px 8px rgba(0,0,0,0.5), 0 0 0 3px rgba(122,184,192,0.4), 0 0 12px rgba(122,184,192,0.25); }
-    50%     { box-shadow: 0 3px 8px rgba(0,0,0,0.5), 0 0 0 5px rgba(122,184,192,0.25), 0 0 22px rgba(122,184,192,0.4); }
+    0%,100% { box-shadow: 0 3px 8px rgba(0,0,0,0.5), 0 0 0 3px rgba(214, 156, 19, 0.4), 0 0 12px rgba(229, 151, 25, 0.25); }
+    50%     { box-shadow: 0 3px 8px rgba(0,0,0,0.5), 0 0 0 5px rgba(209, 177, 17, 0.25), 0 0 22px rgba(177, 135, 9, 0.4); }
   }
 
   /* ── Piece ghost (used by animation engine AND drag-and-drop) ── */
