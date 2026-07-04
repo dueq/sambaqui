@@ -27,6 +27,7 @@
     --mid:        #6c623e;
     --accent:     #7a4f2e;
     --gold:       #c49a44;
+    --container: rgba(202, 172, 121, 0.572);
     --teal:       #7ab8c0;
     --cell-size:  clamp(60px, 12vw, 90px);
     --gap:        clamp(3px, 0.6vw, 6px);
@@ -37,6 +38,89 @@ body {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   font-family: 'Quicksand', serif; color: var(--sand);
   padding: 2rem 0.5rem; gap: 1.1rem;
+}
+
+  /* ── High Contrast── */
+
+body[data-theme="high-contrast"] {
+    background-color: #1a1004;
+  --sand:   #ffffff;
+  --sand2:  #c2bcb5;
+  --sand3:  #d9d9d9;
+  --dark:   #000000;
+  --mid:    #d1cecec4;
+  --accent: #ffcc00cd;
+  --gold:   #eabd09;
+  --container: rgba(15, 15, 15, 0.572);
+      --cell-size:  clamp(85px, 12vw, 130px);
+  --teal:   #00e5ff;
+  --gap:     clamp(px, 0.6vw, 3px);
+}
+
+ body[data-theme="high-contrast"] .board-border {
+    padding: clamp(10px, 2vw, 18px); border: 2px solid var(--dark); border-radius: 0px;
+    box-shadow: 0 0 0 1px rgba(196,154,68,0.15), 0 0 60px rgba(52, 26, 1, 0.261), inset 0 0 20px rgba(35, 23, 3, 0.426);
+    background: var(--container);
+    
+    /* Prevents mobile scrolling and pull-to-refresh when touching the board */
+    touch-action: none; 
+  }
+
+body[data-theme="high-contrast"] .cell {
+  background-image: none;
+  border-color: var(--mid);
+  border-width: 0px;
+  border-radius: 0;
+}
+body[data-theme="high-contrast"] .cell.dark-sq {
+  background-color: #615b53;
+  background-image: none;
+  border-radius: 0;
+}
+body[data-theme="high-contrast"] .piece.p1 {
+  background: #ffffff;
+  border: 2px solid #373737;
+  box-shadow: none;
+}
+body[data-theme="high-contrast"] .piece.p2 {
+  background: #000000;
+  border: 2px solid #757272;
+  box-shadow: none;
+}
+
+body[data-theme="high-contrast"] .piece-ghost.p1 {
+  background: #ffffff;
+  border: 2px solid #908d8d;
+  box-shadow: none; }
+body[data-theme="high-contrast"] .piece-ghost.p2 {
+     background: #000000;
+  border: 2px solid #2b2a2a;
+  box-shadow: none;  }
+
+body[data-theme="high-contrast"] .cell.landing,
+body[data-theme="high-contrast"] .cell.dark-sq.landing {
+  background-color: #a78500;
+  border-color: #000000;
+}
+body[data-theme="high-contrast"] .cell.blocked-landing,
+body[data-theme="high-contrast"] .cell.dark-sq.blocked-landing {
+  box-shadow: inset 0 0 0 3px #00e5ff;
+}
+body[data-theme="high-contrast"] .cell.win-line {
+  background-color: #c9a100 !important;
+  border-color: #000000 !important;
+}
+body[data-theme="high-contrast"] .cell.win-line.enemy-win {
+  background-color: #a91810 !important;
+  border-color: #000000 !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body[data-theme="high-contrast"] .cell.selectable:hover,
+  body[data-theme="high-contrast"] .cell.landing:hover {
+    background-color: #ffe066;
+    border-color: #000000;
+  }
 }
 
   body.clickable-restart {
@@ -218,7 +302,7 @@ body {
   .board-border {
     padding: clamp(10px, 2vw, 18px); border: 2px solid var(--accent); border-radius: 8px;
     box-shadow: 0 0 0 1px rgba(196,154,68,0.15), 0 0 60px rgba(60,30,10,0.8), inset 0 0 20px rgba(35, 23, 3, 0.426);
-    background: rgba(202, 172, 121, 0.572);
+    background: var(--container);
     
     /* Prevents mobile scrolling and pull-to-refresh when touching the board */
     touch-action: none; 
@@ -492,6 +576,10 @@ body {
         EN
       </button>
 
+        <button class="menu-item" id="contrast-toggle-btn">
+         ◪  Alto Contraste
+        </button>
+
       <!-- multiplayer.js inserts Online here -->
 
       <button class="menu-item" id="footer-share-link">
@@ -560,7 +648,7 @@ body {
 
 
 <div class="author">
-  Sambaqui • v1.3.7 • © 2026 Eduardo Eller Quadros
+  Sambaqui • v1.3.8 • © 2026 Eduardo Eller Quadros
 </div>
 </footer>
 
@@ -1260,6 +1348,22 @@ mainMenu.querySelectorAll('.menu-item').forEach(item => {
     item.addEventListener('click', () => {
         mainMenu.classList.add('hidden');
     });
+});
+
+const contrastToggleBtn = document.getElementById('contrast-toggle-btn');
+
+function applyContrastTheme(enabled) {
+  document.body.dataset.theme = enabled ? 'high-contrast' : '';
+  contrastToggleBtn.classList.toggle('active', enabled);
+}
+
+const savedContrast = localStorage.getItem('sambaqui_high_contrast') === 'true';
+applyContrastTheme(savedContrast);
+
+contrastToggleBtn.addEventListener('click', () => {
+  const next = document.body.dataset.theme !== 'high-contrast';
+  applyContrastTheme(next);
+  localStorage.setItem('sambaqui_high_contrast', String(next));
 });
 
 for (let r = 0; r < 5; r++) {
