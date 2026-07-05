@@ -255,7 +255,7 @@ function lbInjectStyles() {
       border-bottom: 1px solid rgba(122,79,46,.35); padding-bottom: .55rem;
     }
     .lb-title {
-      color: var(--gold); font-family: 'Quicksand', cursive;
+      color: var(--gold); font-family: 'Lily Script One', cursive;
       font-size: 1.25rem; letter-spacing: .07em;
     }
     .lb-x {
@@ -270,7 +270,7 @@ function lbInjectStyles() {
       font-size: .78rem; letter-spacing: .12em; color: var(--sand3); text-align: center;
     }
     .lb-score-badge {
-      text-align: center; font-family: 'Quicksand', cursive;
+      text-align: center; font-family: 'Lily Script One', cursive;
       font-size: 1.65rem; color: var(--gold); letter-spacing: .05em;
       text-shadow: 0 0 28px rgba(196,154,68,.4);
     }
@@ -326,7 +326,7 @@ function lbInjectStyles() {
     }
     .lb-tbl td:first-child { color: var(--sand3); font-size: .72rem; width: 1.8rem; }
     .lb-tbl td:nth-child(3) { text-align: center; color: var(--sand3); font-size: .8rem; }
-    .lb-tbl td:last-child { text-align: right; font-family: 'Quicksand', cursive; color: var(--gold); }
+    .lb-tbl td:last-child { text-align: right; font-family: 'Lily Script One', cursive; color: var(--gold); }
     .lb-tbl tr.lb-me td { color: var(--gold); }
     .lb-tbl tr.lb-me td:first-child,
     .lb-tbl tr.lb-me td:nth-child(3) { color: var(--gold); }
