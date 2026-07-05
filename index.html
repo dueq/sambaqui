@@ -3045,6 +3045,11 @@ applyLanguageSwitch();
 // ═══════════════════════════════════════════════════════════════
 window.state            = state;
 window.executeMove      = executeMove;
+// bestResult is reassigned (not just mutated) on every new best, so expose
+// it via a getter rather than a one-time snapshot — used by leaderboard.js
+// so players can submit today's best from the menu, not just right after
+// achieving it.
+window.getBestResult    = () => bestResult;
 Object.defineProperty(window, 'currentLang', {
   get()  { return currentLang; },
   configurable: true, enumerable: true,
