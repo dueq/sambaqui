@@ -405,25 +405,7 @@ async function lbOpen({ prompt = false, level = null, moves = null } = {}) {
         <button class="lb-x" id="lb-x">✕</button>
       </div>
 
-      ${canSubmit ? `
-      <div class="lb-prompt" id="lb-prompt">
-        <div class="lb-prompt-lbl">
-          ${prompt
-            ? lbT('Novo recorde do dia! Adicione ao ranking:', "New daily best! Add it to the ranking:")
-            : lbT('Sua melhor pontuação de hoje:', "Today's best score:")}
-        </div>
-        <div class="lb-score-badge">${level} • ${moves}</div>
-        <div class="lb-row">
-          <input class="lb-input" id="lb-name" maxlength="20"
-            placeholder="${lbT('Seu nome', 'Your name')}"
-            value="${esc(cachedName)}" autocomplete="off" spellcheck="false" />
-          <button class="lb-btn" id="lb-submit">${lbT('Enviar', 'Submit')}</button>
-        </div>
-        <div class="lb-msg" id="lb-msg"></div>
-      </div>` : `
-      <div class="lb-prompt-lbl" style="padding: .2rem 0">
-        ${lbT('Jogue o desafio de hoje para poder enviar sua pontuação!', "Play today's challenge to submit a score!")}
-      </div>`}
+
 
       <div class="lb-tabs">
         <button class="lb-tab active" id="lb-tab-today" data-tab="today">${lbT('Hoje', 'Today')}</button>
@@ -442,6 +424,26 @@ async function lbOpen({ prompt = false, level = null, moves = null } = {}) {
           <tbody id="lb-tbody"></tbody>
         </table>
       </div>
+
+            ${canSubmit ? `
+      <div class="lb-prompt" id="lb-prompt">
+        <div class="lb-prompt-lbl">
+          ${prompt
+            ? lbT('Novo recorde do dia! Adicione ao ranking:', "New daily best! Add it to the ranking:")
+            : lbT('Inclua o seu melhor resultado de hoje:', "Add your best score of today:")}
+        </div>
+        <div class="lb-score-badge">${level} • ${moves}</div>
+        <div class="lb-row">
+          <input class="lb-input" id="lb-name" maxlength="20"
+            placeholder="${lbT('Seu nome', 'Your name')}"
+            value="${esc(cachedName)}" autocomplete="off" spellcheck="false" />
+          <button class="lb-btn" id="lb-submit">${lbT('Enviar', 'Submit')}</button>
+        </div>
+        <div class="lb-msg" id="lb-msg"></div>
+      </div>` : `
+      <div class="lb-prompt-lbl" style="padding: .2rem 0">
+        ${lbT('Jogue o desafio de hoje para poder enviar sua pontuação!', "Play today's challenge to submit a score!")}
+      </div>`}
 
       <div class="lb-actions" id="lb-actions" style="display:none"></div>
     </div>
