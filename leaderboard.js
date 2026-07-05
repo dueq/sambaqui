@@ -58,7 +58,7 @@
  *   grant select on leaderboard_alltime to anon, authenticated;
  *
  *   create or replace function lb_submit_score(p_token text, p_name text, p_level int, p_moves int)
- *   returns void language plpgsql security definer set search_path = public as $$
+ *   returns void language plpgsql security definer set search_path = public, extensions as $$
  *   declare
  *     v_hash text := encode(digest(p_token, 'sha256'), 'hex');
  *     v_today date := (now() at time zone 'utc')::date;
@@ -81,7 +81,7 @@
  *   end $$;
  *
  *   create or replace function lb_rename(p_token text, p_new_name text)
- *   returns void language plpgsql security definer set search_path = public as $$
+ *   returns void language plpgsql security definer set search_path = public, extensions as $$
  *   declare
  *     v_hash text := encode(digest(p_token, 'sha256'), 'hex');
  *     v_name text := left(trim(coalesce(p_new_name, '')), 20);
@@ -91,14 +91,14 @@
  *   end $$;
  *
  *   create or replace function lb_remove_today(p_token text)
- *   returns void language plpgsql security definer set search_path = public as $$
+ *   returns void language plpgsql security definer set search_path = public, extensions as $$
  *   declare v_hash text := encode(digest(p_token, 'sha256'), 'hex');
  *   begin
  *     delete from leaderboard where owner_hash = v_hash and play_date = (now() at time zone 'utc')::date;
  *   end $$;
  *
  *   create or replace function lb_remove_all(p_token text)
- *   returns void language plpgsql security definer set search_path = public as $$
+ *   returns void language plpgsql security definer set search_path = public, extensions as $$
  *   declare v_hash text := encode(digest(p_token, 'sha256'), 'hex');
  *   begin
  *     delete from leaderboard where owner_hash = v_hash;
@@ -270,7 +270,7 @@ function lbInjectStyles() {
       font-size: .78rem; letter-spacing: .12em; color: var(--sand3); text-align: center;
     }
     .lb-score-badge {
-      text-align: center; font-family: 'Lily Script One', cursive;
+      text-align: center; font-family: 'Quicksand', cursive;
       font-size: 1.65rem; color: var(--gold); letter-spacing: .05em;
       text-shadow: 0 0 28px rgba(196,154,68,.4);
     }
@@ -383,7 +383,7 @@ async function lbOpen({ prompt = false, level = null, moves = null } = {}) {
   overlay.innerHTML = `
     <div class="lb-card">
       <div class="lb-head">
-        <span class="lb-title"> ★ ${lbT('Ranking', 'Leaderboard')}</span>
+        <span class="lb-title">🏆 ${lbT('Ranking', 'Leaderboard')}</span>
         <button class="lb-x" id="lb-x">✕</button>
       </div>
 
@@ -394,7 +394,7 @@ async function lbOpen({ prompt = false, level = null, moves = null } = {}) {
             ? lbT('Novo recorde do dia! Adicione ao ranking:', "New daily best! Add it to the ranking:")
             : lbT('Sua melhor pontuação de hoje:', "Today's best score:")}
         </div>
-        <div class="lb-score-badge"> ${level} • ${moves} </div>
+        <div class="lb-score-badge">${lbT('Nível', 'Level')} ${level} • ${moves} ${movesWord}</div>
         <div class="lb-row">
           <input class="lb-input" id="lb-name" maxlength="20"
             placeholder="${lbT('Seu nome', 'Your name')}"
@@ -610,7 +610,7 @@ function lbInjectMenuButton() {
   const btn = document.createElement('button');
   btn.id = 'lb-menu-btn';
   btn.className = 'menu-item';
-  btn.textContent = '★ Ranking';
+  btn.textContent = '🏆 Ranking';
   btn.addEventListener('click', () => lbOpen({ prompt: false }));
 
   // Same insertion point multiplayer.js uses for its own menu item, so both
