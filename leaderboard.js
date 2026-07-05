@@ -255,7 +255,7 @@ function lbInjectStyles() {
       border-bottom: 1px solid rgba(122,79,46,.35); padding-bottom: .55rem;
     }
     .lb-title {
-      color: var(--gold); font-family: 'Lily Script One', cursive;
+      color: var(--gold); font-family: 'Quicksand', cursive;
       font-size: 1.25rem; letter-spacing: .07em;
     }
     .lb-x {
@@ -326,7 +326,7 @@ function lbInjectStyles() {
     }
     .lb-tbl td:first-child { color: var(--sand3); font-size: .72rem; width: 1.8rem; }
     .lb-tbl td:nth-child(3) { text-align: center; color: var(--sand3); font-size: .8rem; }
-    .lb-tbl td:last-child { text-align: right; font-family: 'Lily Script One', cursive; color: var(--gold); }
+    .lb-tbl td:last-child { text-align: right; font-family: 'Quicksand', cursive; color: var(--gold); }
     .lb-tbl tr.lb-me td { color: var(--gold); }
     .lb-tbl tr.lb-me td:first-child,
     .lb-tbl tr.lb-me td:nth-child(3) { color: var(--gold); }
@@ -383,7 +383,7 @@ async function lbOpen({ prompt = false, level = null, moves = null } = {}) {
   overlay.innerHTML = `
     <div class="lb-card">
       <div class="lb-head">
-        <span class="lb-title">🏆 ${lbT('Ranking', 'Leaderboard')}</span>
+        <span class="lb-title"> ★ ${lbT('Ranking', 'Leaderboard')}</span>
         <button class="lb-x" id="lb-x">✕</button>
       </div>
 
@@ -394,7 +394,7 @@ async function lbOpen({ prompt = false, level = null, moves = null } = {}) {
             ? lbT('Novo recorde do dia! Adicione ao ranking:', "New daily best! Add it to the ranking:")
             : lbT('Sua melhor pontuação de hoje:', "Today's best score:")}
         </div>
-        <div class="lb-score-badge">${lbT('Nível', 'Level')} ${level} • ${moves} ${movesWord}</div>
+        <div class="lb-score-badge"> ${level} • ${moves} </div>
         <div class="lb-row">
           <input class="lb-input" id="lb-name" maxlength="20"
             placeholder="${lbT('Seu nome', 'Your name')}"
@@ -610,7 +610,7 @@ function lbInjectMenuButton() {
   const btn = document.createElement('button');
   btn.id = 'lb-menu-btn';
   btn.className = 'menu-item';
-  btn.textContent = '🏆 Ranking';
+  btn.textContent = '★ Ranking';
   btn.addEventListener('click', () => lbOpen({ prompt: false }));
 
   // Same insertion point multiplayer.js uses for its own menu item, so both
