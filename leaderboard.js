@@ -36,9 +36,9 @@
  *     on leaderboard (owner_hash, play_date);
  *
  *   -- One row per player = their single best-ever run (their best day).
- *   create view leaderboard_alltime as
+ *   create or replace view leaderboard_alltime as
  *     select distinct on (owner_hash)
- *       id, name, level, moves, owner_hash, updated_at
+ *       id, name, level, moves, owner_hash, updated_at, play_date
  *     from leaderboard
  *     order by owner_hash, level desc, moves desc, updated_at asc;
  *
@@ -179,6 +179,21 @@ function lbTodayUTC() {
   return new Date().toISOString().slice(0, 10);
 }
 
+const LB_MONTHS_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const LB_MONTHS_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// Formats a 'YYYY-MM-DD' date as e.g. "5 Jul" / "Jul 5" — day + month name
+// reads unambiguously in either language, unlike numeric-only dates where
+// PT (dd/mm) and EN (mm/dd) conventions would otherwise conflict.
+function lbFormatDate(isoDate) {
+  if (!isoDate) return '';
+  const [y, m, d] = isoDate.split('-').map(Number);
+  if (!y || !m || !d) return isoDate;
+  const day = String(d);
+  if (lbLang() === 'PT') return `${day} ${LB_MONTHS_PT[m - 1]}`;
+  return `${LB_MONTHS_EN[m - 1]} ${day}`;
+}
+
 // ── CRUD ──────────────────────────────────────────────────────────────────────
 
 async function lbFetch(tab) {
@@ -186,7 +201,7 @@ async function lbFetch(tab) {
   if (tab === 'alltime') {
     const { data, error } = await c
       .from(LB_VIEW)
-      .select('name, level, moves, owner_hash, updated_at')
+      .select('name, level, moves, play_date, owner_hash, updated_at')
       .order('level', { ascending: false })
       .order('moves', { ascending: false })
       .limit(50);
@@ -255,7 +270,7 @@ function lbInjectStyles() {
       border-bottom: 1px solid rgba(122,79,46,.35); padding-bottom: .55rem;
     }
     .lb-title {
-      color: var(--gold); font-family: 'Lily Script One', cursive;
+      color: var(--gold); font-family: 'Quicksand', cursive;
       font-size: 1.25rem; letter-spacing: .07em;
     }
     .lb-x {
@@ -271,7 +286,7 @@ function lbInjectStyles() {
     }
     .lb-score-badge {
       text-align: center; font-family: 'Lily Script One', cursive;
-      font-size: 1.65rem; color: var(--gold); letter-spacing: .05em;
+      font-size: 1.2rem; color: var(--gold); letter-spacing: .05em;
       text-shadow: 0 0 28px rgba(196,154,68,.4);
     }
     .lb-row { display: flex; gap: .45rem; }
@@ -319,17 +334,20 @@ function lbInjectStyles() {
       padding: .28rem .4rem; border-bottom: 1px solid rgba(122,79,46,.3);
     }
     .lb-tbl th:nth-child(3) { text-align: center; }
-    .lb-tbl th:last-child { text-align: right; }
+    .lb-tbl th:nth-child(4) { text-align: right; }
+    .lb-tbl th.lb-date { text-align: right; }
     .lb-tbl td {
-      font-size: .86rem; letter-spacing: .05em; color: var(--sand);
+      font-size: 1.2rem; letter-spacing: .05em; color: var(--sand);
       padding: .42rem .4rem; border-bottom: 1px solid rgba(122,79,46,.14);
     }
-    .lb-tbl td:first-child { color: var(--sand3); font-size: .72rem; width: 1.8rem; }
-    .lb-tbl td:nth-child(3) { text-align: center; color: var(--sand3); font-size: .8rem; }
-    .lb-tbl td:last-child { text-align: right; font-family: 'Lily Script One', cursive; color: var(--gold); }
+    .lb-tbl td:first-child { color: var(--sand3); font-size: 1rem; width: 1.8rem; }
+    .lb-tbl td:nth-child(3) { text-align: center; font-family: 'Lily Script One', cursive; color: var(--gold); font-size: 1.2rem; }
+    .lb-tbl td:nth-child(4) { text-align: right; font-family: 'Lily Script One', cursive; color: var(--gold); font-size: 1.2rem}
+    .lb-tbl td.lb-date { text-align: right; color: var(--sand3); font-size: .68rem; font-family: 'Quicksand', serif; font-size: 1.2rem;}
     .lb-tbl tr.lb-me td { color: var(--gold); }
     .lb-tbl tr.lb-me td:first-child,
     .lb-tbl tr.lb-me td:nth-child(3) { color: var(--gold); }
+    .lb-tbl tr.lb-me td.lb-date { color: var(--gold); opacity: .75; }
     .lb-tbl tr:last-child td { border-bottom: none; }
     .lb-empty {
       text-align: center; font-size: .74rem; letter-spacing: .1em;
@@ -375,7 +393,7 @@ async function lbOpen({ prompt = false, level = null, moves = null } = {}) {
   const canSubmit  = level > 0;
 
   const cachedName  = localStorage.getItem(NAME_KEY) || '';
-  const movesWord   = lbT(moves === 1 ? 'movimento' : 'movimentos', moves === 1 ? 'move' : 'moves');
+  const movesWord   = lbT(moves === 1 ? 'ponto' : 'pontos', moves === 1 ? 'point' : 'points');
 
   const overlay = document.createElement('div');
   overlay.className = 'lb-overlay';
@@ -394,7 +412,7 @@ async function lbOpen({ prompt = false, level = null, moves = null } = {}) {
             ? lbT('Novo recorde do dia! Adicione ao ranking:', "New daily best! Add it to the ranking:")
             : lbT('Sua melhor pontuação de hoje:', "Today's best score:")}
         </div>
-        <div class="lb-score-badge">${lbT('Nível', 'Level')} ${level} • ${moves} ${movesWord}</div>
+        <div class="lb-score-badge">${level} • ${moves}</div>
         <div class="lb-row">
           <input class="lb-input" id="lb-name" maxlength="20"
             placeholder="${lbT('Seu nome', 'Your name')}"
@@ -415,7 +433,7 @@ async function lbOpen({ prompt = false, level = null, moves = null } = {}) {
       <div class="lb-wrap">
         <div class="lb-loading" id="lb-loading">${lbT('Carregando…', 'Loading…')}</div>
         <table class="lb-tbl" id="lb-tbl" style="display:none">
-          <thead><tr>
+          <thead id="lb-thead"><tr>
             <th>#</th>
             <th>${lbT('Nome', 'Name')}</th>
             <th>${lbT('Nível', 'Lvl')}</th>
@@ -480,9 +498,23 @@ async function lbOpen({ prompt = false, level = null, moves = null } = {}) {
 async function lbRefreshTable() {
   const loadEl   = document.getElementById('lb-loading');
   const tblEl    = document.getElementById('lb-tbl');
+  const theadEl  = document.getElementById('lb-thead');
   const tbodyEl  = document.getElementById('lb-tbody');
   const actEl    = document.getElementById('lb-actions');
   if (!tbodyEl) return;
+
+  const isAllTime = lbActiveTab === 'alltime';
+  const colCount  = isAllTime ? 5 : 4;
+
+  if (theadEl) {
+    theadEl.innerHTML = `<tr>
+      <th>#</th>
+      <th>${lbT('Nome', 'Name')}</th>
+      <th>${lbT('Nível', 'Lvl')}</th>
+      <th>${lbT('Mov.', 'Mvs')}</th>
+      ${isAllTime ? `<th class="lb-date">${lbT('Data', 'Date')}</th>` : ''}
+    </tr>`;
+  }
 
   if (loadEl)  { loadEl.style.display = 'block'; loadEl.textContent = lbT('Carregando…', 'Loading…'); }
   if (tblEl)   tblEl.style.display = 'none';
@@ -496,17 +528,18 @@ async function lbRefreshTable() {
   let mine = null;
 
   if (rows.length === 0) {
-    const emptyMsg = lbActiveTab === 'alltime'
+    const emptyMsg = isAllTime
       ? lbT('Nenhuma pontuação ainda.', 'No scores yet.')
       : lbT('Nenhuma pontuação hoje ainda.', 'No scores today yet.');
-    tbodyEl.innerHTML = `<tr><td colspan="4"><div class="lb-empty">${emptyMsg}</div></td></tr>`;
+    tbodyEl.innerHTML = `<tr><td colspan="${colCount}"><div class="lb-empty">${emptyMsg}</div></td></tr>`;
   } else {
     rows.forEach((row, i) => {
       const isMine = myHash && row.owner_hash === myHash;
       if (isMine) mine = row;
       const tr = document.createElement('tr');
       if (isMine) tr.className = 'lb-me';
-      tr.innerHTML = `<td>${i + 1}</td><td>${esc(row.name)}${isMine ? ' ✎' : ''}</td><td>${row.level}</td><td>${row.moves}</td>`;
+      const dateCell = isAllTime ? `<td class="lb-date">${lbFormatDate(row.play_date)}</td>` : '';
+      tr.innerHTML = `<td>${i + 1}</td><td>${esc(row.name)}${isMine ? ' ✎' : ''}</td><td>${row.level}</td><td>${row.moves}</td>${dateCell}`;
       tbodyEl.appendChild(tr);
     });
   }
@@ -515,7 +548,7 @@ async function lbRefreshTable() {
   if (!actEl) return;
   if (mine) {
     actEl.style.display = 'flex';
-    const removeLabel = lbActiveTab === 'alltime'
+    const removeLabel = isAllTime
       ? lbT('Remover histórico', 'Remove history')
       : lbT('Remover pontuação de hoje', "Remove today's score");
     actEl.innerHTML = `
