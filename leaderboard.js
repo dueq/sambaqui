@@ -359,10 +359,20 @@ function lbClose() { document.getElementById('lb-overlay')?.remove(); }
 
 let lbActiveTab = 'today';
 
-async function lbOpen({ prompt = false, level = 0, moves = 0 } = {}) {
+async function lbOpen({ prompt = false, level = null, moves = null } = {}) {
   if (document.getElementById('lb-overlay')) return;
   lbInjectStyles();
   lbActiveTab = 'today';
+
+  // When opened generically (e.g. from the menu, with no explicit score),
+  // fall back to today's local best so there's always a way to submit —
+  // not just in the instant right after beating it.
+  if (level === null || moves === null) {
+    const b = (typeof window.getBestResult === 'function') ? window.getBestResult() : null;
+    level = b ? b.level : 0;
+    moves = b ? b.moves : 0;
+  }
+  const canSubmit  = level > 0;
 
   const cachedName  = localStorage.getItem(NAME_KEY) || '';
   const movesWord   = lbT(moves === 1 ? 'movimento' : 'movimentos', moves === 1 ? 'move' : 'moves');
@@ -377,10 +387,12 @@ async function lbOpen({ prompt = false, level = 0, moves = 0 } = {}) {
         <button class="lb-x" id="lb-x">✕</button>
       </div>
 
-      ${prompt ? `
+      ${canSubmit ? `
       <div class="lb-prompt" id="lb-prompt">
         <div class="lb-prompt-lbl">
-          ${lbT('Novo recorde do dia! Adicione ao ranking:', "New daily best! Add it to the ranking:")}
+          ${prompt
+            ? lbT('Novo recorde do dia! Adicione ao ranking:', "New daily best! Add it to the ranking:")
+            : lbT('Sua melhor pontuação de hoje:', "Today's best score:")}
         </div>
         <div class="lb-score-badge">${lbT('Nível', 'Level')} ${level} • ${moves} ${movesWord}</div>
         <div class="lb-row">
@@ -390,7 +402,10 @@ async function lbOpen({ prompt = false, level = 0, moves = 0 } = {}) {
           <button class="lb-btn" id="lb-submit">${lbT('Enviar', 'Submit')}</button>
         </div>
         <div class="lb-msg" id="lb-msg"></div>
-      </div>` : ''}
+      </div>` : `
+      <div class="lb-prompt-lbl" style="padding: .2rem 0">
+        ${lbT('Jogue o desafio de hoje para poder enviar sua pontuação!', "Play today's challenge to submit a score!")}
+      </div>`}
 
       <div class="lb-tabs">
         <button class="lb-tab active" id="lb-tab-today" data-tab="today">${lbT('Hoje', 'Today')}</button>
@@ -428,7 +443,7 @@ async function lbOpen({ prompt = false, level = 0, moves = 0 } = {}) {
   });
 
   // Submit flow
-  if (prompt) {
+  if (canSubmit) {
     const nameEl = overlay.querySelector('#lb-name');
     const subBtn = overlay.querySelector('#lb-submit');
     const msgEl  = overlay.querySelector('#lb-msg');
