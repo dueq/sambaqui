@@ -198,7 +198,7 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
   .cell.selectable:hover {
     cursor: pointer;
     border-color: rgba(191, 137, 29, 0.747);
-    background-color: rgba(235, 175, 9, 0.748);
+    background-color: rgba(167, 125, 11, 0.748);
   }
   .cell.landing:hover {
     border-color: var(--sand);
@@ -475,7 +475,7 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
   }
   .piece.sneaking {
     animation: pulse-sneak 0.4s ease-in-out infinite !important;
-    box-shadow: 0 0 24px rgba(222, 150, 5, 0.693);
+    box-shadow: 0 0 24px rgba(222, 150, 5, 0.0);
   }
   @keyframes pulse-sneak {
     0%,100% { box-shadow: 0 3px 8px rgba(0,0,0,0.5), 0 0 0 3px rgba(214, 156, 19, 0.4), 0 0 12px rgba(229, 151, 25, 0.25); }
@@ -1034,7 +1034,7 @@ const BOARD_PATTERNS = [
     T: { player: 2, active: false }, W: { player: 2, active: false },
   },
 
-        // Pattern 6 Quarta
+        // Pattern 6
   {
     B: { player: 1, active: true }, F: { player: 1, active: true },
     O: { player: 1, active: true }, W: { player: 1, active: true },
@@ -1044,10 +1044,10 @@ const BOARD_PATTERNS = [
 
         // Pattern 7 
   {
-    A: { player: 1, active: true }, D: { player: 1, active: true },
-    V: { player: 1, active: true }, Y: { player: 1, active: true },
-    B: { player: 2, active: false }, E: { player: 2, active: false },
-    U: { player: 2, active: false }, X: { player: 2, active: false },
+    A: { player: 1, active: true }, E: { player: 1, active: true },
+    P: { player: 1, active: true }, V: { player: 1, active: true },
+    D: { player: 2, active: false }, J: { player: 2, active: false },
+    U: { player: 2, active: false }, Y: { player: 2, active: false },
   },
 
         // Pattern 8
@@ -1090,6 +1090,31 @@ const BOARD_PATTERNS = [
     R: { player: 2, active: false }, T: { player: 2, active: false },
   },
 
+                 // Pattern 12
+  {
+    A: { player: 1, active: true }, E: { player: 1, active: true },
+    H: { player: 1, active: true }, W: { player: 1, active: true },
+    C: { player: 2, active: false }, R: { player: 2, active: false },
+    U: { player: 2, active: false }, Y: { player: 2, active: false },
+  },
+
+                   // Pattern 13
+  {
+    F: { player: 1, active: true }, C: { player: 1, active: true },
+    R: { player: 1, active: true }, O: { player: 1, active: true },
+    H: { player: 2, active: false }, K: { player: 2, active: false },
+    T: { player: 2, active: false }, W: { player: 2, active: false },
+  },
+  
+                     // Pattern 14
+  {
+    B: { player: 1, active: true }, F: { player: 1, active: true },
+    S: { player: 1, active: true }, W: { player: 1, active: true },
+    C: { player: 2, active: false }, G: { player: 2, active: false },
+    X: { player: 2, active: false }, T: { player: 2, active: false },
+  }
+
+
 
 ];
 
@@ -1105,7 +1130,7 @@ function makeInitialPieces() {
   // 2. Use the modulo operator (%) to safely map the seed to your array length
    const patternIndex = dateSeed % BOARD_PATTERNS.length;
 
-   //const patternIndex = 8
+  // const patternIndex = 14
 
   // 3. Return a *deep copy* so players don't accidentally mutate the master list
   return JSON.parse(JSON.stringify(BOARD_PATTERNS[patternIndex]));
