@@ -21,20 +21,20 @@
 
   :root {
     --sand:       #b9a788;
-    --sand2:      #b8a789eb;
-    --sand3:      #917c55;
+    --sand2:      #a0937deb;
+    --sand3:      #8e7f68;
     --dark:       #1c1510;
     --mid:        #6c623e;
     --accent:     #7a4f2e;
     --gold:       #c49a44;
-    --container: rgba(130, 105, 67, 0.954);
+    --container: rgba(128, 116, 96, 0.954);
     --teal:       #7ab8c0;
     --cell-size:  clamp(64px, 12vw, 90px);
-    --gap:        clamp(2px, 0.6vw, 4px);
+    --gap:        clamp(2px, 0.6vw, 6px);
   }
 
 body {
-  background-color: #241a0e;
+  background-color: #38250d;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   font-family: 'Quicksand', serif; color: var(--sand);
   padding: 2rem 0.5rem; gap: 1.1rem;
@@ -52,7 +52,7 @@ body[data-theme="high-contrast"] {
   --accent: #ffcc00cd;
   --gold:   #eabd09;
   --container: rgba(15, 15, 15, 0.572);
-    --cell-size:  clamp(60px, 12vw, 90px);
+    --cell-size:  clamp(64px, 12vw, 92px);
   --teal:   #00e5ff;
   --gap:     clamp(0px, 0.6vw, 3px);
 }
@@ -197,16 +197,16 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
 @media (hover: hover) and (pointer: fine) {
   .cell.selectable:hover {
     cursor: pointer;
-    border-color: rgba(191, 137, 29, 0.331);
-    background-color: rgba(212, 176, 75, 0.843);
+    border-color: rgba(191, 137, 29, 0.747);
+    background-color: rgba(235, 175, 9, 0.748);
   }
   .cell.landing:hover {
     border-color: var(--sand);
-    background-color: rgba(255, 170, 0, 0.929);
+    background-color: rgba(248, 178, 39, 0.951);
   }
     .cell.dark-sq.landing:hover {
     border-color: var(--sand);
-    background-color: rgba(255, 170, 0, 0.852);
+    background-color: rgba(251, 181, 41, 0.938);
   }
   .nav-btn:hover:not(:disabled) {
     background: var(--mid); border-color: var(--sand); color: var(--sand);
@@ -397,28 +397,28 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
     background-image:
       radial-gradient(ellipse at 30% 30%, rgba(207, 206, 205, 0.423) 0%, transparent 60%),
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='40' height='40' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
-    border: 1px solid var(--sand3); border-radius:4px;
+    border: 1px solid var(--sand3); border-radius:5px;
     display: flex; align-items: center; justify-content: center;
     position: relative; cursor: default; transition: border-color 0.15s, background-color 0.15s;
   }
   .cell.dark-sq {
     background-color: var(--sand3);
-    background-image: radial-gradient(ellipse at 30% 30%, rgba(255, 255, 255, 0.139) 0%, transparent 60%);
+    background-image: radial-gradient(ellipse at 70% 70%, rgba(97, 93, 86, 0.226) 0%, transparent 60%);
   }
   .cell.selectable            { cursor: pointer; }
 
-  .cell.selected              { border-color: var(--gold); box-shadow: inset 0 0 0 2px rgba(255, 190, 60, 0.5); cursor: pointer; }
-  .cell.landing               { cursor: pointer; border-color: rgba(191, 137, 29, 0.331); 
-    background-color: rgba(212, 176, 75, 0.843); }
-  .cell.dark-sq.landing       { background-color: rgba(198, 153, 63, 0.885); }
+  .cell.selected              { border-color: var(--gold); box-shadow: inset 0 0 0 2px rgba(166, 151, 120, 0.947); cursor: pointer; }
+  .cell.landing               { cursor: pointer; border-color: rgba(191, 137, 29, 0.689); 
+    background-color: rgba(246, 182, 53, 0.474); }
+  .cell.dark-sq.landing       { background-color: rgba(246, 182, 53, 0.474); }
 
   .cell.blocked-landing       { box-shadow: inset 0 0 0 2px rgba(196,154,68,0.5); cursor: not-allowed; }
   .cell.dark-sq.blocked-landing { box-shadow: inset 0 0 0 2px rgba(196,154,68,0.5); }
   .cell.los-target            { color: rgba(229, 180, 119, 0.944); }
-  .cell.win-line              { border-color: var(--gold) !important; background-color: rgba(194, 135, 19, 0.762) !important;  }
-  .cell.dark-sq.win-line      { background-color: rgba(175, 125, 25, 0.762) !important;}
-  .cell.win-line.enemy-win         { border-color: #c0704a !important; background-color: rgba(192, 112, 74, 0.762) !important; }
-  .cell.dark-sq.win-line.enemy-win { background-color: rgba(172, 92, 54, 0.762) !important; }
+  .cell.win-line              { border-color: var(--gold) !important; background-color: rgba(233, 161, 16, 0.864) !important;  }
+  .cell.dark-sq.win-line      { background-color: rgba(233, 161, 16, 0.864) !important;}
+  .cell.win-line.enemy-win         { border-color: #c0704a !important; background-color: rgba(166, 79, 38, 0.762) !important; }
+  .cell.dark-sq.win-line.enemy-win { background-color: rgba(166, 79, 38, 0.762)  !important; }
 
   @keyframes win-flash {
     0%,100% { background-color: rgba(236, 218, 182, 0.805); }
