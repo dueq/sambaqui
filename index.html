@@ -34,7 +34,7 @@
   }
 
 body {
-  background-color: #38250d;
+  background-color: #20180d;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   font-family: 'Quicksand', serif; color: var(--sand);
   padding: 2rem 0.5rem; gap: 1.1rem;
@@ -42,8 +42,9 @@ body {
 
   /* ── High Contrast── */
 
+
 body[data-theme="high-contrast"] {
-    background-color: #1a1004;
+  background-color: #20180d;
   --sand:   #ffffff;
   --sand2:  #9b9288;
   --sand3:  #d9d9d9;
@@ -405,6 +406,15 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
     background-color: var(--sand3);
     background-image: radial-gradient(ellipse at 70% 70%, rgba(97, 93, 86, 0.19) 0%, transparent 60%);
   }
+  /* Persistent "painted" cells: squares that were part of a past winning line
+     this run. They accumulate as the player wins more rounds and are wiped
+     on loss (see restartGame). Declared early so any active-state rule
+     below (landing/selected/win-line/etc.) still takes visual priority.
+     Gold = a human win; red = the AI's win (the run-ending line). */
+  .cell.painted               { background-color: rgba(160, 190, 27, 0.32); border-color: rgba(115, 191, 29, 0.55); }
+  .cell.dark-sq.painted       { background-color: rgba(134, 164, 24, 0.4); border-color: rgba(115, 191, 29, 0.55);}
+  .cell.painted-enemy         { background-color: rgba(166, 79, 38, 0.32); border-color: rgba(166, 79, 38, 0.55); }
+  .cell.dark-sq.painted-enemy { background-color: rgba(166, 79, 38, 0.4); }
   .cell.selectable            { cursor: pointer; }
 
   .cell.selected              { border-color: var(--gold); box-shadow: inset 0 0 0 2px rgba(166, 151, 120, 0.947); cursor: pointer; }
@@ -571,6 +581,10 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
     <button class="mode-btn" id="menu-btn">Menu</button>
 
     <div class="menu-dropdown hidden" id="main-menu">
+      <button class="menu-item" id="mode-toggle">
+        Modo Solo
+      </button>
+
       <button class="menu-item" id="open-tutorial-btn">
         Como Jogar
       </button>
@@ -580,7 +594,7 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
       </button>
 
         <button class="menu-item" id="contrast-toggle-btn">
-         ◪  Alto Contraste
+         ◐  Alto Contraste
         </button>
 
       <!-- multiplayer.js inserts Online here -->
@@ -641,9 +655,9 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
 
 <footer>
   <div class="links">
-    <a href="https://ko-fi.com/eduardoeller" target="_blank" id="footer-support-link"></a>
+    <a href="https://ko-fi.com/eduardoeller" target="_blank" id="footer-support-link-bar"></a>
     <div class="footer-divider"></div>
-    <span id="footer-share-link"></span>
+    <span id="footer-share-link-bar"></span>
   </div>
   <div id="toast-msg"></div>
 
@@ -651,7 +665,7 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
 
 
 <div class="author">
-  Sambaqui • v1.3.9 • © 2026 Eduardo Eller Quadros
+  Sambaqui • v1.4.0 • © 2026 Eduardo Eller Quadros
 </div>
 </footer>
 
@@ -684,9 +698,9 @@ let currentLang = localStorage.getItem('sambaqui_lang') || 'PT';
 
 const translations = {
   EN: {
-    newGame: "Computer",
-    practice: "Solo Mode",
-    tutorial: "❖\uFE0E How to Play",
+    newGame: "⧉ Classic",
+    practice: "☕︎ Local Game",
+    tutorial: "⛶\uFE0E How to Play",
     language: "🅰\uFE0E Português",
     level: "Level⠀",
     best: "Score⠀",
@@ -725,7 +739,7 @@ const translations = {
     supportLink: "♥\uFE0E Support Me",
     shareLink: "↪\uFE0E Share the Game",
     shareResultBtn: "↪\uFE0E Share Result",
-    shareResultMsg: "Sambaqui {bestLevel}•{bestMoves}\n{board}\n{url}",
+    shareResultMsg: "Sambaqui {bestLevel}•{bestMoves}\n{filled}/25 painted:\n{board}\n{url}",
     linkCopied: "Link copied to clipboard!",
     tutorialNext: "Next >",
     tutorialPrev: "< Prev",
@@ -739,9 +753,9 @@ const translations = {
    ]
   },
   PT: {
-    newGame: "Computador",
-    practice: "Modo Solo",
-    tutorial: " ❖\uFE0E Como Jogar",
+    newGame: "⧉ Clássico",
+    practice: "☕︎ Jogo Local",
+    tutorial: " ⛶\uFE0E Como Jogar",
     language: "🅰\uFE0E English",
     level: "Nível⠀",
     best: "Pontos⠀",
@@ -780,7 +794,7 @@ const translations = {
     supportLink: "♥\uFE0E Apoie o Jogo",
     shareLink: "↪\uFE0E Compartilhe",
     shareResultBtn: "↪\uFE0E Compartilhar",
-    shareResultMsg: "Sambaqui {bestLevel}•{bestMoves}\n{board}\n{url}",
+    shareResultMsg: "Sambaqui {bestLevel}•{bestMoves}\n{filled}/25 pintado:\n{board}\n{url}",
     linkCopied: "Link copiado!",
     tutorialNext: "Próximo >",
     tutorialPrev: "< Anterior",
@@ -1148,6 +1162,7 @@ const state = {
   losSquares: [],
   animating: false,
   highlightingActive: false,
+  paint: {}, // { [label]: 'gold' | 'red' } — squares painted from past wins this run; persists round-to-round, cleared on loss
 };
 state.history.add(serialiseState(state.pieces, state.currentPlayer));
 
@@ -1252,21 +1267,49 @@ function restoreTimeline(idx) {
   if (!state.gameOver && vsAI && state.currentPlayer !== humanPlayerColor) triggerAIMove();
 }
 
-function doShare() {
-  const text = buildShareText();
+function showToast(text, duration = 2000) {
+  toastMsgEl.textContent = text;
+  toastMsgEl.style.opacity = '1';
+  setTimeout(() => { toastMsgEl.style.opacity = '0'; }, duration);
+}
+
+// Tries the native share sheet, then clipboard, then falls back to just
+// displaying the text so the player can copy it by hand. Every branch ends
+// in visible feedback — nothing fails silently (the native share sheet can
+// be blocked in sandboxed/embedded contexts, and older or non-HTTPS
+// contexts can block the Clipboard API too).
+async function shareOrCopy(text) {
   if (navigator.share) {
-    navigator.share({ text }).catch(() => {});
-  } else {
-    navigator.clipboard.writeText(text).then(() => {
-      toastMsgEl.textContent = t('linkCopied');
-      toastMsgEl.style.opacity = '1';
-      setTimeout(() => { toastMsgEl.style.opacity = '0'; }, 2000);
-    }).catch(() => {
-      toastMsgEl.textContent = text;
-      toastMsgEl.style.opacity = '1';
-      setTimeout(() => { toastMsgEl.style.opacity = '0'; }, 4000);
-    });
+    try {
+      await navigator.share({ text });
+      return; // shared successfully, nothing else to do
+    } catch (err) {
+      if (err && err.name === 'AbortError') return; // player cancelled the share sheet on purpose
+      // otherwise (share blocked, unsupported, etc.) fall through to clipboard
+    }
   }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast(t('linkCopied'), 2000);
+      return;
+    } catch (err) {
+      // clipboard blocked too — fall through to showing the text directly
+    }
+  }
+  showToast(text, 4000);
+}
+
+// The real page URL, guarded against sandboxed/embedded contexts (e.g. an
+// "about:srcdoc" iframe) where location.href isn't a link a player could
+// actually use.
+function getShareUrl() {
+  const href = window.location.href;
+  return /^https?:\/\//.test(href) ? href : '';
+}
+
+function doShare() {
+  shareOrCopy(buildShareText());
 }
 
 function showResultBanner(winner) {
@@ -1300,32 +1343,37 @@ function clearResultBanner() {
   resultBannerSlot.innerHTML = '';
 }
 
-// ── Build the emoji board from today's initial pattern ──────────────────────
+// ── Build the emoji board from the run's final painted result ───────────────
+// Gold = a human win, red = the AI's win, blank = never painted this run.
 function buildEmojiBoard() {
-  const pattern = makeInitialPieces(); // always returns today's pattern (deep copy)
   let rows = [];
   for (let r = 0; r < 5; r++) {
     let row = '';
     for (let c = 0; c < 5; c++) {
       const label = rcToLabel(r, c);
-      const piece = pattern[label];
-      if (!piece)           row += '⬜️';
-      else if (piece.player === 1) row += '🌕';
-      else                  row += '🌑';
+      const color = state.paint[label];
+      if (color === 'gold')      row += '🟩';
+      else if (color === 'red')  row += '🟧';
+      else                       row += '⬜️';
     }
     rows.push(row);
   }
   return rows.join('\n');
 }
 
+function paintedCount() {
+  return Object.values(state.paint).filter(color => color === 'gold').length;
+}
+
 function buildShareText() {
   const board = buildEmojiBoard();
+  const filled = paintedCount();
   const level = humanStreak + 1;
   const moves = playerMoveCount;
   const bestLevel = bestResult.level || 0;
   const bestMoves = bestResult.moves || 0;
-  const url   = window.location.href;
-  return t('shareResultMsg', { board, level, moves, bestLevel, bestMoves, url });
+  const url   = getShareUrl();
+  return t('shareResultMsg', { board, filled, level, moves, bestLevel, bestMoves, url }).trimEnd();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1356,7 +1404,9 @@ const statsLossEl = document.getElementById('stats-loss');
 const statsLossTextEl = document.getElementById('stats-loss-text');
 const statsBestTextEl = document.getElementById('stats-best-text');
 const footerSupportLink = document.getElementById('footer-support-link');
+const footerSupportLinkBar = document.getElementById('footer-support-link-bar');
 const footerShareLink = document.getElementById('footer-share-link');
+const footerShareLinkBar = document.getElementById('footer-share-link-bar');
 const toastMsgEl = document.getElementById('toast-msg');
 const cellEls = {};
 
@@ -1697,6 +1747,13 @@ if (victory) {
   state.winLine._winner = victory.winner;
   state.sneaking = false;
   state.losSquares = [];
+
+  // Board painting: the winning squares stay painted, accumulating round
+  // after round. The AI's win paints red; any other win paints gold.
+  // Cleared only on a full reset (see restartGame).
+  const isEnemyWin = vsAI && victory.winner !== humanPlayerColor;
+  const paintColor = isEnemyWin ? 'red' : 'gold';
+  victory.line.forEach(sq => { state.paint[sq] = paintColor; });
 
   // Freeze BEFORE humanStreak is incremented for next round
   state.lastFinalLevel = humanStreak + 1;
@@ -2502,6 +2559,13 @@ function render() {
       cell.classList.add('path');
     }
 
+    // Persistent painted squares from past wins this run. Skipped when the
+    // square is part of the *current* win-line so that flash stays distinct.
+    const paintColor = state.paint[label];
+    if (paintColor && !cell.classList.contains('win-line')) {
+      cell.classList.add(paintColor === 'red' ? 'painted-enemy' : 'painted');
+    }
+
     if (piece) {
       const el = document.createElement('div');
       if (isSelected) {
@@ -2588,6 +2652,13 @@ function restartGame(forceResetColor) {
   state.lastWinner = null;
   state.history.add(serialiseState(state.pieces, state.currentPlayer));
 
+  // A full reset (loss / new game / mode switch) wipes the painted board.
+  // Advancing to the next round (forceResetColor falsy) keeps it, so the
+  // painting accumulates as the player keeps winning.
+  if (forceResetColor) {
+    state.paint = {};
+  }
+
   timeline.length = 0;
   timelineIndex = -1;
   moveLog.length = 0;
@@ -2669,11 +2740,13 @@ function updateMetaDisplay() {
     }
   }
 
-//  modeToggleBtn.textContent = vsAI ? t('practice') : t('newGame');
+  modeToggleBtn.textContent = vsAI ? t('practice') : t('newGame');
   openTutorialBtn.textContent = t('tutorial');
   langToggleBtn.textContent = t('language');
   footerSupportLink.textContent = t('supportLink');
+  if (footerSupportLinkBar) footerSupportLinkBar.textContent = t('supportLink');
   footerShareLink.textContent = t('shareLink');
+  if (footerShareLinkBar) footerShareLinkBar.textContent = t('shareLink');
 }
 
 function toggleLanguage() {
@@ -2764,21 +2837,19 @@ document.addEventListener('click', (e) => {
 
 undoBtn.addEventListener('click', () => { if (!undoBtn.disabled && !vsAI) restoreTimeline(timelineIndex - 1); });
 redoBtn.addEventListener('click', () => { if (!redoBtn.disabled && !vsAI) restoreTimeline(timelineIndex + 1); });
-//modeToggleBtn.addEventListener('click', () => setMode(!vsAI));
+modeToggleBtn.addEventListener('click', () => setMode(!vsAI));
 openTutorialBtn.addEventListener('click', () => launchTutorial(unlockedTutorialTrigger));
 langToggleBtn.addEventListener('click', toggleLanguage);
 
-footerShareLink.addEventListener('click', () => {
-  navigator.clipboard.writeText(window.location.href).then(() => {
-    toastMsgEl.textContent = t('linkCopied');
-    toastMsgEl.style.opacity = '1';
-    setTimeout(() => { toastMsgEl.style.opacity = '0'; }, 2000);
-  }).catch(() => {
-    toastMsgEl.textContent = window.location.href;
-    toastMsgEl.style.opacity = '1';
-    setTimeout(() => { toastMsgEl.style.opacity = '0'; }, 4000);
-  });
-});
+function shareGameLink() {
+  const url = getShareUrl();
+  // If there's no real page URL to hand out (e.g. an embedded/sandboxed
+  // preview), share the fuller result text instead of a meaningless
+  // internal URL like "about:srcdoc".
+  shareOrCopy(url || buildShareText());
+}
+footerShareLink.addEventListener('click', shareGameLink);
+if (footerShareLinkBar) footerShareLinkBar.addEventListener('click', shareGameLink);
 
 applyLanguageSwitch();
 
