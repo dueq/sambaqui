@@ -106,12 +106,13 @@ function buildPanelHTML() {
   return `
 <div id="mp-panel" style="
   position:fixed; inset:0; z-index:200;
-  background:rgba(10,6,3,0.92); z-index:300;
+  background:rgba(10,6,3,0.5); z-index:300;
   display:flex; align-items:center; justify-content:center;
-  font-family:'Lato',serif; animation:fade-in .3s ease;
+  font-family:'Quicksand',serif; animation:fade-in .3s ease;
 ">
   <div style="
-    background:#241a12; border:2px solid var(--accent); border-radius:10px;
+    background: #241a12f6;
+    border: 1px solid var(--accent); border-radius:10px;
     width:90%; max-width:360px; padding:1.8rem 2rem;
     box-shadow:0 10px 40px rgba(0,0,0,.85);
     display:flex; flex-direction:column; gap:1.2rem;
@@ -119,11 +120,11 @@ function buildPanelHTML() {
 
     <!-- Header -->
     <div style="display:flex; justify-content:space-between; align-items:center;
-                border-bottom:1px solid rgba(122,79,46,.35); padding-bottom:.6rem;">
-      <span style="color:var(--gold); font-size:1.3rem; font-weight:700; letter-spacing:.06em;">🌐\uFE0E Jogar Online</span>
+       border-bottom:1px solid rgba(122,79,46,.35); padding-bottom:.6rem;">
+      <span style="color:var(--gold); font-size:1.2rem;       font-size: 1.25rem; letter-spacing: .07em;">⧉\uFE0E Multiplayer</span>
       <button id="mp-close-btn" style="background:none; border:none; color:var(--sand3);
         font-size:1.3rem; cursor:pointer; line-height:1; padding:.2rem .4rem;"
-        title="Fechar / Close">✕</button>
+        title="Fechar">✕</button>
     </div>
 
     <!-- Lobby screen (shown first) -->
@@ -254,7 +255,7 @@ if (!menu) {
 const btn = document.createElement('button');
 btn.id = 'mp-online-btn';
 btn.className = 'menu-item';
-btn.textContent = '🌐\uFE0E Jogo Online';
+btn.textContent = '⧉\uFE0E Multiplayer';
 btn.addEventListener('click', onOnlineBtnClick);
 
 menu.insertBefore(
