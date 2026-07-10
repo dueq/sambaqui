@@ -254,14 +254,14 @@ function lbInjectStyles() {
   s.textContent = `
     .lb-overlay {
       position: fixed; inset: 0; z-index: 300;
-      background: rgba(10,6,3,0.92);
+      background:rgba(10,6,3,0.5);
       display: flex; align-items: center; justify-content: center;
       font-family: 'Quicksand', serif;
       animation: fade-in .25s ease;
     }
     .lb-card {
-      background: #1e1610; border: 2px solid var(--accent); border-radius: 10px;
-      width: 92%; max-width: 390px; padding: 1.5rem 1.7rem;
+      background: #241a12f6; border: 1px solid var(--accent); border-radius: 10px;
+      width: 92%; max-width: 360px; padding: 1.5rem 1.7rem;
       box-shadow: 0 12px 50px rgba(0,0,0,.85);
       display: flex; flex-direction: column; gap: 1rem;
     }
@@ -401,7 +401,7 @@ async function lbOpen({ prompt = false, level = null, moves = null } = {}) {
   overlay.innerHTML = `
     <div class="lb-card">
       <div class="lb-head">
-        <span class="lb-title">🏆 ${lbT('Ranking', 'Leaderboard')}</span>
+        <span class="lb-title">★ ${lbT('Ranking', 'Leaderboard')}</span>
         <button class="lb-x" id="lb-x">✕</button>
       </div>
 
@@ -645,7 +645,7 @@ function lbInjectMenuButton() {
   const btn = document.createElement('button');
   btn.id = 'lb-menu-btn';
   btn.className = 'menu-item';
-  btn.textContent = '🏆 Ranking';
+  btn.textContent = '★ Ranking';
   btn.addEventListener('click', () => lbOpen({ prompt: false }));
 
   // Same insertion point multiplayer.js uses for its own menu item, so both
