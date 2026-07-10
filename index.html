@@ -526,19 +526,19 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
 
   /* ── Tutorial Card ── */
   .tutorial-card {
-    background: #241a12; border: 2px solid var(--accent); border-radius: 8px;
-    width: 90%; max-width: 440px; padding: 1.8rem; display: flex; flex-direction: column; gap: 1.2rem;
+    background: #2f1b0bee; border: 2px solid var(--accent); border-radius: 8px;
+    width: 90%; max-width: 360px; padding: 1.4rem; display: flex; flex-direction: column; gap: 1.2rem;
     box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.4);
     position: relative;
   }
   .tutorial-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(122,79,46,0.3); padding-bottom: 0.6rem; gap: 0.5rem; }
   .tutorial-title-area { display: flex; align-items: center; gap: 0.6rem; }
-  .tutorial-title { color: var(--gold); font-size: 1.4rem; font-weight: bold; letter-spacing: 0.05em; }
-  .tutorial-pages { font-size: 0.8rem; color: var(--sand3); letter-spacing: 0.1em; white-space: nowrap; }
-  .tutorial-body { font-family:"Quicksand"; font-size: 1.1rem; letter-spacing: 0.05rem; line-height: 1.3; color: var(--sand); min-height: 120px; }
+  .tutorial-title { color: var(--gold); font-size: 1.2rem; font-weight: bold; letter-spacing: 0.05em; }
+  .tutorial-pages { font-size: 0.9rem; color: var(--sand3); letter-spacing: 0.1em; white-space: nowrap; }
+  .tutorial-body { font-family:"Quicksand"; font-size: 0.9rem; letter-spacing: 0.04rem; line-height: 1.3; color: var(--sand); min-height: 120px; }
   .tutorial-body strong { color: var(--gold); }
   .tutorial-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; }
-  .tut-nav { background: transparent; border: 1px solid rgba(184,169,138,0.2); color: var(--sand2); font-family: 'Quicksand', serif; padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer; transition: all 0.2s; font-size: 1rem; }
+  .tut-nav { background: transparent; border: 1px solid rgba(184,169,138,0.2); color: var(--sand2); font-family: 'Quicksand', serif; padding: 0.3rem 0.8rem; border-radius: 10px; cursor: pointer; transition: all 0.2s; font-size: 0.8rem; }
 
   .tut-nav:disabled { opacity: 0.2; cursor: not-allowed; }
 
@@ -550,13 +550,134 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
   .legend-piece.p2 { background: radial-gradient(circle at 38% 32%, #5e4a39, #25180e 55%, #1a0d05);border: 1.5px solid rgba(184,169,138,0.3); }
 
 
+  /* ── Example Game Walkthrough overlay ──
+     All rules are scoped under #walkthrough-overlay with "wt-" prefixed
+     classes so nothing here can ever collide with the live board's
+     .cell/.piece rules or click handlers. */
+  #walkthrough-overlay {
+    position: fixed; inset: 0; display: flex; flex-direction: column;
+    align-items: center; 
+    background: rgb(38, 27, 19); z-index: 400; gap: 0.9rem;
+    animation: fade-in 0.1s ease; padding: 3.5rem 0.6rem; cursor: pointer;
+    -webkit-user-select: none; user-select: none;
+  }
+  .wt-close-btn {
+    position: relative; 
+    width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(196,154,68,0.4);
+    background: rgba(36,26,18,0.9); color: var(--sand); font-size: 1.1rem; line-height: 100;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .wt-close-btn:hover { border-color: var(--gold); color: var(--gold); }
+  }
+  .wt-frame-bar {
+    width: 100%;
+    max-width: calc(var(--cell-size) * 5 + var(--gap) * 4 + clamp(20px, 4vw, 36px) + 4px);
+    background: var(--accent); border: 1px solid rgba(196,154,68,0.3); border-radius: 22px;
+    padding: 0.55rem 1.3rem; display: flex; flex-direction: column; gap: 0.25rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.35); cursor: default;
+  }
+  .wt-game-label { display: none; }
+  .wt-frame-bar-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 0.5rem; }
+  .wt-frame-counter { font-size: 0.7rem; letter-spacing: 0.1em; color: var(--gold); font-weight: 700; white-space: nowrap; }
+  .wt-frame-caption {height:fixed;height:3rem; font-size: 0.95rem; letter-spacing: 0.03em; color: var(--sand); font-weight: 500; text-align: left; flex: 1.2; }
+  .wt-progress-track { width: 100%; height: 5px; border-radius: 3px; background: rgba(0,0,0,0.28); overflow: hidden; cursor: default; }
+  .wt-progress-fill { height: 100%; background: var(--gold); border-radius: 3px; transition: width 0.25s ease; }
+  .wt-turn-bar { display: flex; align-items: center; justify-content: center; gap: 1.2rem; font-size: 0.85rem; letter-spacing: 0.05em; cursor: default; }
+  .wt-player-tag { display: flex; align-items: center; gap: 0.5rem; opacity: 0.35; transition: opacity 0.2s; }
+  .wt-player-tag.active { opacity: 1; }
+  .wt-player-tag .wt-dot { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--accent); }
+  .wt-player-tag.p1 .wt-dot { background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90); }
+  .wt-player-tag.p2 .wt-dot { background: radial-gradient(circle at 38% 32%, #5e4a39, #25180e 55%, #1a0d05); }
+  .wt-turn-divider { width: 2px; height: 16px; background: var(--accent); opacity: 0.6; }
+
+  .wt-board-border {
+    padding: clamp(10px, 2vw, 18px); border: 2px solid var(--accent); border-radius: 10px;
+    box-shadow: 0 0 0 1px rgba(196,154,68,0.15), 0 0 60px rgba(60,30,10,0.8), inset 0 0 20px rgba(35,23,3,0.426);
+    background: var(--container); cursor: default;
+  }
+  .wt-board-wrapper { display: flex; flex-direction: column; gap: var(--gap); position: relative; }
+  .wt-arrow-overlay { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
+  .wt-arrow-overlay line { stroke: var(--gold); stroke-width: 3; stroke-dasharray: 7 5; opacity: 0.85; }
+  .wt-arrow-overlay line.wt-forbidden-arrow { stroke: #c0704a; stroke-dasharray: 3 4; }
+  .wt-board-row { display: flex; gap: var(--gap); }
+
+  .wt-cell {
+    width: var(--cell-size); height: var(--cell-size);
+    background-color: var(--sand2);
+    border: 1px solid var(--sand3); border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; transition: border-color 0.15s, background-color 0.15s;
+  }
+  .wt-cell.wt-dark-sq { background-color: var(--sand3); }
+  .wt-cell.wt-win-line { border-color: var(--gold) !important; background-color: rgba(233,161,16,0.864) !important; }
+  .wt-cell.wt-forbidden { box-shadow: inset 0 0 0 3px #c0704a; }
+  .wt-cell.wt-forbidden::after {
+    content: '✕'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    color: #c0704a; font-size: 1.4rem; font-weight: 800; pointer-events: none; z-index: 2;
+  }
+
+  .wt-piece {
+    width: 68%; height: 68%; border-radius: 50%; flex-shrink: 0;
+    transition: opacity 0.15s; position: relative; z-index: 1;
+  }
+  .wt-piece.p1 {
+    background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8c2ad 55%, #9090a8);
+    border: 1px solid rgba(196,179,68,0.5);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.15);
+  }
+  .wt-piece.p2 {
+    background: radial-gradient(circle at 38% 32%, #554241, #2a190e 55%, #08051a);
+    border: 1px solid rgba(143,184,138,0.3);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.12), inset 0 -2px 4px rgba(0,0,0,0.4);
+  }
+  .wt-piece.wt-inactive { opacity: 1; }
+  .wt-piece.wt-active-piece { opacity: 1; }
+  .wt-piece.wt-pulse { animation: wt-pulse-glow 0.5s ease-in-out infinite; }
+  @keyframes wt-pulse-glow {
+    0%,100% { box-shadow: 0 3px 8px rgba(0,0,0,0.5), 0 0 0 3px rgba(214,156,19,0.4), 0 0 12px rgba(229,151,25,0.25); }
+    50%     { box-shadow: 0 3px 8px rgba(0,0,0,0.5), 0 0 0 6px rgba(209,177,17,0.3), 0 0 24px rgba(177,135,9,0.45); }
+  }
+  .wt-piece-ghost { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999; }
+  .wt-piece-ghost.p1 {
+    background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90);
+    border: 1px solid rgba(196,154,68,0.5);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.6);
+  }
+  .wt-piece-ghost.p2 {
+    background: radial-gradient(circle at 38% 32%, #554241, #2a190e 55%, #08051a);
+    border: 1px solid rgba(184,169,138,0.3);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.12);
+  }
+
+  .wt-tap-hint { font-size: 0.7rem; color: var(--sand3); opacity: 0.6; letter-spacing: 0.1em; cursor: default; }
+
+  .wt-nav-row { display: flex; align-items: center; justify-content: center; gap: 1.4rem; cursor: default; }
+  .wt-nav-btn {
+    width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(196,154,68,0.4);
+    background: rgba(36,26,18,0.9); color: var(--sand); font-size: 1.3rem; line-height: 1;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .wt-nav-btn:hover { border-color: var(--gold); color: var(--gold); }
+  }
+
+  body[data-theme="high-contrast"] .wt-cell { background-image: none; border-color: var(--mid); border-width: 0px; border-radius: 0; }
+  body[data-theme="high-contrast"] .wt-cell.wt-dark-sq { background-color: #615b53; border-radius: 0; }
+  body[data-theme="high-contrast"] .wt-piece.p1 { background: #e8e8e8; border: 2px solid #303030a0; box-shadow: none; }
+  body[data-theme="high-contrast"] .wt-piece.p2 { background: #1d1917; border: 2px solid #b5b0b0cd; box-shadow: none; }
+  body[data-theme="high-contrast"] .wt-cell.wt-win-line { background-color: #c9a100 !important; border-color: #000000 !important; }
+  body[data-theme="high-contrast"] .wt-cell.wt-forbidden { box-shadow: inset 0 0 0 3px #00e5ff; }
+  body[data-theme="high-contrast"] .wt-cell.wt-forbidden::after { color: #00e5ff; }
+  body[data-theme="high-contrast"] .wt-arrow-overlay line.wt-forbidden-arrow { stroke: #00e5ff; }
+
   /* ── Enhanced Footer ── */
   footer {
     font-size: 0.8rem; letter-spacing: 0.15em; color: var(--sand3);
     text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
     margin-top: 0.5rem; text-align: center;
   }
-  footer .author { opacity: 0.5; font-size: 0.5rem; letter-spacing: 0.25em; line-height: 0.01rem}
+  footer .author { opacity: 0.8; font-size: 0.6rem; letter-spacing: 0.2em; line-height: 0.5rem}
   footer .links { display: flex; align-items: center; gap: 1rem; line-height: 0.01rem }
   footer .links a, footer .links span {
     color: var(--gold); text-decoration: none; cursor: pointer;
@@ -587,6 +708,10 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
 
       <button class="menu-item" id="open-tutorial-btn">
         Como Jogar
+      </button>
+
+      <button class="menu-item" id="open-walkthrough-btn">
+        Exemplo de Jogo
       </button>
 
       <button class="menu-item" id="lang-toggle-btn">
@@ -665,7 +790,7 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
 
 
 <div class="author">
-  Sambaqui • v1.4.0 • © 2026 Eduardo Eller Quadros
+  Sambaqui ꕤ v1.4.1 ꕤ  © Eduardo E Quadros 2026
 </div>
 </footer>
 
@@ -698,9 +823,9 @@ let currentLang = localStorage.getItem('sambaqui_lang') || 'PT';
 
 const translations = {
   EN: {
-    newGame: "⧈\uFE0E Classic",
+    newGame: "▣\uFE0E Classic",
     practice: "☕︎\uFE0E Local Game",
-    tutorial: "⛶\uFE0E How to Play",
+    tutorial: "✔\uFE0E Rules",
     language: "Ⓐ\uFE0E Português",
     level: "Level⠀",
     best: "Score⠀",
@@ -750,12 +875,17 @@ const translations = {
       { title: "Line of Sight Rule", text: "As soon as your piece <strong>stops</strong>, moveable enemy stones in its <strong>line of sight</strong> wake up and become <strong>active</strong>. <br></br> Your piece goes to sleep and turn passes to your opponent." },
       { title: "The Chain Rule", text: "If a sliding piece halts and <strong>cannot see any enemies</strong> the <strong>chain move</strong> is triggered. The piece remains active and must be moved again immediately." },
       { title: "The Novelty Rule", text: "Moves that would repeat a previous game state are not allowed. If you have no legal moves left, your turn ends and all enemy pieces activate." },
-   ]
+   ],
+    walkthroughMenuLabel: "➽\uFE0E Walkthrough",
+    wtTapHint: "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+    wtPrev: "Previous",
+    wtNext: "Next",
+    wtClose: "Close",
   },
   PT: {
-    newGame: "⧈\uFE0E Clássico",
-    practice: "☕︎\uFE0E Jogo Local",
-    tutorial: " ⛶\uFE0E Como Jogar",
+    newGame: "▣\uFE0E Clássico",
+    practice: "☕︎ Jogo Local",
+    tutorial: " ✔\uFE0E Regras",
     language: "Ⓐ\uFE0E English",
     level: "Nível⠀",
     best: "Pontos⠀",
@@ -805,7 +935,12 @@ const translations = {
       { title: "Linha de Visão", text: "Assim que sua peça <strong>para</strong>, pedras inimigas móveis na sua <strong>linha de visão</strong> acordam e tornam-se <strong>ativas</strong>. Sua peça dorme e a vez passa para o oponente. A <strong>linha de visão</strong> segue as oito direções principais e é obstruída por qualquer peça." },
       { title: "Regra da Cadeia", text: "Se uma peça parar e <strong>não avistar</strong> um inimigo, o <strong>movimento em cadeia</strong> é ativado. A peça continua ativa e deve ser movida novamente." },
       { title: "Originalidade", text: "Movimentos que <strong>repetiriam</strong> um estado de jogo anterior, incluindo atividade das peças, <strong>não são permitidos</strong>. Se você ficar sem movimentos válidos, sua vez termina e <strong>todas</strong> as peças inimigas são ativadas." },   
-    ]
+    ],
+    walkthroughMenuLabel: "➽\uFE0E Tutorial",
+    wtTapHint: "",
+    wtPrev: "Anterior",
+    wtNext: "Próximo",
+    wtClose: "Fechar",
   }
 };
 
@@ -1007,7 +1142,7 @@ const BOARD_PATTERNS = [
     D: { player: 2, active: false }, J: { player: 2, active: false },
     P: { player: 2, active: false }, V: { player: 2, active: false },
   },
-  // Pattern 1       ADSP - GJVY
+  // Pattern 1        ADSP - GJVY
   {
     A: { player: 1, active: true }, D: { player: 1, active: true },
     P: { player: 1, active: true }, S: { player: 1, active: true },
@@ -1394,6 +1529,7 @@ const resultBannerSlot = document.getElementById('result-banner-slot');
 const modeToggleBtn = document.getElementById('mode-toggle');
 const langToggleBtn = document.getElementById('lang-toggle-btn');
 const openTutorialBtn = document.getElementById('open-tutorial-btn');
+const openWalkthroughBtn = document.getElementById('open-walkthrough-btn');
 const statStreakEl = document.getElementById('stat-streak');
 const statHighEl = document.getElementById('stat-high');
 const statsBarEl = document.getElementById('stats-bar');
@@ -2488,6 +2624,586 @@ function launchTutorial(onCloseCallback) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+//  SECTION 11B — EXAMPLE GAME WALKTHROUGH
+//  Self-contained IIFE: builds its own overlay, board and animation
+//  loop from scratch on every launch, reusing only the shared LABELS /
+//  labelToRC helpers from Section 2. Everything else is scoped locally
+//  (or under the "wt" prefix) so it can never collide with the live
+//  game's board, state, or CSS.
+// ═══════════════════════════════════════════════════════════════
+const launchExampleWalkthrough = (() => {
+
+  function buildGames() {
+    // ── GAME 1 — Basic game example ──
+    //    Setup BFTX vs DJPV → B-A, D-B, F-K, P-S, X-F → P1 wins A-F-K
+    const FRAMES_BASIC = [
+      { // 0/5 — setup
+        pieces: {
+          B:{player:1,active:true}, F:{player:1,active:true}, T:{player:1,active:true}, X:{player:1,active:true},
+          D:{player:2,active:false}, J:{player:2,active:false}, P:{player:2,active:false}, V:{player:2,active:false},
+        },
+        currentPlayer: 1,
+        caption: {
+          PT: 'Deslise uma peça em qualquer direção até atingir algum obstáculo.',
+          EN: 'Slide a piece in any direction until it hits an obstacle.',
+        },
+      },
+      { // 1/5 — B to A, wakes D
+        move: { from: 'B', to: 'A' },
+        pieces: {
+          F:{player:1,active:false}, T:{player:1,active:false}, X:{player:1,active:false},
+          D:{player:2,active:true}, J:{player:2,active:false}, P:{player:2,active:false}, V:{player:2,active:false},
+          A:{player:1,active:false},
+        },
+        currentPlayer: 2,
+        pulse: ['D'],
+        caption: {
+          PT: 'A peça inimiga na sua linha de visão é ativada. O oponente de movê-la.',
+          EN: 'The enemy piece in its line of sight wakes up. Your opponent must move it.',
+        },
+        arrows: [ ['A','D'] ],
+      },
+      { // 2/5 — D to B, wakes A, F and T
+        move: { from: 'D', to: 'B' },
+        pieces: {
+          F:{player:1,active:true}, T:{player:1,active:true}, X:{player:1,active:false},
+          J:{player:2,active:false}, P:{player:2,active:false}, V:{player:2,active:false},
+          A:{player:1,active:true}, B:{player:2,active:false},
+        },
+        currentPlayer: 1,
+        pulse: ['A','F','T'],
+        caption: {
+          PT: 'Três peças suas são ativadas. Você escolhe uma e a move.',
+          EN: 'Three of your pieces wake up. You choose one and move it.',
+        },
+        arrows: [ ['B','A'], ['B','F'], ['B','T'] ],
+      },
+      { // 3/5 — F to K, wakes P
+        move: { from: 'F', to: 'K' },
+        pieces: {
+          T:{player:1,active:false}, X:{player:1,active:false},
+          J:{player:2,active:false}, P:{player:2,active:true}, V:{player:2,active:false},
+          A:{player:1,active:false}, B:{player:2,active:false}, K:{player:1,active:false},
+        },
+        currentPlayer: 2,
+        pulse: ['P'],
+        caption: {
+          PT: 'O oponente deve mover a peça ativada da mesma maneira.',
+          EN: 'Your opponent must move their activated piece the same way.',
+        },
+        arrows: [ ['K','P'] ],
+      },
+      { // 4/5 — P to S, wakes A, T and X
+        move: { from: 'P', to: 'S' },
+        pieces: {
+          T:{player:1,active:true}, X:{player:1,active:true},
+          J:{player:2,active:false}, V:{player:2,active:false},
+          A:{player:1,active:true}, B:{player:2,active:false}, K:{player:1,active:false}, S:{player:2,active:false},
+        },
+        currentPlayer: 1,
+        pulse: ['A','T','X'],
+        caption: {
+          PT: 'Três peças são ativadas. Uma delas deve se mover até ser bloqueada.',
+          EN: 'Three pieces wake up. One is chosen and slides until it is blocked.',
+        },
+        arrows: [ ['S','A'], ['S','T'], ['S','X'] ],
+      },
+      { // 5/5 — X to F: completes A-F-K
+        move: { from: 'X', to: 'F' },
+        pieces: {
+          T:{player:1,active:false},
+          J:{player:2,active:false}, V:{player:2,active:false},
+          A:{player:1,active:false}, B:{player:2,active:false}, K:{player:1,active:false}, S:{player:2,active:false},
+          F:{player:1,active:false},
+        },
+        currentPlayer: 1,
+        winLine: ['A','F','K'],
+        caption: {
+          PT: 'Alinhe três peças para vencer o jogo.',
+          EN: 'Line up three pieces to win the game.',
+        },
+      },
+    ];
+
+    // ── GAME 2 — Combo move example (Player 2 starts) ──
+    //    Setup BFTX vs DJPV, P2 active → D-L, B-A-E (combo)
+    const FRAMES_COMBO = [
+      { // 0/3 — setup, Player 2 begins
+        pieces: {
+          B:{player:1,active:false}, F:{player:1,active:false}, T:{player:1,active:false}, X:{player:1,active:false},
+          D:{player:2,active:true}, J:{player:2,active:true}, P:{player:2,active:true}, V:{player:2,active:true},
+        },
+        currentPlayer: 2,
+        caption: {
+          PT: 'Jogadores revezam quem começa.',
+          EN: 'Players take turns starting the game.',
+        },
+      },
+      { // 1/3 — D to L, wakes F, B and X
+        move: { from: 'D', to: 'L' },
+        pieces: {
+          B:{player:1,active:true}, F:{player:1,active:true}, T:{player:1,active:false}, X:{player:1,active:true},
+          J:{player:2,active:false}, P:{player:2,active:false}, V:{player:2,active:false},
+          L:{player:2,active:false},
+        },
+        currentPlayer: 1,
+        pulse: ['F','B','X'],
+        caption: {
+          PT: 'Peças na linha de visão são ativadas. Uma delas deve se mover.',
+          EN: 'Pieces in its line of sight wake up. One of them must move.',
+        },
+        arrows: [ ['L','F'], ['L','B'], ['L','X'] ],
+      },
+      { // 2/3 — B to A: no enemy in sight, must move again
+        move: { from: 'B', to: 'A' },
+        pieces: {
+          F:{player:1,active:false}, T:{player:1,active:false}, X:{player:1,active:false},
+          J:{player:2,active:false}, P:{player:2,active:false}, V:{player:2,active:false},
+          L:{player:2,active:false}, A:{player:1,active:true},
+        },
+        currentPlayer: 1,
+        pulse: ['A'],
+        caption: {
+          PT: 'Nenhuma peça inimiga ativa; a mesma peça deve ser movida novamente.',
+          EN: 'No enemy piece wakes up, so the same piece must move again.',
+        },
+      },
+      { // 3/3 — A to E, wakes J
+        move: { from: 'A', to: 'E' },
+        pieces: {
+          F:{player:1,active:false}, T:{player:1,active:false}, X:{player:1,active:false},
+          J:{player:2,active:true}, P:{player:2,active:false}, V:{player:2,active:false},
+          L:{player:2,active:false}, E:{player:1,active:false},
+        },
+        currentPlayer: 2,
+        pulse: ['J'],
+        caption: {
+          PT: 'Ela desliza até o final do tabuleiro. O jogo continua normalmente.',
+          EN: 'It slides all the way to the edge of the board. Play continues as normal.',
+        },
+        arrows: [ ['E','J'] ],
+      },
+    ];
+
+    // ── GAME 3 — "No repeat" rule example ──
+    //    Mid-game: V-N, X-U-Y (chain), Y→U forbidden, forced Y-A
+    const FRAMES_NOREPEAT = [
+      { // 0/4 — V to N, wakes K, X and T
+        move: { from: 'V', to: 'N' },
+        pieces: {
+          T:{player:1,active:true}, X:{player:1,active:true},
+          D:{player:2,active:false}, J:{player:2,active:false},
+          K:{player:1,active:true}, H:{player:2,active:false}, Q:{player:1,active:false}, N:{player:2,active:false},
+        },
+        currentPlayer: 1,
+        pulse: ['K','X','T'],
+        caption: {
+          PT: 'Neste exemplo a regra que proibe repetições é posta em prática.',
+          EN: 'This example puts the rule against repeating positions into practice.',
+        },
+        arrows: [ ['N','K'], ['N','X'], ['N','T'] ],
+      },
+      { // 1/4 — X to U: no enemy in sight, must move again
+        move: { from: 'X', to: 'U' },
+        pieces: {
+          T:{player:1,active:false},
+          D:{player:2,active:false}, J:{player:2,active:false},
+          K:{player:1,active:false}, H:{player:2,active:false}, Q:{player:1,active:false}, N:{player:2,active:false},
+          U:{player:1,active:true},
+        },
+        currentPlayer: 1,
+        pulse: ['U'],
+        caption: {
+          PT: 'Uma peça ativa desliza até o fim. Sem inimigos à vista, move-se novamente.',
+          EN: 'An active piece slides all the way. With no enemies in sight, it must move again.',
+        },
+      },
+      { // 2/4 — U to Y: still no enemy, must move again
+        move: { from: 'U', to: 'Y' },
+        pieces: {
+          T:{player:1,active:false},
+          D:{player:2,active:false}, J:{player:2,active:false},
+          K:{player:1,active:false}, H:{player:2,active:false}, Q:{player:1,active:false}, N:{player:2,active:false},
+          Y:{player:1,active:true},
+        },
+        currentPlayer: 1,
+        pulse: ['Y'],
+        caption: {
+          PT: 'Nenhum inimigo à vista ainda, deve se mover de novo.',
+          EN: 'Still no enemy in sight, so it must move once more.',
+        },
+      },
+      { // 3/4 — pause: going back to U would repeat a past position
+        pieces: {
+          T:{player:1,active:false},
+          D:{player:2,active:false}, J:{player:2,active:false},
+          K:{player:1,active:false}, H:{player:2,active:false}, Q:{player:1,active:false}, N:{player:2,active:false},
+          Y:{player:1,active:true},
+        },
+        currentPlayer: 1,
+        pulse: ['Y'],
+        caption: {
+          PT: 'Retornar à posição anterior é proibido. O movimento restante é obrigatório.',
+          EN: 'Returning to the previous square is forbidden. The remaining move becomes mandatory.',
+        },
+        forbidden: ['U'],
+        arrows: [ {from:'Y', to:'U', style:'forbidden'}, {from:'Y', to:'A', style:'normal'} ],
+      },
+      { // 4/4 — Y to A (forced), wakes D
+        move: { from: 'Y', to: 'A' },
+        pieces: {
+          T:{player:1,active:false},
+          D:{player:2,active:true}, J:{player:2,active:false},
+          K:{player:1,active:false}, H:{player:2,active:false}, Q:{player:1,active:false}, N:{player:2,active:false},
+          A:{player:1,active:false},
+        },
+        currentPlayer: 2,
+        pulse: ['D'],
+        caption: {
+          PT: 'O jogo continua normalmente.',
+          EN: 'Play continues as normal.',
+        },
+        arrows: [ ['A','D'] ],
+      },
+    ];
+
+    // ── GAME 4 — "Dead end" (deadlock/pass) rule example ──
+    //    Mid-game: B-A-Y (chain into a corner), dead end, turn passes
+    const FRAMES_DEADEND = [
+      { // 0/3 — B to A: no enemy in sight, must move again
+        move: { from: 'B', to: 'A' },
+        pieces: {
+          F:{player:1,active:false}, T:{player:1,active:false}, X:{player:1,active:false},
+          J:{player:2,active:false}, P:{player:2,active:false}, V:{player:2,active:false},
+          L:{player:2,active:false}, A:{player:1,active:true},
+        },
+        currentPlayer: 1,
+        pulse: ['A'],
+        caption: {
+          PT: 'Neste último exemplo o jogador fica sem movimentos.',
+          EN: 'In this last example, the player runs out of legal moves.',
+        },
+      },
+      { // 1/3 — A to Y: still no enemy, must move again... into a corner
+        move: { from: 'A', to: 'Y' },
+        pieces: {
+          F:{player:1,active:false}, T:{player:1,active:false}, X:{player:1,active:false},
+          J:{player:2,active:false}, P:{player:2,active:false}, V:{player:2,active:false},
+          L:{player:2,active:false}, Y:{player:1,active:true},
+        },
+        currentPlayer: 1,
+        pulse: ['Y'],
+        caption: {
+          PT: 'A peça deve ser movida novamente. Desliza até o fim do tabuleiro.',
+          EN: 'The piece must move again. It slides all the way to the edge of the board.',
+        },
+      },
+      { // 2/3 — pause: the only way back would repeat a past position — dead end
+        pieces: {
+          F:{player:1,active:false}, T:{player:1,active:false}, X:{player:1,active:false},
+          J:{player:2,active:false}, P:{player:2,active:false}, V:{player:2,active:false},
+          L:{player:2,active:false}, Y:{player:1,active:true},
+        },
+        currentPlayer: 1,
+        pulse: ['Y'],
+        caption: {
+          PT: 'O único movimento restante é proibido, pois repitiria o jogo.',
+          EN: 'The only move left is forbidden, since it would repeat a past position.',
+        },
+        forbidden: ['Y'],
+        arrows: [ {from:'Y', to:'A', style:'forbidden'} ],
+      },
+      { // 3/3 — no legal moves: turn passes, every Player 2 piece wakes up
+        pieces: {
+          F:{player:1,active:false}, T:{player:1,active:false}, X:{player:1,active:false},
+          J:{player:2,active:true}, P:{player:2,active:true}, V:{player:2,active:true},
+          L:{player:2,active:true}, Y:{player:1,active:false},
+        },
+        currentPlayer: 2,
+        pulse: ['J','P','V','L'],
+        caption: {
+          PT: 'A vez passa para o oponente. Todas as suas peças ativam.',
+          EN: 'The turn passes to the opponent. All of their pieces wake up.',
+        },
+      },
+    ];
+
+    return [
+      { frames: FRAMES_BASIC },
+      { frames: FRAMES_COMBO },
+      { frames: FRAMES_NOREPEAT },
+      { frames: FRAMES_DEADEND },
+    ];
+  }
+
+  // Verified once, reused on every launch (data itself is static).
+  const GAMES = buildGames();
+
+  // Flatten every game's frames into one continuous sequence, so the whole
+  // walkthrough behaves as a single "1 of 19" progression instead of four
+  // separately-numbered mini-games.
+  const FLAT = [];
+  GAMES.forEach((g, gi) => { g.frames.forEach((frame, fi) => FLAT.push({ gi, fi, frame })); });
+  const TOTAL = FLAT.length;
+
+  function captionFor(f) {
+    if (!f.caption) return '';
+    return f.caption[currentLang] || f.caption.EN || '';
+  }
+
+  return function launchExampleWalkthrough() {
+    const overlay = document.createElement('div');
+    overlay.id = 'walkthrough-overlay';
+    overlay.innerHTML = `
+      <button class="wt-close-btn" id="wt-close-btn" aria-label="Close" title="Close">✕</button>
+      <div class="wt-frame-bar">
+        <div class="wt-progress-track"><div class="wt-progress-fill" id="wt-progress-fill"></div></div>
+        <div class="wt-frame-bar-row">
+          <span class="wt-frame-caption" id="wt-frame-caption"></span>
+          <span class="wt-frame-counter" id="wt-frame-counter"></span>
+        </div>
+      </div>
+      <div class="wt-board-border"><div class="wt-board-wrapper" id="wt-board"></div></div>
+      <div class="wt-turn-bar">
+        <div class="wt-player-tag p1" id="wt-tag-p1"><div class="wt-dot"></div><span id="wt-p1-label"></span></div>
+        <div class="wt-turn-divider"></div>
+        <div class="wt-player-tag p2" id="wt-tag-p2"><div class="wt-dot"></div><span id="wt-p2-label"></span></div>
+      </div>
+      <div class="wt-nav-row">
+        <button class="wt-nav-btn" id="wt-prev-btn">‹</button>
+        <div class="wt-tap-hint" id="wt-tap-hint"></div>
+        <button class="wt-nav-btn" id="wt-next-btn">›</button>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const boardEl      = overlay.querySelector('#wt-board');
+    const counterEl     = overlay.querySelector('#wt-frame-counter');
+    const captionEl     = overlay.querySelector('#wt-frame-caption');
+    const progressFillEl = overlay.querySelector('#wt-progress-fill');
+    const tagP1         = overlay.querySelector('#wt-tag-p1');
+    const tagP2         = overlay.querySelector('#wt-tag-p2');
+    const prevBtn       = overlay.querySelector('#wt-prev-btn');
+    const nextBtn       = overlay.querySelector('#wt-next-btn');
+    overlay.querySelector('#wt-p1-label').textContent = t('player1');
+    overlay.querySelector('#wt-p2-label').textContent = t('player2');
+    overlay.querySelector('#wt-tap-hint').textContent = t('wtTapHint');
+    prevBtn.setAttribute('aria-label', t('wtPrev'));
+    prevBtn.setAttribute('title', t('wtPrev'));
+    nextBtn.setAttribute('aria-label', t('wtNext'));
+    nextBtn.setAttribute('title', t('wtNext'));
+    const closeBtn = overlay.querySelector('#wt-close-btn');
+    closeBtn.setAttribute('aria-label', t('wtClose'));
+    closeBtn.setAttribute('title', t('wtClose'));
+
+    const cellEls = {};
+
+    function buildBoard() {
+      for (let r = 0; r < 5; r++) {
+        const row = document.createElement('div');
+        row.className = 'wt-board-row';
+        for (let c = 0; c < 5; c++) {
+          const label = LABELS[r * 5 + c];
+          const cell = document.createElement('div');
+          cell.className = 'wt-cell' + (((r + c) % 2 === 1) ? ' wt-dark-sq' : '');
+          cell.dataset.label = label;
+          row.appendChild(cell);
+          cellEls[label] = cell;
+        }
+        boardEl.appendChild(row);
+      }
+    }
+    buildBoard();
+
+    function renderStatic(pieces, opts = {}) {
+      for (const label of LABELS) {
+        const cell = cellEls[label];
+        const [r, c] = labelToRC(label);
+        cell.className = 'wt-cell' + (((r + c) % 2 === 1) ? ' wt-dark-sq' : '');
+        cell.innerHTML = '';
+        if (opts.winLine && opts.winLine.includes(label)) cell.classList.add('wt-win-line');
+        if (opts.forbidden && opts.forbidden.includes(label)) cell.classList.add('wt-forbidden');
+        const piece = pieces[label];
+        if (piece) {
+          const el = document.createElement('div');
+          let cls = `wt-piece p${piece.player}`;
+          if (piece.active && opts.pulse && opts.pulse.includes(label)) cls += ' wt-active-piece wt-pulse';
+          else if (piece.active) cls += ' wt-active-piece';
+          else cls += ' wt-inactive';
+          el.className = cls;
+          cell.appendChild(el);
+        }
+      }
+    }
+
+    function cellCenter(label) {
+      const r = cellEls[label].getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    }
+
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    function clearArrows() {
+      const old = boardEl.querySelector('.wt-arrow-overlay');
+      if (old) old.remove();
+    }
+    function drawArrows(pairs) {
+      clearArrows();
+      if (!pairs || pairs.length === 0) return;
+      const boardRect = boardEl.getBoundingClientRect();
+      const svg = document.createElementNS(SVG_NS, 'svg');
+      svg.setAttribute('class', 'wt-arrow-overlay');
+      svg.setAttribute('width', boardRect.width);
+      svg.setAttribute('height', boardRect.height);
+
+      const defs = document.createElementNS(SVG_NS, 'defs');
+      const marker = document.createElementNS(SVG_NS, 'marker');
+      marker.setAttribute('id', 'wt-arrowhead');
+      marker.setAttribute('markerWidth', '8'); marker.setAttribute('markerHeight', '8');
+      marker.setAttribute('refX', '5'); marker.setAttribute('refY', '4'); marker.setAttribute('orient', 'auto');
+      const head = document.createElementNS(SVG_NS, 'path');
+      head.setAttribute('d', 'M0,0 L8,4 L0,8 Z'); head.setAttribute('fill', 'var(--gold)');
+      marker.appendChild(head); defs.appendChild(marker);
+
+      const marker2 = document.createElementNS(SVG_NS, 'marker');
+      marker2.setAttribute('id', 'wt-arrowhead-forbidden');
+      marker2.setAttribute('markerWidth', '8'); marker2.setAttribute('markerHeight', '8');
+      marker2.setAttribute('refX', '5'); marker2.setAttribute('refY', '4'); marker2.setAttribute('orient', 'auto');
+      const head2 = document.createElementNS(SVG_NS, 'path');
+      head2.setAttribute('d', 'M0,0 L8,4 L0,8 Z'); head2.setAttribute('fill', '#c0704a');
+      marker2.appendChild(head2); defs.appendChild(marker2);
+      svg.appendChild(defs);
+
+      for (const item of pairs) {
+        const fromLabel = Array.isArray(item) ? item[0] : item.from;
+        const toLabel   = Array.isArray(item) ? item[1] : item.to;
+        const style     = Array.isArray(item) ? 'normal' : (item.style || 'normal');
+        const a = cellCenter(fromLabel), b = cellCenter(toLabel);
+        let x1 = a.x - boardRect.left, y1 = a.y - boardRect.top;
+        let x2 = b.x - boardRect.left, y2 = b.y - boardRect.top;
+        const dx = x2 - x1, dy = y2 - y1;
+        const len = Math.hypot(dx, dy) || 1;
+        const pullStart = 22, pullEnd = 26;
+        x1 += (dx / len) * pullStart; y1 += (dy / len) * pullStart;
+        x2 -= (dx / len) * pullEnd;   y2 -= (dy / len) * pullEnd;
+
+        const line = document.createElementNS(SVG_NS, 'line');
+        line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+        line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+        line.setAttribute('marker-end', style === 'forbidden' ? 'url(#wt-arrowhead-forbidden)' : 'url(#wt-arrowhead)');
+        if (style === 'forbidden') line.setAttribute('class', 'wt-forbidden-arrow');
+        svg.appendChild(line);
+      }
+      boardEl.appendChild(svg);
+    }
+
+    function animateMove(fromLabel, toLabel, player, onDone) {
+      const srcCell = cellEls[fromLabel];
+      const srcPieceEl = srcCell.querySelector('.wt-piece');
+      const size = srcCell.getBoundingClientRect().width * 0.68;
+
+      const ghost = document.createElement('div');
+      ghost.className = `wt-piece-ghost p${player}`;
+      Object.assign(ghost.style, { position: 'fixed', left: '0', top: '0', width: size + 'px', height: size + 'px', zIndex: 9999 });
+      document.body.appendChild(ghost);
+      if (srcPieceEl) srcPieceEl.style.opacity = '0';
+
+      const start = cellCenter(fromLabel), end = cellCenter(toLabel);
+      const startX = start.x - size / 2, startY = start.y - size / 2;
+      const endX = end.x - size / 2, endY = end.y - size / 2;
+      ghost.style.transform = `translate3d(${startX}px, ${startY}px, 0)`;
+
+      const duration = 380;
+      const t0 = performance.now();
+      function frame(now) {
+        const p = Math.min((now - t0) / duration, 1);
+        const e = p * (2 - p);
+        const x = startX + (endX - startX) * e;
+        const y = startY + (endY - startY) * e;
+        ghost.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+        if (p < 1) requestAnimationFrame(frame);
+        else { ghost.remove(); onDone(); }
+      }
+      requestAnimationFrame(frame);
+    }
+
+    let currentPos = 0, animating = false, closed = false;
+
+    function showFrame(pos) {
+      currentPos = pos;
+      const entry = FLAT[pos];
+      const f = entry.frame;
+      progressFillEl.style.width = `${((pos + 1) / TOTAL) * 100}%`;
+
+      //  counterEl.textContent = `${pos + 1} / ${TOTAL}`;
+      counterEl.textContent = ``;
+      captionEl.textContent = captionFor(f);
+      if (f.currentPlayer === 1) { tagP1.classList.add('active'); tagP2.classList.remove('active'); }
+      else { tagP2.classList.add('active'); tagP1.classList.remove('active'); }
+      renderStatic(f.pieces, { winLine: f.winLine, pulse: f.pulse, forbidden: f.forbidden });
+      if (f.arrows) drawArrows(f.arrows); else clearArrows();
+    }
+
+    function goNext() {
+      if (animating || closed) return;
+      if (currentPos === TOTAL - 1) { closeOverlay(); return; }
+      const nextPos = (currentPos + 1) % TOTAL;
+      const curEntry = FLAT[currentPos];
+      const nextEntry = FLAT[nextPos];
+
+      if (nextEntry.gi === curEntry.gi && nextEntry.frame.move) {
+        animating = true;
+        clearArrows();
+        const mover = curEntry.frame.pieces[nextEntry.frame.move.from];
+        animateMove(nextEntry.frame.move.from, nextEntry.frame.move.to, mover ? mover.player : 1, () => {
+          showFrame(nextPos);
+          animating = false;
+        });
+      } else {
+        showFrame(nextPos);
+      }
+    }
+
+    function goPrev() {
+      if (animating || closed) return;
+      const prevPos = (currentPos - 1 + TOTAL) % TOTAL;
+      showFrame(prevPos);
+    }
+
+    function closeOverlay() {
+      closed = true;
+      overlay.removeEventListener('click', onOverlayClick);
+      document.removeEventListener('keydown', onKeyDown);
+      overlay.remove();
+    }
+
+    function onOverlayClick(e) {
+      if (e.target === closeBtn || closeBtn.contains(e.target)) { closeOverlay(); return; }
+      if (e.target === prevBtn || prevBtn.contains(e.target)) return;
+      if (e.target === nextBtn || nextBtn.contains(e.target)) return;
+      goNext();
+    }
+
+    function onKeyDown(e) {
+      if (e.key === 'Escape') { closeOverlay(); }
+      else if (e.key === 'ArrowLeft') { goPrev(); }
+      else if (e.key === 'ArrowRight' || e.key === ' ') { goNext(); }
+    }
+
+    closeBtn.addEventListener('click', (e) => { e.stopPropagation(); closeOverlay(); });
+    prevBtn.addEventListener('click', (e) => { e.stopPropagation(); goPrev(); });
+    nextBtn.addEventListener('click', (e) => { e.stopPropagation(); goNext(); });
+    overlay.addEventListener('click', onOverlayClick);
+    document.addEventListener('keydown', onKeyDown);
+
+    showFrame(0);
+  };
+})();
+
+if (openWalkthroughBtn) {
+  openWalkthroughBtn.addEventListener('click', () => launchExampleWalkthrough());
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  SECTION 12 — INITIALIZATION LOOP
 // ═══════════════════════════════════════════════════════════════
 
@@ -2742,6 +3458,7 @@ function updateMetaDisplay() {
 
   modeToggleBtn.textContent = vsAI ? t('practice') : t('newGame');
   openTutorialBtn.textContent = t('tutorial');
+  openWalkthroughBtn.textContent = t('walkthroughMenuLabel');
   langToggleBtn.textContent = t('language');
   footerSupportLink.textContent = t('supportLink');
   if (footerSupportLinkBar) footerSupportLinkBar.textContent = t('supportLink');
