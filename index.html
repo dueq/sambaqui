@@ -790,7 +790,7 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
 
 
 <div class="author">
-  Sambaqui ꕤ v1.4.1 ꕤ  © Eduardo E Quadros 2026
+  Sambaqui ꕤ v1.4.2 ꕤ  © Eduardo E Quadros 2026
 </div>
 </footer>
 
@@ -1133,608 +1133,230 @@ let humanPlayerColor = 1;
 window.isWaitingForContinue = false;
 window.achievedNewBest = false;
 
-const BOARD_PATTERNS = [
-  // BFTX-DJPV
-  { B: { player: 1, active: true }, F: { player: 1, active: true }, T: { player: 1, active: true }, X: { player: 1, active: true }, D: { player: 2, active: false }, J: { player: 2, active: false }, P: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // GJKN-FILO
-  { G: { player: 1, active: true }, J: { player: 1, active: true }, K: { player: 1, active: true }, N: { player: 1, active: true }, F: { player: 2, active: false }, I: { player: 2, active: false }, L: { player: 2, active: false }, O: { player: 2, active: false } },
-
-  // EGRV-BHQY
-  { E: { player: 1, active: true }, G: { player: 1, active: true }, R: { player: 1, active: true }, V: { player: 1, active: true }, B: { player: 2, active: false }, H: { player: 2, active: false }, Q: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // CNVY-AHOP
-  { C: { player: 1, active: true }, N: { player: 1, active: true }, V: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, H: { player: 2, active: false }, O: { player: 2, active: false }, P: { player: 2, active: false } },
-
-  // CJNW-DHKO
-  { C: { player: 1, active: true }, J: { player: 1, active: true }, N: { player: 1, active: true }, W: { player: 1, active: true }, D: { player: 2, active: false }, H: { player: 2, active: false }, K: { player: 2, active: false }, O: { player: 2, active: false } },
-
-  // CPRT-BLOV
-  { C: { player: 1, active: true }, P: { player: 1, active: true }, R: { player: 1, active: true }, T: { player: 1, active: true }, B: { player: 2, active: false }, L: { player: 2, active: false }, O: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // JPSY-EFIT
-  { J: { player: 1, active: true }, P: { player: 1, active: true }, S: { player: 1, active: true }, Y: { player: 1, active: true }, E: { player: 2, active: false }, F: { player: 2, active: false }, I: { player: 2, active: false }, T: { player: 2, active: false } },
-
-  // BIQV-DGSX
-  { B: { player: 1, active: true }, I: { player: 1, active: true }, Q: { player: 1, active: true }, V: { player: 1, active: true }, D: { player: 2, active: false }, G: { player: 2, active: false }, S: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // BIUY-AEQX
-  { B: { player: 1, active: true }, I: { player: 1, active: true }, U: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, E: { player: 2, active: false }, Q: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // GJKY-ADSW
-  { G: { player: 1, active: true }, J: { player: 1, active: true }, K: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, D: { player: 2, active: false }, S: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // AKST-FGOY
-  { A: { player: 1, active: true }, K: { player: 1, active: true }, S: { player: 1, active: true }, T: { player: 1, active: true }, F: { player: 2, active: false }, G: { player: 2, active: false }, O: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // BGTX-DJQV
-  { B: { player: 1, active: true }, G: { player: 1, active: true }, T: { player: 1, active: true }, X: { player: 1, active: true }, D: { player: 2, active: false }, J: { player: 2, active: false }, Q: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // BJTV-DFPX
-  { B: { player: 1, active: true }, J: { player: 1, active: true }, T: { player: 1, active: true }, V: { player: 1, active: true }, D: { player: 2, active: false }, F: { player: 2, active: false }, P: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // BJPY-EFTV
-  { B: { player: 1, active: true }, J: { player: 1, active: true }, P: { player: 1, active: true }, Y: { player: 1, active: true }, E: { player: 2, active: false }, F: { player: 2, active: false }, T: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // ACTV-BOPY
-  { A: { player: 1, active: true }, C: { player: 1, active: true }, T: { player: 1, active: true }, V: { player: 1, active: true }, B: { player: 2, active: false }, O: { player: 2, active: false }, P: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // DFRW-JKLX
-  { D: { player: 1, active: true }, F: { player: 1, active: true }, R: { player: 1, active: true }, W: { player: 1, active: true }, J: { player: 2, active: false }, K: { player: 2, active: false }, L: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // EITX-AGPV
-  { E: { player: 1, active: true }, I: { player: 1, active: true }, T: { player: 1, active: true }, X: { player: 1, active: true }, A: { player: 2, active: false }, G: { player: 2, active: false }, P: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // GNPX-FHSV
-  { G: { player: 1, active: true }, N: { player: 1, active: true }, P: { player: 1, active: true }, X: { player: 1, active: true }, F: { player: 2, active: false }, H: { player: 2, active: false }, S: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // DKLV-BNOX
-  { D: { player: 1, active: true }, K: { player: 1, active: true }, L: { player: 1, active: true }, V: { player: 1, active: true }, B: { player: 2, active: false }, N: { player: 2, active: false }, O: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // AEST-IJUY
-  { A: { player: 1, active: true }, E: { player: 1, active: true }, S: { player: 1, active: true }, T: { player: 1, active: true }, I: { player: 2, active: false }, J: { player: 2, active: false }, U: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // BJKS-DGTW
-  { B: { player: 1, active: true }, J: { player: 1, active: true }, K: { player: 1, active: true }, S: { player: 1, active: true }, D: { player: 2, active: false }, G: { player: 2, active: false }, T: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // FGSU-AIPQ
-  { F: { player: 1, active: true }, G: { player: 1, active: true }, S: { player: 1, active: true }, U: { player: 1, active: true }, A: { player: 2, active: false }, I: { player: 2, active: false }, P: { player: 2, active: false }, Q: { player: 2, active: false } },
-
-  // DGKO-CJSW
-  { D: { player: 1, active: true }, G: { player: 1, active: true }, K: { player: 1, active: true }, O: { player: 1, active: true }, C: { player: 2, active: false }, J: { player: 2, active: false }, S: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // ILOP-DHQW
-  { I: { player: 1, active: true }, L: { player: 1, active: true }, O: { player: 1, active: true }, P: { player: 1, active: true }, D: { player: 2, active: false }, H: { player: 2, active: false }, Q: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // BJRW-FNOV
-  { B: { player: 1, active: true }, J: { player: 1, active: true }, R: { player: 1, active: true }, W: { player: 1, active: true }, F: { player: 2, active: false }, N: { player: 2, active: false }, O: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // GJRU-AHQT
-  { G: { player: 1, active: true }, J: { player: 1, active: true }, R: { player: 1, active: true }, U: { player: 1, active: true }, A: { player: 2, active: false }, H: { player: 2, active: false }, Q: { player: 2, active: false }, T: { player: 2, active: false } },
-
-  // DFIU-APSX
-  { D: { player: 1, active: true }, F: { player: 1, active: true }, I: { player: 1, active: true }, U: { player: 1, active: true }, A: { player: 2, active: false }, P: { player: 2, active: false }, S: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // CFTV-BJKX
-  { C: { player: 1, active: true }, F: { player: 1, active: true }, T: { player: 1, active: true }, V: { player: 1, active: true }, B: { player: 2, active: false }, J: { player: 2, active: false }, K: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // AIQV-EGSX
-  { A: { player: 1, active: true }, I: { player: 1, active: true }, Q: { player: 1, active: true }, V: { player: 1, active: true }, E: { player: 2, active: false }, G: { player: 2, active: false }, S: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // GSUX-IQVY
-  { G: { player: 1, active: true }, S: { player: 1, active: true }, U: { player: 1, active: true }, X: { player: 1, active: true }, I: { player: 2, active: false }, Q: { player: 2, active: false }, V: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // FGUY-AEPQ
-  { F: { player: 1, active: true }, G: { player: 1, active: true }, U: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, E: { player: 2, active: false }, P: { player: 2, active: false }, Q: { player: 2, active: false } },
-
-  // BKTU-DOPY
-  { B: { player: 1, active: true }, K: { player: 1, active: true }, T: { player: 1, active: true }, U: { player: 1, active: true }, D: { player: 2, active: false }, O: { player: 2, active: false }, P: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // ELSU-ANQY
-  { E: { player: 1, active: true }, L: { player: 1, active: true }, S: { player: 1, active: true }, U: { player: 1, active: true }, A: { player: 2, active: false }, N: { player: 2, active: false }, Q: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // BFNW-HKTX
-  { B: { player: 1, active: true }, F: { player: 1, active: true }, N: { player: 1, active: true }, W: { player: 1, active: true }, H: { player: 2, active: false }, K: { player: 2, active: false }, T: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // HJQU-EILV
-  { H: { player: 1, active: true }, J: { player: 1, active: true }, Q: { player: 1, active: true }, U: { player: 1, active: true }, E: { player: 2, active: false }, I: { player: 2, active: false }, L: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // ADST-IJUX
-  { A: { player: 1, active: true }, D: { player: 1, active: true }, S: { player: 1, active: true }, T: { player: 1, active: true }, I: { player: 2, active: false }, J: { player: 2, active: false }, U: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // DHRX-FJLN
-  { D: { player: 1, active: true }, H: { player: 1, active: true }, R: { player: 1, active: true }, X: { player: 1, active: true }, F: { player: 2, active: false }, J: { player: 2, active: false }, L: { player: 2, active: false }, N: { player: 2, active: false } },
-
-  // ACST-BGOY
-  { A: { player: 1, active: true }, C: { player: 1, active: true }, S: { player: 1, active: true }, T: { player: 1, active: true }, B: { player: 2, active: false }, G: { player: 2, active: false }, O: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // BJKW-COPX
-  { B: { player: 1, active: true }, J: { player: 1, active: true }, K: { player: 1, active: true }, W: { player: 1, active: true }, C: { player: 2, active: false }, O: { player: 2, active: false }, P: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // DIPY-BGTU
-  { D: { player: 1, active: true }, I: { player: 1, active: true }, P: { player: 1, active: true }, Y: { player: 1, active: true }, B: { player: 2, active: false }, G: { player: 2, active: false }, T: { player: 2, active: false }, U: { player: 2, active: false } },
-
-  // CJNQ-IKRV
-  { C: { player: 1, active: true }, J: { player: 1, active: true }, N: { player: 1, active: true }, Q: { player: 1, active: true }, I: { player: 2, active: false }, K: { player: 2, active: false }, R: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // KLTX-BFRW
-  { K: { player: 1, active: true }, L: { player: 1, active: true }, T: { player: 1, active: true }, X: { player: 1, active: true }, B: { player: 2, active: false }, F: { player: 2, active: false }, R: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // APQV-BFGU
-  { A: { player: 1, active: true }, P: { player: 1, active: true }, Q: { player: 1, active: true }, V: { player: 1, active: true }, B: { player: 2, active: false }, F: { player: 2, active: false }, G: { player: 2, active: false }, U: { player: 2, active: false } },
-
-  // BFNO-CHTX
-  { B: { player: 1, active: true }, F: { player: 1, active: true }, N: { player: 1, active: true }, O: { player: 1, active: true }, C: { player: 2, active: false }, H: { player: 2, active: false }, T: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // ALTV-DFNY
-  { A: { player: 1, active: true }, L: { player: 1, active: true }, T: { player: 1, active: true }, V: { player: 1, active: true }, D: { player: 2, active: false }, F: { player: 2, active: false }, N: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // DGSV-BIQX
-  { D: { player: 1, active: true }, G: { player: 1, active: true }, S: { player: 1, active: true }, V: { player: 1, active: true }, B: { player: 2, active: false }, I: { player: 2, active: false }, Q: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // JNQU-EIRV
-  { J: { player: 1, active: true }, N: { player: 1, active: true }, Q: { player: 1, active: true }, U: { player: 1, active: true }, E: { player: 2, active: false }, I: { player: 2, active: false }, R: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // JKLY-ADRW
-  { J: { player: 1, active: true }, K: { player: 1, active: true }, L: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, D: { player: 2, active: false }, R: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // CIJU-EKQV
-  { C: { player: 1, active: true }, I: { player: 1, active: true }, J: { player: 1, active: true }, U: { player: 1, active: true }, E: { player: 2, active: false }, K: { player: 2, active: false }, Q: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // GLTX-BFNS
-  { G: { player: 1, active: true }, L: { player: 1, active: true }, T: { player: 1, active: true }, X: { player: 1, active: true }, B: { player: 2, active: false }, F: { player: 2, active: false }, N: { player: 2, active: false }, S: { player: 2, active: false } },
-
-  // DFIV-BPSX
-  { D: { player: 1, active: true }, F: { player: 1, active: true }, I: { player: 1, active: true }, V: { player: 1, active: true }, B: { player: 2, active: false }, P: { player: 2, active: false }, S: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // FGOX-IJKV
-  { F: { player: 1, active: true }, G: { player: 1, active: true }, O: { player: 1, active: true }, X: { player: 1, active: true }, I: { player: 2, active: false }, J: { player: 2, active: false }, K: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // BFIU-APSV
-  { B: { player: 1, active: true }, F: { player: 1, active: true }, I: { player: 1, active: true }, U: { player: 1, active: true }, A: { player: 2, active: false }, P: { player: 2, active: false }, S: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // BHQX-DGRV
-  { B: { player: 1, active: true }, H: { player: 1, active: true }, Q: { player: 1, active: true }, X: { player: 1, active: true }, D: { player: 2, active: false }, G: { player: 2, active: false }, R: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // CLUX-EHKT
-  { C: { player: 1, active: true }, L: { player: 1, active: true }, U: { player: 1, active: true }, X: { player: 1, active: true }, E: { player: 2, active: false }, H: { player: 2, active: false }, K: { player: 2, active: false }, T: { player: 2, active: false } },
-
-  // DFNW-HJKX
-  { D: { player: 1, active: true }, F: { player: 1, active: true }, N: { player: 1, active: true }, W: { player: 1, active: true }, H: { player: 2, active: false }, J: { player: 2, active: false }, K: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // CQXY-ABIW
-  { C: { player: 1, active: true }, Q: { player: 1, active: true }, X: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, B: { player: 2, active: false }, I: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // BGJX-DQTV
-  { B: { player: 1, active: true }, G: { player: 1, active: true }, J: { player: 1, active: true }, X: { player: 1, active: true }, D: { player: 2, active: false }, Q: { player: 2, active: false }, T: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // AEVX-BDUY
-  { A: { player: 1, active: true }, E: { player: 1, active: true }, V: { player: 1, active: true }, X: { player: 1, active: true }, B: { player: 2, active: false }, D: { player: 2, active: false }, U: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // CRVY-ADHW
-  { C: { player: 1, active: true }, R: { player: 1, active: true }, V: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, D: { player: 2, active: false }, H: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // DGPW-JKSV
-  { D: { player: 1, active: true }, G: { player: 1, active: true }, P: { player: 1, active: true }, W: { player: 1, active: true }, J: { player: 2, active: false }, K: { player: 2, active: false }, S: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // CGPW-KOSV
-  { C: { player: 1, active: true }, G: { player: 1, active: true }, P: { player: 1, active: true }, W: { player: 1, active: true }, K: { player: 2, active: false }, O: { player: 2, active: false }, S: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // DFSY-BJQU
-  { D: { player: 1, active: true }, F: { player: 1, active: true }, S: { player: 1, active: true }, Y: { player: 1, active: true }, B: { player: 2, active: false }, J: { player: 2, active: false }, Q: { player: 2, active: false }, U: { player: 2, active: false } },
-
-  // BHSW-CGRX
-  { B: { player: 1, active: true }, H: { player: 1, active: true }, S: { player: 1, active: true }, W: { player: 1, active: true }, C: { player: 2, active: false }, G: { player: 2, active: false }, R: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // BIUX-ADSV
-  { B: { player: 1, active: true }, I: { player: 1, active: true }, U: { player: 1, active: true }, X: { player: 1, active: true }, A: { player: 2, active: false }, D: { player: 2, active: false }, S: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // AIUV-EGXY
-  { A: { player: 1, active: true }, I: { player: 1, active: true }, U: { player: 1, active: true }, V: { player: 1, active: true }, E: { player: 2, active: false }, G: { player: 2, active: false }, X: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // AEHP-FRUY
-  { A: { player: 1, active: true }, E: { player: 1, active: true }, H: { player: 1, active: true }, P: { player: 1, active: true }, F: { player: 2, active: false }, R: { player: 2, active: false }, U: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // AEIT-FQUY
-  { A: { player: 1, active: true }, E: { player: 1, active: true }, I: { player: 1, active: true }, T: { player: 1, active: true }, F: { player: 2, active: false }, Q: { player: 2, active: false }, U: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // NTUX-LPVY
-  { N: { player: 1, active: true }, T: { player: 1, active: true }, U: { player: 1, active: true }, X: { player: 1, active: true }, L: { player: 2, active: false }, P: { player: 2, active: false }, V: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // GPTV-BFJQ
-  { G: { player: 1, active: true }, P: { player: 1, active: true }, T: { player: 1, active: true }, V: { player: 1, active: true }, B: { player: 2, active: false }, F: { player: 2, active: false }, J: { player: 2, active: false }, Q: { player: 2, active: false } },
-
-  // AHOV-CNPY
-  { A: { player: 1, active: true }, H: { player: 1, active: true }, O: { player: 1, active: true }, V: { player: 1, active: true }, C: { player: 2, active: false }, N: { player: 2, active: false }, P: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // CPSV-DGJW
-  { C: { player: 1, active: true }, P: { player: 1, active: true }, S: { player: 1, active: true }, V: { player: 1, active: true }, D: { player: 2, active: false }, G: { player: 2, active: false }, J: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // GPWX-FKSV
-  { G: { player: 1, active: true }, P: { player: 1, active: true }, W: { player: 1, active: true }, X: { player: 1, active: true }, F: { player: 2, active: false }, K: { player: 2, active: false }, S: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // DPRV-BFHX
-  { D: { player: 1, active: true }, P: { player: 1, active: true }, R: { player: 1, active: true }, V: { player: 1, active: true }, B: { player: 2, active: false }, F: { player: 2, active: false }, H: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // FJVX-BDPT
-  { F: { player: 1, active: true }, J: { player: 1, active: true }, V: { player: 1, active: true }, X: { player: 1, active: true }, B: { player: 2, active: false }, D: { player: 2, active: false }, P: { player: 2, active: false }, T: { player: 2, active: false } },
-
-  // CFSX-DIPW
-  { C: { player: 1, active: true }, F: { player: 1, active: true }, S: { player: 1, active: true }, X: { player: 1, active: true }, D: { player: 2, active: false }, I: { player: 2, active: false }, P: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // BFGS-DIJQ
-  { B: { player: 1, active: true }, F: { player: 1, active: true }, G: { player: 1, active: true }, S: { player: 1, active: true }, D: { player: 2, active: false }, I: { player: 2, active: false }, J: { player: 2, active: false }, Q: { player: 2, active: false } },
-
-  // DFNW-CLTV
-  { D: { player: 1, active: true }, F: { player: 1, active: true }, N: { player: 1, active: true }, W: { player: 1, active: true }, C: { player: 2, active: false }, L: { player: 2, active: false }, T: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // DFHQ-BILP
-  { D: { player: 1, active: true }, F: { player: 1, active: true }, H: { player: 1, active: true }, Q: { player: 1, active: true }, B: { player: 2, active: false }, I: { player: 2, active: false }, L: { player: 2, active: false }, P: { player: 2, active: false } },
-
-  // ADGO-CJSY
-  { A: { player: 1, active: true }, D: { player: 1, active: true }, G: { player: 1, active: true }, O: { player: 1, active: true }, C: { player: 2, active: false }, J: { player: 2, active: false }, S: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // DLOV-BKNX
-  { D: { player: 1, active: true }, L: { player: 1, active: true }, O: { player: 1, active: true }, V: { player: 1, active: true }, B: { player: 2, active: false }, K: { player: 2, active: false }, N: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // CEQV-IJKU
-  { C: { player: 1, active: true }, E: { player: 1, active: true }, Q: { player: 1, active: true }, V: { player: 1, active: true }, I: { player: 2, active: false }, J: { player: 2, active: false }, K: { player: 2, active: false }, U: { player: 2, active: false } },
-
-  // DHKT-CLPX
-  { D: { player: 1, active: true }, H: { player: 1, active: true }, K: { player: 1, active: true }, T: { player: 1, active: true }, C: { player: 2, active: false }, L: { player: 2, active: false }, P: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // BLOV-FHJW
-  { B: { player: 1, active: true }, L: { player: 1, active: true }, O: { player: 1, active: true }, V: { player: 1, active: true }, F: { player: 2, active: false }, H: { player: 2, active: false }, J: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // BLUX-DNVY
-  { B: { player: 1, active: true }, L: { player: 1, active: true }, U: { player: 1, active: true }, X: { player: 1, active: true }, D: { player: 2, active: false }, N: { player: 2, active: false }, V: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // DPTX-BFJV
-  { D: { player: 1, active: true }, P: { player: 1, active: true }, T: { player: 1, active: true }, X: { player: 1, active: true }, B: { player: 2, active: false }, F: { player: 2, active: false }, J: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // CFLT-BHKX
-  { C: { player: 1, active: true }, F: { player: 1, active: true }, L: { player: 1, active: true }, T: { player: 1, active: true }, B: { player: 2, active: false }, H: { player: 2, active: false }, K: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // AKST-BGWY
-  { A: { player: 1, active: true }, K: { player: 1, active: true }, S: { player: 1, active: true }, T: { player: 1, active: true }, B: { player: 2, active: false }, G: { player: 2, active: false }, W: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // BEFL-ADJN
-  { B: { player: 1, active: true }, E: { player: 1, active: true }, F: { player: 1, active: true }, L: { player: 1, active: true }, A: { player: 2, active: false }, D: { player: 2, active: false }, J: { player: 2, active: false }, N: { player: 2, active: false } },
-
-  // AHSW-GKNY
-  { A: { player: 1, active: true }, H: { player: 1, active: true }, S: { player: 1, active: true }, W: { player: 1, active: true }, G: { player: 2, active: false }, K: { player: 2, active: false }, N: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // AEJQ-GTUY
-  { A: { player: 1, active: true }, E: { player: 1, active: true }, J: { player: 1, active: true }, Q: { player: 1, active: true }, G: { player: 2, active: false }, T: { player: 2, active: false }, U: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // BCSU-AIVW
-  { B: { player: 1, active: true }, C: { player: 1, active: true }, S: { player: 1, active: true }, U: { player: 1, active: true }, A: { player: 2, active: false }, I: { player: 2, active: false }, V: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // ABDO-CJTY
-  { A: { player: 1, active: true }, B: { player: 1, active: true }, D: { player: 1, active: true }, O: { player: 1, active: true }, C: { player: 2, active: false }, J: { player: 2, active: false }, T: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // FJLS-DGRX
-  { F: { player: 1, active: true }, J: { player: 1, active: true }, L: { player: 1, active: true }, S: { player: 1, active: true }, D: { player: 2, active: false }, G: { player: 2, active: false }, R: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // AIJY-EFGU
-  { A: { player: 1, active: true }, I: { player: 1, active: true }, J: { player: 1, active: true }, Y: { player: 1, active: true }, E: { player: 2, active: false }, F: { player: 2, active: false }, G: { player: 2, active: false }, U: { player: 2, active: false } },
-
-  // IOPS-GKQT
-  { I: { player: 1, active: true }, O: { player: 1, active: true }, P: { player: 1, active: true }, S: { player: 1, active: true }, G: { player: 2, active: false }, K: { player: 2, active: false }, Q: { player: 2, active: false }, T: { player: 2, active: false } },
-
-  // AJSX-DFGY
-  { A: { player: 1, active: true }, J: { player: 1, active: true }, S: { player: 1, active: true }, X: { player: 1, active: true }, D: { player: 2, active: false }, F: { player: 2, active: false }, G: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // DFNW-BOPR
-  { D: { player: 1, active: true }, F: { player: 1, active: true }, N: { player: 1, active: true }, W: { player: 1, active: true }, B: { player: 2, active: false }, O: { player: 2, active: false }, P: { player: 2, active: false }, R: { player: 2, active: false } },
-
-  // FILO-GJKN
-  { F: { player: 1, active: true }, I: { player: 1, active: true }, L: { player: 1, active: true }, O: { player: 1, active: true }, G: { player: 2, active: false }, J: { player: 2, active: false }, K: { player: 2, active: false }, N: { player: 2, active: false } },
-
-  // DFGW-JKSX
-  { D: { player: 1, active: true }, F: { player: 1, active: true }, G: { player: 1, active: true }, W: { player: 1, active: true }, J: { player: 2, active: false }, K: { player: 2, active: false }, S: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // DIVY-BESX
-  { D: { player: 1, active: true }, I: { player: 1, active: true }, V: { player: 1, active: true }, Y: { player: 1, active: true }, B: { player: 2, active: false }, E: { player: 2, active: false }, S: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // CJQU-EIPW
-  { C: { player: 1, active: true }, J: { player: 1, active: true }, Q: { player: 1, active: true }, U: { player: 1, active: true }, E: { player: 2, active: false }, I: { player: 2, active: false }, P: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // CLNP-DHKR
-  { C: { player: 1, active: true }, L: { player: 1, active: true }, N: { player: 1, active: true }, P: { player: 1, active: true }, D: { player: 2, active: false }, H: { player: 2, active: false }, K: { player: 2, active: false }, R: { player: 2, active: false } },
-
-  // EIKV-CJQU
-  { E: { player: 1, active: true }, I: { player: 1, active: true }, K: { player: 1, active: true }, V: { player: 1, active: true }, C: { player: 2, active: false }, J: { player: 2, active: false }, Q: { player: 2, active: false }, U: { player: 2, active: false } },
-
-  // DKNX-CPRT
-  { D: { player: 1, active: true }, K: { player: 1, active: true }, N: { player: 1, active: true }, X: { player: 1, active: true }, C: { player: 2, active: false }, P: { player: 2, active: false }, R: { player: 2, active: false }, T: { player: 2, active: false } },
-
-  // CDRX-FJLO
-  { C: { player: 1, active: true }, D: { player: 1, active: true }, R: { player: 1, active: true }, X: { player: 1, active: true }, F: { player: 2, active: false }, J: { player: 2, active: false }, L: { player: 2, active: false }, O: { player: 2, active: false } },
-
-  // ELSV-ANQX
-  { E: { player: 1, active: true }, L: { player: 1, active: true }, S: { player: 1, active: true }, V: { player: 1, active: true }, A: { player: 2, active: false }, N: { player: 2, active: false }, Q: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // BJOW-CDKT
-  { B: { player: 1, active: true }, J: { player: 1, active: true }, O: { player: 1, active: true }, W: { player: 1, active: true }, C: { player: 2, active: false }, D: { player: 2, active: false }, K: { player: 2, active: false }, T: { player: 2, active: false } },
-
-  // BIUY-AESV
-  { B: { player: 1, active: true }, I: { player: 1, active: true }, U: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, E: { player: 2, active: false }, S: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // BDLW-FHOP
-  { B: { player: 1, active: true }, D: { player: 1, active: true }, L: { player: 1, active: true }, W: { player: 1, active: true }, F: { player: 2, active: false }, H: { player: 2, active: false }, O: { player: 2, active: false }, P: { player: 2, active: false } },
-
-  // DGTV-BJQX
-  { D: { player: 1, active: true }, G: { player: 1, active: true }, T: { player: 1, active: true }, V: { player: 1, active: true }, B: { player: 2, active: false }, J: { player: 2, active: false }, Q: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // DIQX-BGSV
-  { D: { player: 1, active: true }, I: { player: 1, active: true }, Q: { player: 1, active: true }, X: { player: 1, active: true }, B: { player: 2, active: false }, G: { player: 2, active: false }, S: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // ADIU-BEGY
-  { A: { player: 1, active: true }, D: { player: 1, active: true }, I: { player: 1, active: true }, U: { player: 1, active: true }, B: { player: 2, active: false }, E: { player: 2, active: false }, G: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // ATUX-EPVY
-  { A: { player: 1, active: true }, T: { player: 1, active: true }, U: { player: 1, active: true }, X: { player: 1, active: true }, E: { player: 2, active: false }, P: { player: 2, active: false }, V: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // DHQT-ILPX
-  { D: { player: 1, active: true }, H: { player: 1, active: true }, Q: { player: 1, active: true }, T: { player: 1, active: true }, I: { player: 2, active: false }, L: { player: 2, active: false }, P: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // BIJQ-DFGS
-  { B: { player: 1, active: true }, I: { player: 1, active: true }, J: { player: 1, active: true }, Q: { player: 1, active: true }, D: { player: 2, active: false }, F: { player: 2, active: false }, G: { player: 2, active: false }, S: { player: 2, active: false } },
-
-  // BCPT-DFKX
-  { B: { player: 1, active: true }, C: { player: 1, active: true }, P: { player: 1, active: true }, T: { player: 1, active: true }, D: { player: 2, active: false }, F: { player: 2, active: false }, K: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // EHNV-DLRU
-  { E: { player: 1, active: true }, H: { player: 1, active: true }, N: { player: 1, active: true }, V: { player: 1, active: true }, D: { player: 2, active: false }, L: { player: 2, active: false }, R: { player: 2, active: false }, U: { player: 2, active: false } },
-
-  // BENW-FORU
-  { B: { player: 1, active: true }, E: { player: 1, active: true }, N: { player: 1, active: true }, W: { player: 1, active: true }, F: { player: 2, active: false }, O: { player: 2, active: false }, R: { player: 2, active: false }, U: { player: 2, active: false } },
-
-  // DJPY-EFTX
-  { D: { player: 1, active: true }, J: { player: 1, active: true }, P: { player: 1, active: true }, Y: { player: 1, active: true }, E: { player: 2, active: false }, F: { player: 2, active: false }, T: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // BEQX-FITU
-  { B: { player: 1, active: true }, E: { player: 1, active: true }, Q: { player: 1, active: true }, X: { player: 1, active: true }, F: { player: 2, active: false }, I: { player: 2, active: false }, T: { player: 2, active: false }, U: { player: 2, active: false } },
-
-  // HJKR-CLNV
-  { H: { player: 1, active: true }, J: { player: 1, active: true }, K: { player: 1, active: true }, R: { player: 1, active: true }, C: { player: 2, active: false }, L: { player: 2, active: false }, N: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // EFRV-BHPY
-  { E: { player: 1, active: true }, F: { player: 1, active: true }, R: { player: 1, active: true }, V: { player: 1, active: true }, B: { player: 2, active: false }, H: { player: 2, active: false }, P: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // FJNQ-BIRV
-  { F: { player: 1, active: true }, J: { player: 1, active: true }, N: { player: 1, active: true }, Q: { player: 1, active: true }, B: { player: 2, active: false }, I: { player: 2, active: false }, R: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // GIPT-FJQS
-  { G: { player: 1, active: true }, I: { player: 1, active: true }, P: { player: 1, active: true }, T: { player: 1, active: true }, F: { player: 2, active: false }, J: { player: 2, active: false }, Q: { player: 2, active: false }, S: { player: 2, active: false } },
-
-  // BNQV-DILX
-  { B: { player: 1, active: true }, N: { player: 1, active: true }, Q: { player: 1, active: true }, V: { player: 1, active: true }, D: { player: 2, active: false }, I: { player: 2, active: false }, L: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // AGTW-CFSY
-  { A: { player: 1, active: true }, G: { player: 1, active: true }, T: { player: 1, active: true }, W: { player: 1, active: true }, C: { player: 2, active: false }, F: { player: 2, active: false }, S: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // CKTV-DFOW
-  { C: { player: 1, active: true }, K: { player: 1, active: true }, T: { player: 1, active: true }, V: { player: 1, active: true }, D: { player: 2, active: false }, F: { player: 2, active: false }, O: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // BIKY-AOQX
-  { B: { player: 1, active: true }, I: { player: 1, active: true }, K: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, O: { player: 2, active: false }, Q: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // BGJW-CPSX
-  { B: { player: 1, active: true }, G: { player: 1, active: true }, J: { player: 1, active: true }, W: { player: 1, active: true }, C: { player: 2, active: false }, P: { player: 2, active: false }, S: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // CUXY-ABEW
-  { C: { player: 1, active: true }, U: { player: 1, active: true }, X: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, B: { player: 2, active: false }, E: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // BITU-EFQX
-  { B: { player: 1, active: true }, I: { player: 1, active: true }, T: { player: 1, active: true }, U: { player: 1, active: true }, E: { player: 2, active: false }, F: { player: 2, active: false }, Q: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // BORW-CHKX
-  { B: { player: 1, active: true }, O: { player: 1, active: true }, R: { player: 1, active: true }, W: { player: 1, active: true }, C: { player: 2, active: false }, H: { player: 2, active: false }, K: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // JLSU-EGNP
-  { J: { player: 1, active: true }, L: { player: 1, active: true }, S: { player: 1, active: true }, U: { player: 1, active: true }, E: { player: 2, active: false }, G: { player: 2, active: false }, N: { player: 2, active: false }, P: { player: 2, active: false } },
-
-  // AJTU-EFPY
-  { A: { player: 1, active: true }, J: { player: 1, active: true }, T: { player: 1, active: true }, U: { player: 1, active: true }, E: { player: 2, active: false }, F: { player: 2, active: false }, P: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // DKRW-CHOV
-  { D: { player: 1, active: true }, K: { player: 1, active: true }, R: { player: 1, active: true }, W: { player: 1, active: true }, C: { player: 2, active: false }, H: { player: 2, active: false }, O: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // DEFW-CTUV
-  { D: { player: 1, active: true }, E: { player: 1, active: true }, F: { player: 1, active: true }, W: { player: 1, active: true }, C: { player: 2, active: false }, T: { player: 2, active: false }, U: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // AIST-FGQY
-  { A: { player: 1, active: true }, I: { player: 1, active: true }, S: { player: 1, active: true }, T: { player: 1, active: true }, F: { player: 2, active: false }, G: { player: 2, active: false }, Q: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // DQTX-BFIV
-  { D: { player: 1, active: true }, Q: { player: 1, active: true }, T: { player: 1, active: true }, X: { player: 1, active: true }, B: { player: 2, active: false }, F: { player: 2, active: false }, I: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // FJSU-EGPT
-  { F: { player: 1, active: true }, J: { player: 1, active: true }, S: { player: 1, active: true }, U: { player: 1, active: true }, E: { player: 2, active: false }, G: { player: 2, active: false }, P: { player: 2, active: false }, T: { player: 2, active: false } },
-
-  // HPST-FGJR
-  { H: { player: 1, active: true }, P: { player: 1, active: true }, S: { player: 1, active: true }, T: { player: 1, active: true }, F: { player: 2, active: false }, G: { player: 2, active: false }, J: { player: 2, active: false }, R: { player: 2, active: false } },
-
-  // CRTU-EFHW
-  { C: { player: 1, active: true }, R: { player: 1, active: true }, T: { player: 1, active: true }, U: { player: 1, active: true }, E: { player: 2, active: false }, F: { player: 2, active: false }, H: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // AOPU-EJKY
-  { A: { player: 1, active: true }, O: { player: 1, active: true }, P: { player: 1, active: true }, U: { player: 1, active: true }, E: { player: 2, active: false }, J: { player: 2, active: false }, K: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // CITX-BFQW
-  { C: { player: 1, active: true }, I: { player: 1, active: true }, T: { player: 1, active: true }, X: { player: 1, active: true }, B: { player: 2, active: false }, F: { player: 2, active: false }, Q: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // CIUY-AEQW
-  { C: { player: 1, active: true }, I: { player: 1, active: true }, U: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, E: { player: 2, active: false }, Q: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // EGNQ-ILSU
-  { E: { player: 1, active: true }, G: { player: 1, active: true }, N: { player: 1, active: true }, Q: { player: 1, active: true }, I: { player: 2, active: false }, L: { player: 2, active: false }, S: { player: 2, active: false }, U: { player: 2, active: false } },
-
-  // DGWX-BCSV
-  { D: { player: 1, active: true }, G: { player: 1, active: true }, W: { player: 1, active: true }, X: { player: 1, active: true }, B: { player: 2, active: false }, C: { player: 2, active: false }, S: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // BIVY-ADQX
-  { B: { player: 1, active: true }, I: { player: 1, active: true }, V: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, D: { player: 2, active: false }, Q: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // FLOY-AKNT
-  { F: { player: 1, active: true }, L: { player: 1, active: true }, O: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, K: { player: 2, active: false }, N: { player: 2, active: false }, T: { player: 2, active: false } },
-
-  // DGJU-EPSV
-  { D: { player: 1, active: true }, G: { player: 1, active: true }, J: { player: 1, active: true }, U: { player: 1, active: true }, E: { player: 2, active: false }, P: { player: 2, active: false }, S: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // KNQY-AILO
-  { K: { player: 1, active: true }, N: { player: 1, active: true }, Q: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, I: { player: 2, active: false }, L: { player: 2, active: false }, O: { player: 2, active: false } },
-
-  // IPRT-FHJQ
-  { I: { player: 1, active: true }, P: { player: 1, active: true }, R: { player: 1, active: true }, T: { player: 1, active: true }, F: { player: 2, active: false }, H: { player: 2, active: false }, J: { player: 2, active: false }, Q: { player: 2, active: false } },
-
-  // BDPT-FJVX
-  { B: { player: 1, active: true }, D: { player: 1, active: true }, P: { player: 1, active: true }, T: { player: 1, active: true }, F: { player: 2, active: false }, J: { player: 2, active: false }, V: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // APRV-DHJY
-  { A: { player: 1, active: true }, P: { player: 1, active: true }, R: { player: 1, active: true }, V: { player: 1, active: true }, D: { player: 2, active: false }, H: { player: 2, active: false }, J: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // BPSV-DGJX
-  { B: { player: 1, active: true }, P: { player: 1, active: true }, S: { player: 1, active: true }, V: { player: 1, active: true }, D: { player: 2, active: false }, G: { player: 2, active: false }, J: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // FHOS-GKRT
-  { F: { player: 1, active: true }, H: { player: 1, active: true }, O: { player: 1, active: true }, S: { player: 1, active: true }, G: { player: 2, active: false }, K: { player: 2, active: false }, R: { player: 2, active: false }, T: { player: 2, active: false } },
-
-  // ADHX-BRVY
-  { A: { player: 1, active: true }, D: { player: 1, active: true }, H: { player: 1, active: true }, X: { player: 1, active: true }, B: { player: 2, active: false }, R: { player: 2, active: false }, V: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // DQSW-CGIV
-  { D: { player: 1, active: true }, Q: { player: 1, active: true }, S: { player: 1, active: true }, W: { player: 1, active: true }, C: { player: 2, active: false }, G: { player: 2, active: false }, I: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // BOQU-EIKX
-  { B: { player: 1, active: true }, O: { player: 1, active: true }, Q: { player: 1, active: true }, U: { player: 1, active: true }, E: { player: 2, active: false }, I: { player: 2, active: false }, K: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // HJKW-COPR
-  { H: { player: 1, active: true }, J: { player: 1, active: true }, K: { player: 1, active: true }, W: { player: 1, active: true }, C: { player: 2, active: false }, O: { player: 2, active: false }, P: { player: 2, active: false }, R: { player: 2, active: false } },
-
-  // EFHS-GRTU
-  { E: { player: 1, active: true }, F: { player: 1, active: true }, H: { player: 1, active: true }, S: { player: 1, active: true }, G: { player: 2, active: false }, R: { player: 2, active: false }, T: { player: 2, active: false }, U: { player: 2, active: false } },
-
-  // BILS-GNQX
-  { B: { player: 1, active: true }, I: { player: 1, active: true }, L: { player: 1, active: true }, S: { player: 1, active: true }, G: { player: 2, active: false }, N: { player: 2, active: false }, Q: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // DGJW-CPSV
-  { D: { player: 1, active: true }, G: { player: 1, active: true }, J: { player: 1, active: true }, W: { player: 1, active: true }, C: { player: 2, active: false }, P: { player: 2, active: false }, S: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // CILV-DNQW
-  { C: { player: 1, active: true }, I: { player: 1, active: true }, L: { player: 1, active: true }, V: { player: 1, active: true }, D: { player: 2, active: false }, N: { player: 2, active: false }, Q: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // BFQY-AITX
-  { B: { player: 1, active: true }, F: { player: 1, active: true }, Q: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, I: { player: 2, active: false }, T: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // GPTV-DFJS
-  { G: { player: 1, active: true }, P: { player: 1, active: true }, T: { player: 1, active: true }, V: { player: 1, active: true }, D: { player: 2, active: false }, F: { player: 2, active: false }, J: { player: 2, active: false }, S: { player: 2, active: false } },
-
-  // GJKQ-IOPS
-  { G: { player: 1, active: true }, J: { player: 1, active: true }, K: { player: 1, active: true }, Q: { player: 1, active: true }, I: { player: 2, active: false }, O: { player: 2, active: false }, P: { player: 2, active: false }, S: { player: 2, active: false } },
-
-  // ACRX-BHWY
-  { A: { player: 1, active: true }, C: { player: 1, active: true }, R: { player: 1, active: true }, X: { player: 1, active: true }, B: { player: 2, active: false }, H: { player: 2, active: false }, W: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // CTUX-BEFW
-  { C: { player: 1, active: true }, T: { player: 1, active: true }, U: { player: 1, active: true }, X: { player: 1, active: true }, B: { player: 2, active: false }, E: { player: 2, active: false }, F: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // AIPT-FJQY
-  { A: { player: 1, active: true }, I: { player: 1, active: true }, P: { player: 1, active: true }, T: { player: 1, active: true }, F: { player: 2, active: false }, J: { player: 2, active: false }, Q: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // AKNT-FLOY
-  { A: { player: 1, active: true }, K: { player: 1, active: true }, N: { player: 1, active: true }, T: { player: 1, active: true }, F: { player: 2, active: false }, L: { player: 2, active: false }, O: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // GKTY-AFOS
-  { G: { player: 1, active: true }, K: { player: 1, active: true }, T: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, F: { player: 2, active: false }, O: { player: 2, active: false }, S: { player: 2, active: false } },
-
-  // DGWY-ACSV
-  { D: { player: 1, active: true }, G: { player: 1, active: true }, W: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, C: { player: 2, active: false }, S: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // GPRT-FHJS
-  { G: { player: 1, active: true }, P: { player: 1, active: true }, R: { player: 1, active: true }, T: { player: 1, active: true }, F: { player: 2, active: false }, H: { player: 2, active: false }, J: { player: 2, active: false }, S: { player: 2, active: false } },
-
-  // JSVY-ADGP
-  { J: { player: 1, active: true }, S: { player: 1, active: true }, V: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, D: { player: 2, active: false }, G: { player: 2, active: false }, P: { player: 2, active: false } },
-
-  // CIJU-EPQW
-  { C: { player: 1, active: true }, I: { player: 1, active: true }, J: { player: 1, active: true }, U: { player: 1, active: true }, E: { player: 2, active: false }, P: { player: 2, active: false }, Q: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // ATWX-BCFY
-  { A: { player: 1, active: true }, T: { player: 1, active: true }, W: { player: 1, active: true }, X: { player: 1, active: true }, B: { player: 2, active: false }, C: { player: 2, active: false }, F: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // EGPQ-IJSU
-  { E: { player: 1, active: true }, G: { player: 1, active: true }, P: { player: 1, active: true }, Q: { player: 1, active: true }, I: { player: 2, active: false }, J: { player: 2, active: false }, S: { player: 2, active: false }, U: { player: 2, active: false } },
-
-  // EITW-CFQU
-  { E: { player: 1, active: true }, I: { player: 1, active: true }, T: { player: 1, active: true }, W: { player: 1, active: true }, C: { player: 2, active: false }, F: { player: 2, active: false }, Q: { player: 2, active: false }, U: { player: 2, active: false } },
-
-  // BGNV-DLSX
-  { B: { player: 1, active: true }, G: { player: 1, active: true }, N: { player: 1, active: true }, V: { player: 1, active: true }, D: { player: 2, active: false }, L: { player: 2, active: false }, S: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // DGQX-BISV
-  { D: { player: 1, active: true }, G: { player: 1, active: true }, Q: { player: 1, active: true }, X: { player: 1, active: true }, B: { player: 2, active: false }, I: { player: 2, active: false }, S: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // BDQS-GIVX
-  { B: { player: 1, active: true }, D: { player: 1, active: true }, Q: { player: 1, active: true }, S: { player: 1, active: true }, G: { player: 2, active: false }, I: { player: 2, active: false }, V: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // DGHW-CRSV
-  { D: { player: 1, active: true }, G: { player: 1, active: true }, H: { player: 1, active: true }, W: { player: 1, active: true }, C: { player: 2, active: false }, R: { player: 2, active: false }, S: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // AJLV-DNPY
-  { A: { player: 1, active: true }, J: { player: 1, active: true }, L: { player: 1, active: true }, V: { player: 1, active: true }, D: { player: 2, active: false }, N: { player: 2, active: false }, P: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // BCSV-DGWX
-  { B: { player: 1, active: true }, C: { player: 1, active: true }, S: { player: 1, active: true }, V: { player: 1, active: true }, D: { player: 2, active: false }, G: { player: 2, active: false }, W: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // AOSU-EGKY
-  { A: { player: 1, active: true }, O: { player: 1, active: true }, S: { player: 1, active: true }, U: { player: 1, active: true }, E: { player: 2, active: false }, G: { player: 2, active: false }, K: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // JSUY-AEGP
-  { J: { player: 1, active: true }, S: { player: 1, active: true }, U: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, E: { player: 2, active: false }, G: { player: 2, active: false }, P: { player: 2, active: false } },
-
-  // DJKY-AOPV
-  { D: { player: 1, active: true }, J: { player: 1, active: true }, K: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, O: { player: 2, active: false }, P: { player: 2, active: false }, V: { player: 2, active: false } },
-
-  // BNPV-DJLX
-  { B: { player: 1, active: true }, N: { player: 1, active: true }, P: { player: 1, active: true }, V: { player: 1, active: true }, D: { player: 2, active: false }, J: { player: 2, active: false }, L: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // IJSU-EGPQ
-  { I: { player: 1, active: true }, J: { player: 1, active: true }, S: { player: 1, active: true }, U: { player: 1, active: true }, E: { player: 2, active: false }, G: { player: 2, active: false }, P: { player: 2, active: false }, Q: { player: 2, active: false } },
-
-  // BDFY-ATVX
-  { B: { player: 1, active: true }, D: { player: 1, active: true }, F: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, T: { player: 2, active: false }, V: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // AHLS-GNRY
-  { A: { player: 1, active: true }, H: { player: 1, active: true }, L: { player: 1, active: true }, S: { player: 1, active: true }, G: { player: 2, active: false }, N: { player: 2, active: false }, R: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // BNRY-AHLX
-  { B: { player: 1, active: true }, N: { player: 1, active: true }, R: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, H: { player: 2, active: false }, L: { player: 2, active: false }, X: { player: 2, active: false } },
-
-  // CQRX-BHIW
-  { C: { player: 1, active: true }, Q: { player: 1, active: true }, R: { player: 1, active: true }, X: { player: 1, active: true }, B: { player: 2, active: false }, H: { player: 2, active: false }, I: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // AQUX-BEIY
-  { A: { player: 1, active: true }, Q: { player: 1, active: true }, U: { player: 1, active: true }, X: { player: 1, active: true }, B: { player: 2, active: false }, E: { player: 2, active: false }, I: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // CKLT-FNOW
-  { C: { player: 1, active: true }, K: { player: 1, active: true }, L: { player: 1, active: true }, T: { player: 1, active: true }, F: { player: 2, active: false }, N: { player: 2, active: false }, O: { player: 2, active: false }, W: { player: 2, active: false } },
-
-  // AEQV-DIUY
-  { A: { player: 1, active: true }, E: { player: 1, active: true }, Q: { player: 1, active: true }, V: { player: 1, active: true }, D: { player: 2, active: false }, I: { player: 2, active: false }, U: { player: 2, active: false }, Y: { player: 2, active: false } },
-
-  // JKLX-BNOP
-  { J: { player: 1, active: true }, K: { player: 1, active: true }, L: { player: 1, active: true }, X: { player: 1, active: true }, B: { player: 2, active: false }, N: { player: 2, active: false }, O: { player: 2, active: false }, P: { player: 2, active: false } },
-
-  // FNOY-AKLT
-  { F: { player: 1, active: true }, N: { player: 1, active: true }, O: { player: 1, active: true }, Y: { player: 1, active: true }, A: { player: 2, active: false }, K: { player: 2, active: false }, L: { player: 2, active: false }, T: { player: 2, active: false } },
-
-  // BJPX-DFTV
-  { B: { player: 1, active: true }, J: { player: 1, active: true }, P: { player: 1, active: true }, X: { player: 1, active: true }, D: { player: 2, active: false }, F: { player: 2, active: false }, T: { player: 2, active: false }, V: { player: 2, active: false } },
+const BOARD_CODES = [
+  'BFTX-DJPV',
+  'GJKN-FILO',
+  'EGRV-BHQY',
+  'CNVY-AHOP',
+  'CJNW-DHKO',
+  'CPRT-BLOV',
+  'JPSY-EFIT',
+  'BIQV-DGSX',
+  'BIUY-AEQX',
+  'GJKY-ADSW',
+  'AKST-FGOY',
+  'BGTX-DJQV',
+  'BJTV-DFPX',
+  'BJPY-EFTV',
+  'ACTV-BOPY',
+  'DFRW-JKLX',
+  'EITX-AGPV',
+  'GNPX-FHSV',
+  'DKLV-BNOX',
+  'AEST-IJUY',
+  'BJKS-DGTW',
+  'FGSU-AIPQ',
+  'DGKO-CJSW',
+  'ILOP-DHQW',
+  'BJRW-FNOV',
+  'GJRU-AHQT',
+  'DFIU-APSX',
+  'CFTV-BJKX',
+  'AIQV-EGSX',
+  'GSUX-IQVY',
+  'FGUY-AEPQ',
+  'BKTU-DOPY',
+  'ELSU-ANQY',
+  'BFNW-HKTX',
+  'HJQU-EILV',
+  'ADST-IJUX',
+  'DHRX-FJLN',
+  'ACST-BGOY',
+  'BJKW-COPX',
+  'DIPY-BGTU',
+  'CJNQ-IKRV',
+  'KLTX-BFRW',
+  'APQV-BFGU',
+  'BFNO-CHTX',
+  'ALTV-DFNY',
+  'DGSV-BIQX',
+  'JNQU-EIRV',
+  'JKLY-ADRW',
+  'CIJU-EKQV',
+  'GLTX-BFNS',
+  'DFIV-BPSX',
+  'FGOX-IJKV',
+  'BFIU-APSV',
+  'BHQX-DGRV',
+  'CLUX-EHKT',
+  'DFNW-HJKX',
+  'CQXY-ABIW',
+  'BGJX-DQTV',
+  'AEVX-BDUY',
+  'CRVY-ADHW',
+  'DGPW-JKSV',
+  'CGPW-KOSV',
+  'DFSY-BJQU',
+  'BHSW-CGRX',
+  'BIUX-ADSV',
+  'AIUV-EGXY',
+  'AEHP-FRUY',
+  'AEIT-FQUY',
+  'NTUX-LPVY',
+  'GPTV-BFJQ',
+  'AHOV-CNPY',
+  'CPSV-DGJW',
+  'GPWX-FKSV',
+  'DPRV-BFHX',
+  'FJVX-BDPT',
+  'CFSX-DIPW',
+  'BFGS-DIJQ',
+  'DFNW-CLTV',
+  'DFHQ-BILP',
+  'ADGO-CJSY',
+  'DLOV-BKNX',
+  'CEQV-IJKU',
+  'DHKT-CLPX',
+  'BLOV-FHJW',
+  'BLUX-DNVY',
+  'DPTX-BFJV',
+  'CFLT-BHKX',
+  'AKST-BGWY',
+  'BEFL-ADJN',
+  'AHSW-GKNY',
+  'AEJQ-GTUY',
+  'BCSU-AIVW',
+  'ABDO-CJTY',
+  'FJLS-DGRX',
+  'AIJY-EFGU',
+  'IOPS-GKQT',
+  'AJSX-DFGY',
+  'DFNW-BOPR',
+  'FILO-GJKN',
+  'DFGW-JKSX',
+  'DIVY-BESX',
+  'CJQU-EIPW',
+  'CLNP-DHKR',
+  'EIKV-CJQU',
+  'DKNX-CPRT',
+  'CDRX-FJLO',
+  'ELSV-ANQX',
+  'BJOW-CDKT',
+  'BIUY-AESV',
+  'BDLW-FHOP',
+  'DGTV-BJQX',
+  'DIQX-BGSV',
+  'ADIU-BEGY',
+  'ATUX-EPVY',
+  'DHQT-ILPX',
+  'BIJQ-DFGS',
+  'BCPT-DFKX',
+  'EHNV-DLRU',
+  'BENW-FORU',
+  'DJPY-EFTX',
+  'BEQX-FITU',
+  'HJKR-CLNV',
+  'EFRV-BHPY',
+  'FJNQ-BIRV',
+  'GIPT-FJQS',
+  'BNQV-DILX',
+  'AGTW-CFSY',
+  'CKTV-DFOW',
+  'BIKY-AOQX',
+  'BGJW-CPSX',
+  'CUXY-ABEW',
+  'BITU-EFQX',
+  'BORW-CHKX',
+  'JLSU-EGNP',
+  'AJTU-EFPY',
+  'DKRW-CHOV',
+  'DEFW-CTUV',
+  'AIST-FGQY',
+  'DQTX-BFIV',
+  'FJSU-EGPT',
+  'HPST-FGJR',
+  'CRTU-EFHW',
+  'AOPU-EJKY',
+  'CITX-BFQW',
+  'CIUY-AEQW',
+  'EGNQ-ILSU',
+  'DGWX-BCSV',
+  'BIVY-ADQX',
+  'FLOY-AKNT',
+  'DGJU-EPSV',
+  'KNQY-AILO',
+  'IPRT-FHJQ',
+  'BDPT-FJVX',
+  'APRV-DHJY',
+  'BPSV-DGJX',
+  'FHOS-GKRT',
+  'ADHX-BRVY',
+  'DQSW-CGIV',
+  'BOQU-EIKX',
+  'HJKW-COPR',
+  'EFHS-GRTU',
+  'BILS-GNQX',
+  'DGJW-CPSV',
+  'CILV-DNQW',
+  'BFQY-AITX',
+  'GPTV-DFJS',
+  'GJKQ-IOPS',
+  'ACRX-BHWY',
+  'CTUX-BEFW',
+  'AIPT-FJQY',
+  'AKNT-FLOY',
+  'GKTY-AFOS',
+  'DGWY-ACSV',
+  'GPRT-FHJS',
+  'JSVY-ADGP',
+  'CIJU-EPQW',
+  'ATWX-BCFY',
+  'EGPQ-IJSU',
+  'EITW-CFQU',
+  'BGNV-DLSX',
+  'DGQX-BISV',
+  'BDQS-GIVX',
+  'DGHW-CRSV',
+  'AJLV-DNPY',
+  'BCSV-DGWX',
+  'AOSU-EGKY',
+  'JSUY-AEGP',
+  'DJKY-AOPV',
+  'BNPV-DJLX',
+  'IJSU-EGPQ',
+  'BDFY-ATVX',
+  'AHLS-GNRY',
+  'BNRY-AHLX',
+  'CQRX-BHIW',
+  'AQUX-BEIY',
+  'CKLT-FNOW',
+  'AEQV-DIUY',
+  'JKLX-BNOP',
+  'FNOY-AKLT',
+  'BJPX-DFTV',
 ];
 
+function decompressPatterns(compressedList) {
+  return compressedList.map(pattern => {
+    const [p1Chars, p2Chars] = pattern.split('-');
+    const boardObject = {};
+
+    // Map Player 1 characters
+    for (const char of p1Chars) {
+      boardObject[char] = { player: 1, active: true };
+    }
+
+    // Map Player 2 characters
+    for (const char of p2Chars) {
+      boardObject[char] = { player: 2, active: true };
+    }
+
+    return boardObject;
+  });
+}
+
+// Usage:
+const BOARD_PATTERNS = decompressPatterns(BOARD_CODES);
 function makeInitialPieces() {
   // 1. Get a unique number for the current day (YYYYMMDD format)
   const today = new Date();
@@ -1754,6 +1376,7 @@ function makeInitialPieces() {
 }
 
 const state = {
+  colorAssigned: false,
   currentPlayer: 1,
   selectedSquare: null,
   currentMoves: [],
@@ -2161,10 +1784,28 @@ function renderMoveLog() {
 // ═══════════════════════════════════════════════════════════════
 //  SECTION 5 — INTERACTION RULES
 // ═══════════════════════════════════════════════════════════════
+function assignStartingColor(playerColor) {
+  if (state.colorAssigned) return;
+  
+  // Wipe the default history and rebuild it from the perspective of the chosen color
+  state.history.clear();
+  state.currentPlayer = playerColor;
+  state.history.add(serialiseState(state.pieces, state.currentPlayer));
+
+  if (vsAI) humanPlayerColor = playerColor;
+  
+  // Update the very first timeline snapshot to match the choice
+  if (timeline.length > 0) {
+    timeline[0].currentPlayer = state.currentPlayer;
+    timeline[0].history = new Set(state.history);
+  }
+  
+  updateMetaDisplay(); // Instantly swaps the "You" / "Computer" labels if they picked Black
+}
+
 function handleSquareClick(label) {
   if (state.gameOver || state.animating) return;
-  if (vsAI && state.currentPlayer !== humanPlayerColor) return;
-  // Online multiplayer: block interaction when it is the opponent's turn
+  if (vsAI && state.colorAssigned && state.currentPlayer !== humanPlayerColor) return;
   if (window.mpOnline && state.currentPlayer !== window.mpMyColor) return;
   if (window.isWaitingForContinue) return;
 
@@ -2175,18 +1816,25 @@ function handleSquareClick(label) {
     const src = state.selectedSquare;
     clearSelection();
     executeMove(src, targetMove);
-  } else if (piece && piece.player === state.currentPlayer && piece.active) {
-    if (state.sneaking && label !== state.sneakingSquare) return;
-    if (state.selectedSquare === label) { clearSelection(); state.highlightingActive = true; render(); }
-    else selectPiece(label);
   } else {
-    if (state.selectedSquare) {
-      clearSelection();
-      state.highlightingActive = true;
-      render();
+    // If color isn't assigned yet, let them pick any active piece
+    if (!state.colorAssigned && piece && piece.active && !window.mpOnline) {
+      assignStartingColor(piece.player);
+    }
+
+    if (piece && piece.player === state.currentPlayer && piece.active) {
+      if (state.sneaking && label !== state.sneakingSquare) return;
+      if (state.selectedSquare === label) { clearSelection(); state.highlightingActive = true; render(); }
+      else selectPiece(label);
     } else {
-      state.highlightingActive = !state.highlightingActive;
-      render();
+      if (state.selectedSquare) {
+        clearSelection();
+        state.highlightingActive = true;
+        render();
+      } else {
+        state.highlightingActive = !state.highlightingActive;
+        render();
+      }
     }
   }
 }
@@ -2310,6 +1958,9 @@ function executeMove(fromLabel, move) {
 }
 
 function finalizeMove(fromLabel, move) {
+  if (!state.colorAssigned) {
+    state.colorAssigned = true;
+  }
   // Record this half-move before any state change so timeline stays aligned.
   // Capture the full set of active same-player squares and a position snapshot
   // now, before the deactivation sweep below overwrites state.pieces.
@@ -2345,37 +1996,35 @@ function finalizeMove(fromLabel, move) {
   state.pieces[move.landing] = movingPiece;
 
   const victory = checkVictory(state.pieces);
-if (victory) {
-  state.gameOver = true;
-  state.lastWinner = victory.winner;
-  state.winLine = victory.line;
-  state.winLine._winner = victory.winner;
-  state.sneaking = false;
-  state.losSquares = [];
+  if (victory) {
+    state.gameOver = true;
+    state.lastWinner = victory.winner;
+    state.winLine = victory.line;
+    state.winLine._winner = victory.winner;
+    state.sneaking = false;
+    state.losSquares = [];
 
-  // Board painting: the winning squares stay painted, accumulating round
-  // after round. The AI's win paints red; any other win paints gold.
-  // Cleared only on a full reset (see restartGame).
-  const isEnemyWin = vsAI && victory.winner !== humanPlayerColor;
-  const paintColor = isEnemyWin ? 'red' : 'gold';
-  victory.line.forEach(sq => { state.paint[sq] = paintColor; });
+    // Board painting: the winning squares stay painted, accumulating round
+    // after round. The AI's win paints red; any other win paints gold.
+    // Cleared only on a full reset (see restartGame).
+    const isEnemyWin = vsAI && victory.winner !== humanPlayerColor;
+    const paintColor = isEnemyWin ? 'red' : 'gold';
+    victory.line.forEach(sq => { state.paint[sq] = paintColor; });
 
-  // Freeze BEFORE humanStreak is incremented for next round
-  state.lastFinalLevel = humanStreak + 1;
-  state.lastFinalMoves = playerMoveCount;
+    // Freeze BEFORE humanStreak is incremented for next round
+    state.lastFinalLevel = humanStreak + 1;
+    state.lastFinalMoves = playerMoveCount;
 
-  if (vsAI && victory.winner === humanPlayerColor) {
-    humanStreak++;
+    if (vsAI && victory.winner === humanPlayerColor) {
+      humanStreak++;
+    }
+
+    render();
+    updateMetaDisplay();
+    pushTimeline();
+    setTimeout(() => showVictory(victory.winner), 600);
+    return;
   }
-
-  render();
-  updateMetaDisplay();
-  pushTimeline();
-  setTimeout(() => showVictory(victory.winner), 600);
-  return;
-}
-
-  // Response time was 1200
 
   const responseTime = 100;
 
@@ -3687,6 +3336,7 @@ function render() {
   const humanTurn = window.mpOnline
     ? state.currentPlayer === window.mpMyColor
     : (state.currentPlayer === humanPlayerColor || !vsAI);
+    
   if (state.currentPlayer === 1) {
     tagP1.classList.add('active');
     tagP2.classList.remove('active');
@@ -3694,8 +3344,8 @@ function render() {
     tagP1.classList.remove('active');
     tagP2.classList.add('active');
   }
-  const pathSquares = new Set();
   
+  const pathSquares = new Set();
   for (const m of state.currentMoves) {
     if (!m.blocked) {
       for (const sq of m.path) pathSquares.add(sq);
@@ -3715,13 +3365,13 @@ function render() {
       coord.textContent = label;
       cell.appendChild(coord);
     }
+    
     const isSelected = state.selectedSquare === label;
     const move = state.currentMoves.find(m => m.landing === label);
 
     if (state.winLine && state.winLine.includes(label)) {
       cell.classList.add('win-line');
       
-      // --- ADD THIS BLOCK ---
       const isEnemyWin = window.mpOnline 
         ? state.winLine._winner !== window.mpMyColor 
         : (vsAI && state.winLine._winner !== humanPlayerColor);
@@ -3729,7 +3379,6 @@ function render() {
       if (isEnemyWin) {
         cell.classList.add('enemy-win');
       }
-      // ----------------------
     }
     else if (state.highlightingActive && piece && piece.player === state.currentPlayer && piece.active && !state.selectedSquare) {
       cell.classList.add('landing');
@@ -3760,7 +3409,17 @@ function render() {
         el.className = `piece p${piece.player} sneaking`;
       } else if (piece.active) {
         el.className = `piece p${piece.player} active-piece`;
-        if (piece.player === state.currentPlayer && !state.gameOver && humanTurn && !window.isWaitingForContinue) {
+        
+        let canSelectThis = false;
+        if (!state.gameOver && !window.isWaitingForContinue) {
+          if (!state.colorAssigned && !window.mpOnline) {
+            canSelectThis = true; // Both colors are selectable initially
+          } else if (piece.player === state.currentPlayer && humanTurn) {
+            canSelectThis = true;
+          }
+        }
+        
+        if (canSelectThis) {
           cell.classList.add('selectable');
         }
       } else {
@@ -3779,7 +3438,6 @@ function render() {
   }
   updateNavButtons();
 }
-
 function setStatus(msg, variant = false) {
   statusEl.textContent = msg;
   statusEl.classList.remove('highlight', 'warn', 'sneaking');
@@ -3808,20 +3466,33 @@ function restartGame(forceResetColor) {
   document.querySelector('.victory-overlay')?.remove();
   clearResultBanner();
 
+  let newColorAssigned = state.colorAssigned;
+
   if (vsAI) {
     if (forceResetColor) {
       humanPlayerColor = 1;
       humanStreak = 0;
       playerMoveCount = 0;
+      newColorAssigned = false;
       window.achievedNewBest = true; // Força render correto dos labels de nível
       window.achievedNewBest = false;
     } else {
-      humanPlayerColor = humanPlayerColor === 1 ? 2 : 1;
+      newColorAssigned = true; // Preserve the assigned color between rounds
     }
+  } else {
+    if (forceResetColor) newColorAssigned = false;
+  }
+
+  // Round 1: Default to 1 (Player can override it). 
+  // Subsequent Rounds: Alternate based on humanStreak (even = human starts, odd = AI starts).
+  let startingPlayer = 1;
+  if (vsAI && newColorAssigned) {
+    startingPlayer = (humanStreak % 2 === 0) ? humanPlayerColor : (humanPlayerColor === 1 ? 2 : 1);
   }
 
   Object.assign(state, {
-    currentPlayer: 1,
+    currentPlayer: startingPlayer,
+    colorAssigned: newColorAssigned,
     selectedSquare: null,
     currentMoves: [],
     gameOver: false,
@@ -3834,6 +3505,7 @@ function restartGame(forceResetColor) {
     pieces: makeInitialPieces(),
     history: new Set(),
   });
+  
   state.lastWinner = null;
   state.history.add(serialiseState(state.pieces, state.currentPlayer));
 
@@ -3850,7 +3522,7 @@ function restartGame(forceResetColor) {
   pushTimeline();
   updateMetaDisplay();
 
-  if (vsAI && state.currentPlayer !== humanPlayerColor) {
+  if (vsAI && state.colorAssigned && state.currentPlayer !== humanPlayerColor) {
     setStatus(t('calculatingOpening'), 'highlight');
     triggerAIMove();
   } else {
@@ -4067,12 +3739,20 @@ applyLanguageSwitch();
 
   // ── helpers ─────────────────────────────────────────────────
 
-  function canDragFrom(label) {
+function canDragFrom(label) {
     if (state.gameOver || state.animating || window.isWaitingForContinue) return false;
-    if (vsAI && state.currentPlayer !== humanPlayerColor) return false;
+    if (vsAI && state.colorAssigned && state.currentPlayer !== humanPlayerColor) return false;
     if (window.mpOnline && state.currentPlayer !== window.mpMyColor) return false;
+
     const piece = state.pieces[label];
-    if (!piece || piece.player !== state.currentPlayer || !piece.active) return false;
+    if (!piece || !piece.active) return false;
+
+    if (!state.colorAssigned && !window.mpOnline) {
+      // Can drag any active piece
+    } else {
+      if (piece.player !== state.currentPlayer) return false;
+    }
+
     if (state.sneaking && label !== state.sneakingSquare) return false;
     return true;
   }
@@ -4147,7 +3827,11 @@ applyLanguageSwitch();
     if (dragHideStyle) { dragHideStyle.remove(); dragHideStyle = null; }
   }
 
-  function beginDrag(label, clientX, clientY) {
+function beginDrag(label, clientX, clientY) {
+    if (!state.colorAssigned && !window.mpOnline) {
+      assignStartingColor(state.pieces[label].player);
+    }
+
     // Select the piece (shows landing dots etc.) — triggers render() internally
     if (state.selectedSquare !== label) {
       handleSquareClick(label);
