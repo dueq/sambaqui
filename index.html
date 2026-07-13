@@ -252,6 +252,7 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
     transition: background 0.2s, border-color 0.2s, color 0.2s;
   }
   .mode-btn.active { background: rgba(196,154,68,0.12); border-color: var(--gold); color: var(--gold); }
+  .menu-item.active { background: rgba(196,154,68,0.12); color: var(--gold); }
 
 
   .help-btn {
@@ -270,6 +271,19 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
   .player-tag.p1 .dot { background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90); border: 1.5px solid var(--accent); }
   .player-tag.p2 .dot{  background: radial-gradient(circle at 38% 32%, #704737, #1e1209 55%, #1a0d05); border: 1.5px solid var(--accent); }
   .turn-divider { width: 2px; height: 20px; background: var(--accent); opacity: 0.6; }
+
+
+  /* ── Speed Timer ── */
+#speed-timer-bar {
+  width: 100%;
+  max-width: calc(var(--cell-size) * 5 + var(--gap) * 4 + clamp(20px, 4vw, 36px) + 4px);
+  height: 4px;
+  background: var(--gold);
+  border-radius: 2px;
+}
+#speed-timer-bar.warning {
+  background: #c0704a; /* Red/warn color from your palette */
+}
 
   /* ── Shared slot: turn-bar and result-banner occupy the same fixed-height area ── */
   .banner-zone {
@@ -719,22 +733,17 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
       </button>
 
         <button class="menu-item" id="contrast-toggle-btn">
-         ◐  Alto Contraste
+         ◐ Contraste
+        </button>
+
+        <button class="menu-item" id="speed-toggle-btn">
+         ⚡︎ Speed
         </button>
 
       <!-- multiplayer.js inserts Online here -->
 
-      <button class="menu-item" id="footer-share-link">
-        ↪︎ Compartilhar
-      </button>
 
-      <a
-        class="menu-item"
-        id="footer-support-link"
-        href="https://ko-fi.com/eduardoeller"
-        target="_blank">
-        ♥ Apoiar o jogo
-      </a>
+      
     </div>
   </div>
 </div>
@@ -764,6 +773,8 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
     <div class="board-wrapper" id="board"></div>
   </div>
 
+  <div id="speed-timer-bar" class="hidden"></div>
+
   <div class="banner-zone">
     <div id="result-banner-slot"></div>
     <div class="turn-bar">
@@ -790,7 +801,7 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
 
 
 <div class="author">
-  Sambaqui ꕤ v1.4.2 ꕤ  © Eduardo E Quadros 2026
+  Sambaqui ꕤ v1.4.3 ꕤ  © Eduardo E Quadros 2026
 </div>
 </footer>
 
@@ -825,7 +836,7 @@ const translations = {
   EN: {
     newGame: "▣\uFE0E Classic",
     practice: "☕︎\uFE0E Local Game",
-    tutorial: "✔\uFE0E Rules",
+    tutorial: "☰\uFE0E Rules",
     language: "Ⓐ\uFE0E Português",
     level: "Level⠀",
     best: "Score⠀",
@@ -854,6 +865,7 @@ const translations = {
     haltedEnemies: "Halted. {n} enemy piece{plural} spotted.",
     chainNoEnemies: "No enemies spotted, move again.",
     noLegalMovesPass: "Player {passedFrom} has no legal moves! Turn passes.",
+    speedTimeoutPass: "Time's up! Player {passedFrom}'s turn passes.",
     victoryOverlayTitle: "Victory!",
     victoryLevelComplete: "Level {humanStreak} Complete!",
     nextRound: "Next Round",
@@ -885,7 +897,7 @@ const translations = {
   PT: {
     newGame: "▣\uFE0E Clássico",
     practice: "☕︎ Jogo Local",
-    tutorial: " ✔\uFE0E Regras",
+    tutorial: " ☰\uFE0E Regras",
     language: "Ⓐ\uFE0E English",
     level: "Nível⠀",
     best: "Pontos⠀",
@@ -914,6 +926,7 @@ const translations = {
     haltedEnemies: "Parado. {n} peça{plural} inimiga{plural} à vista.",
     chainNoEnemies: "Nenhum inimigo avistado, mova novamente.",
     noLegalMovesPass: "Jogador {passedFrom} não tem movimentos válidos.",
+    speedTimeoutPass: "Tempo esgotado! A vez do Jogador {passedFrom} passa.",
     victoryOverlayTitle: "Vitória!",
     victoryLevelComplete: "Nível {humanStreak} Concluído.",
     nextRound: "Continue",
@@ -1603,6 +1616,97 @@ function buildShareText() {
   return t('shareResultMsg', { board, filled, level, moves, bestLevel, bestMoves, url }).trimEnd();
 }
 
+// ── Speed Mode State ──
+let isSpeedMode = false; // Set to true when the player selects this mode
+let speedTimerId = null;
+let speedTimeRemaining = 5000; // 5 seconds in milliseconds
+const SPEED_LIMIT = 5000;
+const speedTimerBar = document.getElementById('speed-timer-bar');
+
+function startSpeedTimer() {
+  if (!isSpeedMode || !vsAI || state.gameOver) return;
+  
+  stopSpeedTimer(); // Clear any existing timer
+  speedTimeRemaining = SPEED_LIMIT;
+  speedTimerBar.classList.remove('hidden', 'warning');
+  speedTimerBar.style.width = '100%';
+  
+  // Update every 50ms for a smooth visual drain
+  speedTimerId = setInterval(() => {
+    speedTimeRemaining -= 50;
+    const percentage = (speedTimeRemaining / SPEED_LIMIT) * 100;
+    speedTimerBar.style.width = `${percentage}%`;
+    
+    // Change color when time is low (< 1.5 seconds)
+    if (speedTimeRemaining <= 1500) {
+      speedTimerBar.classList.add('warning');
+    }
+    
+    if (speedTimeRemaining <= 0) {
+      handleTimeOut();
+    }
+  }, 50);
+}
+
+function stopSpeedTimer() {
+  if (speedTimerId) {
+    clearInterval(speedTimerId);
+    speedTimerId = null;
+  }
+  if (isSpeedMode && vsAI) {
+    // Not counting down right now (e.g. it's the computer's turn) — keep the
+    // bar's space reserved and show it full & static instead of hiding it,
+    // so the page doesn't bob up and down as the bar appears/disappears
+    // between turns.
+    speedTimerBar.classList.remove('hidden', 'warning');
+    speedTimerBar.style.width = '100%';
+  } else {
+    speedTimerBar.classList.add('hidden');
+  }
+}
+
+function handleTimeOut() {
+  stopSpeedTimer();
+  if (state.gameOver || state.animating) return;
+
+  // Time's up: the turn is forfeit. This mirrors the "no legal moves" pass
+  // (see checkTurnPassing) — the timed-out player's turn ends and every
+  // piece belonging to the other player activates.
+  const passedFrom = state.currentPlayer;
+  const oppositePlayer = passedFrom === 1 ? 2 : 1;
+
+  // Cancel any in-progress selection or chain move — the turn is over.
+  state.selectedSquare = null;
+  state.currentMoves = [];
+  state.sneaking = false;
+  state.sneakingSquare = null;
+  state.losSquares = [];
+
+  for (const [sq, p] of Object.entries(state.pieces)) {
+    state.pieces[sq] = { ...p, active: p.player === oppositePlayer };
+  }
+  state.currentPlayer = oppositePlayer;
+  state.history.add(serialiseState(state.pieces, state.currentPlayer));
+
+  render();
+  pushTimeline();
+
+  setStatus(t('speedTimeoutPass', { passedFrom }), 'warn');
+
+  const currentVersion = stateVersion;
+  setTimeout(() => {
+    if (stateVersion !== currentVersion) return;
+    if (!state.gameOver) {
+      if (vsAI && state.currentPlayer !== humanPlayerColor) {
+        triggerAIMove();
+      } else {
+        setStatus(t('selectActive'));
+        startSpeedTimer();
+      }
+    }
+  }, 1400);
+}
+
 // ═══════════════════════════════════════════════════════════════
 //  SECTION 4 — DOM REFERENCES & BOARD CONSTRUCTION
 // ═══════════════════════════════════════════════════════════════
@@ -1670,6 +1774,34 @@ contrastToggleBtn.addEventListener('click', () => {
   const next = document.body.dataset.theme !== 'high-contrast';
   applyContrastTheme(next);
   localStorage.setItem('sambaqui_high_contrast', String(next));
+});
+
+const speedToggleBtn = document.getElementById('speed-toggle-btn');
+
+function applySpeedMode(enabled) {
+  isSpeedMode = enabled;
+  speedToggleBtn.classList.toggle('active', enabled);
+  if (enabled) {
+    // If it's already the human's move, kick off the countdown right away
+    // instead of waiting for the next turn transition. Otherwise, show the
+    // bar full & static (reserving its space) until it becomes relevant.
+    if (vsAI && !state.gameOver && !state.animating && state.currentPlayer === humanPlayerColor) {
+      startSpeedTimer();
+    } else {
+      stopSpeedTimer();
+    }
+  } else {
+    stopSpeedTimer();
+  }
+}
+
+const savedSpeedMode = localStorage.getItem('sambaqui_speed_mode') === 'true';
+applySpeedMode(savedSpeedMode);
+
+speedToggleBtn.addEventListener('click', () => {
+  const next = !isSpeedMode;
+  applySpeedMode(next);
+  localStorage.setItem('sambaqui_speed_mode', String(next));
 });
 
 for (let r = 0; r < 5; r++) {
@@ -1946,6 +2078,7 @@ function animateSlide(player, fromLabel, path, onDone) {
 //  SECTION 8 — MOVE DISPATCHER & COMBAT LOGIC
 // ═══════════════════════════════════════════════════════════════
 function executeMove(fromLabel, move) {
+  stopSpeedTimer();
   const player = state.currentPlayer;
   if (window._dragDropActive) {
     // Piece was already dragged by the user — skip the slide animation
@@ -2076,8 +2209,13 @@ function finalizeMove(fromLabel, move) {
 function checkTurnPassing() {
   if (state.gameOver) return;
   const hasMoves = currentPlayerHasLegalMoves(state.pieces, state.currentPlayer, state.sneaking, state.sneakingSquare, state.history);
+
   if (hasMoves) {
-    if (vsAI && state.currentPlayer !== humanPlayerColor) triggerAIMove();
+    if (vsAI && state.currentPlayer !== humanPlayerColor) {
+      triggerAIMove();
+    } else {
+      startSpeedTimer(); // <--- ADD THIS: Start timer for human
+    }
     return;
   }
 
@@ -2096,12 +2234,16 @@ function checkTurnPassing() {
 
   const currentVersion = stateVersion;
 
-  setStatus(t('noLegalMovesPass', { passedFrom: passedFrom }), 'warn');
+setStatus(t('noLegalMovesPass', { passedFrom: passedFrom }), 'warn');
   setTimeout(() => {
     if (stateVersion !== currentVersion) return;
     if (!state.gameOver) {
-      if (vsAI && state.currentPlayer !== humanPlayerColor) triggerAIMove();
-      else setStatus(t('selectActive'));
+      if (vsAI && state.currentPlayer !== humanPlayerColor) {
+        triggerAIMove();
+      } else {
+        setStatus(t('selectActive'));
+        startSpeedTimer(); // <--- ADD THIS: Start timer for human after pass
+      }
     }
   }, 1400);
 }
@@ -3462,6 +3604,7 @@ function restartGame(forceResetColor) {
   
   window.isWaitingForContinue = false;
   document.body.classList.remove('clickable-restart');
+  stopSpeedTimer();
 
   document.querySelector('.victory-overlay')?.remove();
   clearResultBanner();
@@ -3522,11 +3665,12 @@ function restartGame(forceResetColor) {
   pushTimeline();
   updateMetaDisplay();
 
-  if (vsAI && state.colorAssigned && state.currentPlayer !== humanPlayerColor) {
+if (vsAI && state.colorAssigned && state.currentPlayer !== humanPlayerColor) {
     setStatus(t('calculatingOpening'), 'highlight');
     triggerAIMove();
   } else {
     setStatus(t('selectActive'));
+    startSpeedTimer(); // <--- ADD THIS: Start timer on turn 1
   }
   render();
 }
@@ -3601,9 +3745,9 @@ function updateMetaDisplay() {
   openTutorialBtn.textContent = t('tutorial');
   openWalkthroughBtn.textContent = t('walkthroughMenuLabel');
   langToggleBtn.textContent = t('language');
-  footerSupportLink.textContent = t('supportLink');
+  if (footerSupportLink) footerSupportLink.textContent = t('supportLink');
   if (footerSupportLinkBar) footerSupportLinkBar.textContent = t('supportLink');
-  footerShareLink.textContent = t('shareLink');
+  if (footerShareLink) footerShareLink.textContent = t('shareLink');
   if (footerShareLinkBar) footerShareLinkBar.textContent = t('shareLink');
 }
 
@@ -3706,7 +3850,7 @@ function shareGameLink() {
   // internal URL like "about:srcdoc".
   shareOrCopy(url || buildShareText());
 }
-footerShareLink.addEventListener('click', shareGameLink);
+if (footerShareLink) footerShareLink.addEventListener('click', shareGameLink);
 if (footerShareLinkBar) footerShareLinkBar.addEventListener('click', shareGameLink);
 
 applyLanguageSwitch();
