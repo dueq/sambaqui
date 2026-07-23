@@ -475,16 +475,57 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
     user-select: none; -webkit-user-select: none;
     -webkit-user-drag: none;
   }
-  .piece.p1 {
-    background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8c2ad 55%, #9a90a8);
-    border: 1px solid rgba(196, 179, 68, 0.5);
-    box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.15);
-  }
-  .piece.p2 {
-     background: radial-gradient(circle at 38% 32%, #5e4a39, #25180e 55%, #1a0d05);
-    border: 1px solid rgba(143, 184, 138, 0.3);
-    box-shadow: 0 3px 8px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.12), inset 0 -2px 4px rgba(0,0,0,0.4);
-  }
+/* Player 1: Light Shell / Nacre with 3D Beveled Ridges */
+.piece.p1 {
+  background: 
+    /* Base 3D Shading & Highlight */
+    radial-gradient(
+      circle at 38% 32%, 
+      rgba(245, 240, 232, 0.95), 
+      rgba(200, 194, 173, 0.85) 55%, 
+      rgba(154, 144, 168, 0.9)
+    ),
+    /* 3D Curved Corrugation (Ramp per ridge) */
+    repeating-conic-gradient(
+      from 0deg at 50% 100%,
+      rgba(255, 255, 255, 0.45) 0deg,        /* Crest (Highlight) */
+      rgba(255, 255, 255, 0.05) 4deg,        /* Mid-slope */
+      rgba(50, 40, 30, 0.15) 8deg,           /* Deep Groove (Shadow) */
+      rgba(255, 255, 255, 0.5) 12deg         /* Next Crest */
+    );
+  background-blend-mode: overlay;
+  border: 1px solid rgba(196, 179, 68, 0.5);
+  box-shadow: 
+    0 4px 10px rgba(0, 0, 0, 0.55), 
+    inset 0 1px 2px rgba(255, 255, 255, 0.8), 
+    inset 0 -3px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Player 2: Dark Shell / Terracotta with 3D Beveled Ridges */
+.piece.p2 {
+  background: 
+    /* Base 3D Shading & Highlight */
+    radial-gradient(
+      circle at 38% 32%, 
+      rgba(71, 48, 27, 0.95), 
+      rgba(37, 24, 14, 0.9) 55%, 
+      rgba(64, 27, 4, 0.95)
+    ),
+    repeating-conic-gradient(
+      from 0deg at 50% 100%,
+      rgba(69, 42, 22, 0.2) 0deg,        /* Crest (Highlight) */
+      rgba(162, 144, 118, 0.448) 8deg,        /* Mid-slope */
+      rgba(175, 92, 8, 0.15) 10deg,           /* Deep Groove (Shadow) */
+      rgba(97, 70, 47, 0.5) 12deg         /* Next Crest */
+    );
+  background-blend-mode: overlay;
+  border: 1px solid rgb(97, 75, 61);
+  box-shadow: 
+    0 4px 10px rgba(0, 0, 0, 0.65), 
+    inset 0 1px 2px rgba(255, 255, 255, 0.3), 
+    inset 0 -3px 6px rgba(0, 0, 0, 0.6);
+}
+
   .piece.inactive       { opacity: 1; transform: scale(1); }
   .piece.active-piece   { opacity: 1; transform: scale(1); }
   .piece.p1.active-piece {
@@ -508,15 +549,55 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
 
   /* ── Piece ghost (used by animation engine AND drag-and-drop) ── */
   .piece-ghost { position: fixed; border-radius: 50%; pointer-events: none; z-index: 50; }
-  .piece-ghost.p1 {
-    background: radial-gradient(circle at 38% 32%, #f5f0e8, #c8bfad 55%, #a89f90);
-    border: 1px solid rgba(196,154,68,0.5);
-    box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.15);
- }
-  .piece-ghost.p2 {
-    background: radial-gradient(circle at 38% 32%, #5e4a39, #25180e 55%, #1a0d05);
-    box-shadow: 0 3px 8px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.12), inset 0 -2px 4px rgba(0,0,0,0.4);
-  }
+.piece-ghost.p1 {
+  background: 
+    /* Base 3D Shading & Highlight */
+    radial-gradient(
+      circle at 38% 32%, 
+      rgba(245, 240, 232, 0.95), 
+      rgba(200, 194, 173, 0.85) 55%, 
+      rgba(154, 144, 168, 0.9)
+    ),
+    /* 3D Curved Corrugation (Ramp per ridge) */
+    repeating-conic-gradient(
+      from 0deg at 50% 100%,
+      rgba(255, 255, 255, 0.45) 0deg,        /* Crest (Highlight) */
+      rgba(255, 255, 255, 0.05) 4deg,        /* Mid-slope */
+      rgba(50, 40, 30, 0.15) 8deg,           /* Deep Groove (Shadow) */
+      rgba(255, 255, 255, 0.5) 12deg         /* Next Crest */
+    );
+  background-blend-mode: overlay;
+  border: 1px solid rgba(196, 179, 68, 0.5);
+  box-shadow: 
+    0 4px 10px rgba(0, 0, 0, 0.55), 
+    inset 0 1px 2px rgba(255, 255, 255, 0.8), 
+    inset 0 -3px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Player 2: Dark Shell / Terracotta with 3D Beveled Ridges */
+.piece-ghost.p2 {
+  background: 
+    /* Base 3D Shading & Highlight */
+    radial-gradient(
+      circle at 38% 32%, 
+      rgba(71, 48, 27, 0.95), 
+      rgba(37, 24, 14, 0.9) 55%, 
+      rgba(64, 27, 4, 0.95)
+    ),
+    repeating-conic-gradient(
+      from 0deg at 50% 100%,
+      rgba(69, 42, 22, 0.2) 0deg,        /* Crest (Highlight) */
+      rgba(162, 144, 118, 0.448) 8deg,        /* Mid-slope */
+      rgba(175, 92, 8, 0.15) 10deg,           /* Deep Groove (Shadow) */
+      rgba(97, 70, 47, 0.5) 12deg         /* Next Crest */
+    );
+  background-blend-mode: overlay;
+  border: 1px solid rgb(97, 75, 61);
+  box-shadow: 
+    0 4px 10px rgba(0, 0, 0, 0.65), 
+    inset 0 1px 2px rgba(255, 255, 255, 0.3), 
+    inset 0 -3px 6px rgba(0, 0, 0, 0.6);
+}
 
   /* ── Drag-and-drop states ── */
   .cell.drag-over-valid   { border-color: var(--gold) !important; background-color: rgba(231, 158, 12, 0.891); }
@@ -801,7 +882,7 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
 
 
 <div class="author">
-  Sambaqui ꕤ v1.4.3 ꕤ  © Eduardo E Quadros 2026
+  Sambaqui ꕤ v1.4.4 ꕤ  © Eduardo E Quadros 2026
 </div>
 </footer>
 
