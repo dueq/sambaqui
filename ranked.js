@@ -187,7 +187,7 @@ function injectMenuButton() {
 // ─── Initialization ──────────────────────────────────────────────────────────
 function boot() {
   loadState();
-  injectMenuButton();
+ // injectMenuButton();
 }
 
 if (document.readyState === 'loading') {
