@@ -1876,7 +1876,7 @@ function finalizeMove(fromLabel, move) {
     // Cleared only on a full reset (see restartGame).
     const isEnemyWin = vsAI && victory.winner !== humanPlayerColor;
     const paintColor = isEnemyWin ? 'red' : 'gold';
-    victory.line.forEach(sq => { state.paint[sq] = paintColor; });
+    // victory.line.forEach(sq => { state.paint[sq] = paintColor; });
 
     // Freeze BEFORE humanStreak is incremented for next round
     state.lastFinalLevel = humanStreak + 1;
