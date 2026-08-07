@@ -100,7 +100,7 @@ body[data-theme="high-contrast"] .piece-ghost.p2 {
 
 body[data-theme="high-contrast"] .cell.landing,
 body[data-theme="high-contrast"] .cell.dark-sq.landing {
-  background-color: #a78500;
+  background-color: #a78;
   border-color: #000000;
 }
 body[data-theme="high-contrast"] .cell.blocked-landing,
@@ -683,7 +683,7 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
   .wt-game-label { display: none; }
   .wt-frame-bar-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 0.5rem; }
   .wt-frame-counter { font-size: 0.7rem; letter-spacing: 0.1em; color: var(--gold); font-weight: 700; white-space: nowrap; }
-  .wt-frame-caption {height:fixed;height:3rem; font-size: 0.95rem; letter-spacing: 0.03em; color: var(--sand); font-weight: 500; text-align: left; flex: 1.2; }
+  .wt-frame-caption {height:fixed;height:3rem; font-size: 0.95rem; letter-spacing: 0.03em; color: var(--sand); font-weight: ; text-align: left; flex: 1.2; }
   .wt-progress-track { width: 100%; height: 5px; border-radius: 3px; background: rgba(0,0,0,0.28); overflow: hidden; cursor: default; }
   .wt-progress-fill { height: 100%; background: var(--gold); border-radius: 3px; transition: width 0.25s ease; }
   .wt-turn-bar { display: flex; align-items: center; justify-content: center; gap: 1.2rem; font-size: 0.85rem; letter-spacing: 0.05em; cursor: default; }
@@ -851,7 +851,7 @@ body[data-theme="high-contrast"] .cell.win-line.enemy-win {
     <!-- Player's own Elo (updates as normal games are won/lost — see
          updatePlayerEloUI() / updatePlayerEloForGame() below). The AI's
          current-level Elo is shown separately, below the board. -->
-    <span id="stat-elo-label">Elo</span> <strong id="stat-elo">500</strong>
+    <span id="stat-elo-label">Elo</span> <strong id="stat-elo">400</strong>
     <span class="stats-sep">⠀•⠀</span>
     
     <strong id="stat-high">0</strong> <span id="stat-best-label">pts</span>
@@ -2109,7 +2109,7 @@ function updateAiEloUI() {
 // shouldn't be able to wipe a player's real rating) — its own storage key,
 // its own state, so none of the three systems can collide.
 const PLAYER_ELO_STORAGE_KEY = 'sambaqui_player_elo';
-let playerElo = 500;
+let playerElo = 400;
 let playerGamesPlayed = 0;
 
 function loadPlayerElo() {
